@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core'
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core'
 import CloudSyncSettingsData from '../../../data/setting-items'
 import { AuthType, createClient } from 'webdav'
 import Lang from '../../../data/lang'
@@ -22,13 +22,22 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
     @Output() setFormMessage = new EventEmitter()
 
     presetData = CloudSyncSettingsData
-    builtinLoginMode = CloudSyncSettingsData.BuiltinLoginMode.LOGIN
+    isSettingSaved = false
     isCheckLoginSuccess = false
     isFormProcessing = false
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.WEBDAV] as formData
 
     ngOnInit (): void {
-
+        const fs = require('fs')
+        fs.readFile(SettingsHelper.settingPathFile, 'utf8' , (err, data) => {
+            if (!err && data) {
+                try {
+                    const value = JSON.parse(data)
+                    this.form = value.configs as formData
+                    this.isSettingSaved = true
+                } catch (e) {}
+            }
+        })
     }
 
     async testConnection (): Promise<void> {
@@ -82,6 +91,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
                     type: 'error',
                 })
             } else {
+                this.isSettingSaved = true
                 this.setFormMessage.emit({
                     message: Lang.trans('settings.amazon.save_settings_success'),
                     type: 'success',
@@ -93,5 +103,9 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
     cancelSaveSettings (): void {
         this.resetFormMessages.emit()
         this.isCheckLoginSuccess = false
+    }
+
+    removeSavedSettings (): void {
+
     }
 }

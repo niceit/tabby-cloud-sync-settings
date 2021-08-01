@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr'
 import { PasswordStorageService } from 'services/PasswordStorage.service'
 import CloudSyncSettingsData from '../data/setting-items'
 import Lang from '../data/lang'
+import SettingsHelper from "../utils/settings-helper";
 
 /** @hidden */
 @Component({
@@ -22,7 +23,7 @@ export class CloudSyncSettingsComponent implements OnInit {
         errors: [],
         success: [],
     }
-    isFormProcessing = false
+    storedSettingsData = {}
 
     form: any = CloudSyncSettingsData.formData
 

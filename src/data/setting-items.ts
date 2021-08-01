@@ -31,10 +31,10 @@ const CloudSyncSettingsData = {
             region: '',
         },
         [providerConstantItems.WEBDAV]: {
-            host: '',
-            username: '',
-            password: '',
-            location: '',
+            host: 'https://app.koofr.net',
+            username: 'tranit1209@gmail.com',
+            password: 'wg1l 1gtv 86ct zudl',
+            location: '/dav/Koofr/AppSync/filezilla',
             port: '443',
         },
         [providerConstantItems.FTP]: {

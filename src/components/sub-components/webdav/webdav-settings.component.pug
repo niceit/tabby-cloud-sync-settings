@@ -10,7 +10,7 @@
                 input.form-control(
                     type='text',
                     placeholder='Host',
-                    [disabled]='isCheckLoginSuccess',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
                     [(ngModel)]='form.host',
                 )
 
@@ -21,7 +21,7 @@
                 input.form-control(
                     type='text',
                     placeholder='Username or Email',
-                    [disabled]='isCheckLoginSuccess',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
                     [(ngModel)]='form.username',
                 )
 
@@ -32,7 +32,7 @@
                 input.form-control(
                     type='password',
                     placeholder='******',
-                    [disabled]='isCheckLoginSuccess',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
                     [(ngModel)]='form.password',
                 )
 
@@ -44,7 +44,7 @@
                 input.form-control(
                     type='text',
                     placeholder='Port',
-                    [disabled]='isCheckLoginSuccess',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
                     [(ngModel)]='form.port',
                 )
 
@@ -55,11 +55,11 @@
                 input.form-control(
                     type='text',
                     placeholder='Location /',
-                    [disabled]='isCheckLoginSuccess',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
                     [(ngModel)]='form.location',
                 )
 
-    .row.mt-3
+    .row.mt-3(*ngIf='!isSettingSaved')
         .col-md-12.col-sm-12.pl-0(*ngIf='!isCheckLoginSuccess')
             button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='!isFormProcessing ? testConnection() : null')
                 i.fas.fa-fw.fa-plug.mr-2
@@ -75,3 +75,8 @@
             button.btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='cancelSaveSettings()')
                 i.fas.fa-fw.fa-times-circle.mr-2
                 span Cancel
+
+    .row.mt-3(*ngIf='isSettingSaved')
+        button.btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='removeSavedSettings()')
+            i.fas.fa-fw.fa-times-circle.mr-2
+            span Remove this settings

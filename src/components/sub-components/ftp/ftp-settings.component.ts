@@ -65,7 +65,7 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                 })
 
                 const resolve = require('path').resolve
-                const testFile = resolve('./tabby-cloud-sync/src/data/test.txt')
+                const testFile = resolve('./tabby-cloud-sync-settings/src/data/test.txt')
                 await client.uploadFrom(testFile, this.form.location + 'test.txt')
                     .then(result => {
                         this.isFormProcessing = false
