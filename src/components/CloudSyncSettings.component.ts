@@ -36,7 +36,7 @@ export class CloudSyncSettingsComponent implements OnInit {
     }
 
     ngOnInit (): void {
-        this.selectedProvider = this.serviceProviderValues.FTP
+        this.selectedProvider = this.serviceProviderValues.WEBDAV
     }
 
     onSelectProviderChange (): void {
