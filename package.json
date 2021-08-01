@@ -1,0 +1,68 @@
+{
+  "name": "tabby-cloud-settings-sync",
+  "version": "1.0.0",
+  "description": "Cloud Services sync the Tabby config and connections.",
+  "keywords": [
+    "tabby-plugin"
+  ],
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "build": "webpack --progress --color --mode=production",
+    "watch": "webpack --progress --color --watch",
+    "prepublishOnly": "npm run build --mode=production",
+    "test": "jest"
+  },
+  "files": [
+    "dist"
+  ],
+  "author": "TranIT",
+  "license": "MIT",
+  "devDependencies": {
+    "@angular/animations": "^7.2.8",
+    "@angular/common": "^7.2.8",
+    "@angular/core": "^7.2.8",
+    "@angular/forms": "^7.2.8",
+    "@angular/platform-browser": "^7.2.8",
+    "@ng-bootstrap/ng-bootstrap": "^2.2.0",
+    "@types/jest": "^26.0.23",
+    "@types/js-yaml": "^4.0.0",
+    "@types/webpack-env": "^1.16.0",
+    "apply-loader": "^2.0.0",
+    "axios": "^0.21.1",
+    "clean-webpack-plugin": "^0.1.19",
+    "css-loader": "^5.1.1",
+    "electron": "^7.0.0",
+    "jest": "^27.0.6",
+    "js-yaml": "^4.1.0",
+    "keytar": "^7.6.0",
+    "ngx-toastr": "^8.8.0",
+    "node-sass": "^5.0.0",
+    "pug": "^2.0.3",
+    "pug-loader": "^2.4.0",
+    "rxjs": "^6.2.1",
+    "sass-loader": "^11.0.1",
+    "strip-ansi": "^5.0.0",
+    "style-loader": "^2.0.0",
+    "terminus-core": "^1.0.140",
+    "terminus-settings": "^1.0.140",
+    "terminus-terminal": "^1.0.140",
+    "to-string-loader": "^1.1.6",
+    "ts-jest": "^27.0.3",
+    "ts-loader": "^9.2.3",
+    "typescript": "^4.3.5",
+    "webpack": "^5.24.4",
+    "webpack-cli": "^4.5.0",
+    "winston": "^3.3.3"
+  },
+  "peerDependencies": {
+    "@angular/core": "^4.0.1"
+  },
+  "repository": "niceit/tabby-cloud-settings-sync",
+  "dependencies": {
+    "aws-sdk": "^2.956.0",
+    "basic-ftp": "^4.6.6",
+    "crypto-js": "^4.0.0",
+    "webdav": "^4.6.0"
+  }
+}

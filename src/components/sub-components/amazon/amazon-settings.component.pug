@@ -1,0 +1,76 @@
+.form-group
+    .header.mb-2
+        .title Enter your AppID and Secret token
+    .row
+        .col-md-6.col-sm-12
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-lock
+                input.form-control(
+                    type='text',
+                    [disabled]='isServiceAccountCheckPassed',
+                    placeholder='Application Id',
+                    [(ngModel)]='form.appId',
+                )
+
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-lock
+                input.form-control(
+                    type='text',
+                    [disabled]='isServiceAccountCheckPassed',
+                    placeholder='Application Secret',
+                    [(ngModel)]='form.appSecret',
+                )
+
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-folder
+                input.form-control(
+                    type='text',
+                    [disabled]='isServiceAccountCheckPassed',
+                    placeholder='Bucket',
+                    [(ngModel)]='form.bucket',
+                )
+
+        .col-md-6.col-sm-12
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-globe
+                select.form-control(
+                    [disabled]='isServiceAccountCheckPassed',
+                    [(ngModel)]='form.region'
+                )
+                    option(*ngFor='let item of s3Regions', [ngValue]='item.value') {{item.text}}
+
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-folder-open
+                input.form-control(
+                    type='text',
+                    [disabled]='isServiceAccountCheckPassed'
+                    placeholder='Location /',
+                    [(ngModel)]='form.location',
+                )
+
+    .row.mt-3
+        .col-md-12.col-sm-12.pl-0(*ngIf='!isServiceAccountCheckPassed')
+            button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='!isFormProcessing ? performLoginAmazonS3() : null')
+                i.fas.fa-fw.fa-plug.mr-2
+                span(*ngIf='!isFormProcessing') Test Connect
+                span.spinner-border.spinner-border-sm.mr-2(*ngIf='isFormProcessing')
+                span(*ngIf='isFormProcessing') Processing...
+
+        .col-md-12.col-sm-12.pl-0(*ngIf='isServiceAccountCheckPassed')
+            button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='saveAmazonS3Settings()')
+                i.fas.fa-fw.fa-save.mr-2
+                span Save This Setting
+
+            button.btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='cancelSaveSettings()')
+                i.fas.fa-fw.fa-times-circle.mr-2
+                span Cancel

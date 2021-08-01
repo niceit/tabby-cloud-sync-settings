@@ -1,0 +1,48 @@
+.form-group
+    .builtin-login(*ngIf='builtinLoginMode === presetData.BuiltinLoginMode.LOGIN')
+        .header.mb-2
+            .title Login to your account
+        .row
+            .col-md-6.col-sm-12
+                input.form-control.mb-2(
+                    type='text',
+                    placeholder='Email',
+                    [(ngModel)]='form.email',
+                )
+                input.form-control(
+                    type='password',
+                    placeholder='******',
+                    [(ngModel)]='form.password',
+                )
+
+            .col-md-6.col-sm-12
+                button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='performLoginWithEmailPassword()')
+                    i.fas.fa-fw.fa-lock.mr-2
+                    | Login
+
+                button.btn.btn-secondary.flex-shrink-0.ml-3((click)='switchBetweenBuiltinLoginScreens(presetData.BuiltinLoginMode.RESET_PASSWORD)')
+                    i.fas.fa-fw.fa-lock-open.mr-2
+                    | Reset Password
+
+    .builtin-reset-password(*ngIf='builtinLoginMode === presetData.BuiltinLoginMode.RESET_PASSWORD')
+        .header.mb-2
+            .title Enter your registered email
+        .row
+            .col-md-6.col-sm-12
+                input.form-control.mb-2(
+                    type='text',
+                    placeholder='Email',
+                    [(ngModel)]='form["reset_password_email"]',
+                )
+            .col-md-6.col-sm-12
+                button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='performLoginWithEmailPassword()')
+                    i.fas.fa-fw.fa-paper-plane.mr-2
+                    | Recover password
+
+                button.btn.btn-secondary.flex-shrink-0.ml-3((click)='switchBetweenBuiltinLoginScreens(presetData.BuiltinLoginMode.LOGIN)')
+                    i.fas.fa-fw.fa-arrow-left.mr-2
+                    | Cancel
+            .col-md-12.mt-2
+                p.alert.alert-warning
+                    i.fas.faw.fa-info-circle.mr-2
+                    | We will send you a reset password email, please follow the instructions in that email content to reset your password.

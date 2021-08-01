@@ -1,0 +1,68 @@
+h3([textContent]='translate.trans("settings.title")')
+div.mb-3([textContent]='translate.trans("settings.sub_title")')
+div.row.pb-5
+    .col-md-12
+        .form-line
+            .header
+                .title([textContent]='translate.trans("settings.service_label")')
+            select.form-control(
+                [(ngModel)]='selectedProvider',
+                (ngModelChange)='onSelectProviderChange()',
+
+            )
+                option(*ngFor='let item of serviceProviders', [ngValue]='item.value') {{item.name}}
+
+
+    .col-md-12(*ngIf='form_messages.errors.length || form_messages.success.length')
+        .alert.alert-success(*ngIf='form_messages.success.length')
+            p.pb-0.mb-0(*ngFor='let message of form_messages.success') {{message}}
+
+        .alert.alert-danger(*ngIf='form_messages.errors.length')
+            p.pb-0.mb-0(*ngFor='let message of form_messages.errors') {{message}}
+
+    .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.BUILT_IN')
+        builtin-settings(
+            (resetFormMessages)='resetFormMessages()',
+            (setFormMessage)='setFormMessage($event)'
+        )
+
+    .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.S3')
+        amazon-settings(
+            (resetFormMessages)='resetFormMessages()',
+            (setFormMessage)='setFormMessage($event)'
+        )
+
+    .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.WEBDAV')
+        webdav-settings(
+            (resetFormMessages)='resetFormMessages()',
+            (setFormMessage)='setFormMessage($event)'
+        )
+
+    .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.FTP')
+        ftp-settings(
+            (resetFormMessages)='resetFormMessages()',
+            (setFormMessage)='setFormMessage($event)'
+        )
+
+    .col-md-12.has-border-top.pt-3
+        p.small.mb-0
+            i.fas.fa-fw.fa-user.mr-2
+            | Author: TranIT - tranit1209@gmail.com
+        p.small.mb-0
+            i.fas.fa-fw.fa-home.mr-2
+            | Plugin support URL: https://tabby-cloud.tranit.co
+        p.small.mb-0
+            i.fab.fa-fw.fa-github.mr-2
+            | Github URL: https://www.github.com/niceit/tabby-cloud-settings
+        p.small
+            i.fas.fa-fw.fa-history.mr-2
+            | Version: 1.0.0 build 1 - Release date 22/12/2020
+
+    .col-md-12.pl-0
+        button.btn.btn-primary.flex-shrink-0.ml-3((click)='performCheckPluginUpdate()')
+            i.fas.fa-fa.fa-sync.mr-2
+            span([textContent]='translate.trans("buttons.check_update")')
+
+
+
+

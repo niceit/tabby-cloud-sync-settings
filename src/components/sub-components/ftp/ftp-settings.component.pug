@@ -1,0 +1,75 @@
+.form-group
+    .header.mb-2
+        .title Enter your FTP login credentials
+    .row
+        .col-md-6.col-sm-12
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-globe
+                select.form-control(
+                    [(ngModel)]='form.protocol',
+                    [disabled]='isCheckLoginSuccess',
+
+                )
+                    option(*ngFor='let item of protocol', [ngValue]='item.value') {{item.name}}
+
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-globe
+                input.form-control(
+                    type='text',
+                    placeholder='Host',
+                    [disabled]='isCheckLoginSuccess',
+                    [(ngModel)]='form.host',
+                )
+
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-folder-open
+                input.form-control(
+                    type='text',
+                    placeholder='Location /',
+                    [disabled]='isCheckLoginSuccess',
+                    [(ngModel)]='form.location',
+                )
+        .col-md-6.col-sm-12
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-user
+                input.form-control(
+                    type='text',
+                    placeholder='Username',
+                    [disabled]='isCheckLoginSuccess',
+                    [(ngModel)]='form.username',
+                )
+
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-lock
+                input.form-control(
+                    type='password',
+                    placeholder='******',
+                    [disabled]='isCheckLoginSuccess',
+                    [(ngModel)]='form.password',
+                )
+    .row.mt-3
+        .col-md-12.col-sm-12.pl-0(*ngIf='!isCheckLoginSuccess')
+            button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='testConnection()')
+                i.fas.fa-fw.fa-plug.mr-2
+                span(*ngIf='!isFormProcessing') Test Connection
+                span.spinner-border.spinner-border-sm.mr-2(*ngIf='isFormProcessing')
+                span(*ngIf='isFormProcessing') Processing...
+
+        .col-md-12.col-sm-12.pl-0(*ngIf='isCheckLoginSuccess')
+            button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='saveSettings()')
+                i.fas.fa-fw.fa-save.mr-2
+                span Save This Setting
+
+            button.btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='cancelSaveSettings()')
+                i.fas.fa-fw.fa-times-circle.mr-2
+                span Cancel
