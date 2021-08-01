@@ -37,11 +37,23 @@ export class CloudSyncSettingsComponent implements OnInit {
     }
 
     ngOnInit (): void {
-        this.selectedProvider = this.serviceProviderValues.WEBDAV
+        const fs = require('fs')
+        fs.readFile(SettingsHelper.settingPathFile, 'utf8' , (err, data) => {
+            if (!err && data) {
+                try {
+                    const value = JSON.parse(data)
+                    this.selectedProvider = value.adapter
+                } catch (e) {
+                    this.selectedProvider = this.serviceProviderValues.BUILT_IN
+                }
+            } else {
+                this.selectedProvider = this.serviceProviderValues.BUILT_IN
+            }
+        })
     }
 
     onSelectProviderChange (): void {
-        console.log(this.selectedProvider)
+        this.resetFormMessages()
     }
 
     performCheckPluginUpdate (): void {

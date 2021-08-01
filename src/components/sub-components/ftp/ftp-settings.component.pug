@@ -1,4 +1,10 @@
-.form-group
+.form-group(*ngIf='isPreloadingSavedConfig')
+    .row
+        .col-md-12
+            span.spinner-border.spinner-border-sm.mr-2
+            span Loading config...
+
+.form-group(*ngIf='!isPreloadingSavedConfig')
     .header.mb-2
         .title Enter your FTP login credentials
     .row
@@ -9,7 +15,7 @@
                         i.fas.fa-fw.fa-globe
                 select.form-control(
                     [(ngModel)]='form.protocol',
-                    [disabled]='isCheckLoginSuccess',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
 
                 )
                     option(*ngFor='let item of protocol', [ngValue]='item.value') {{item.name}}
@@ -21,7 +27,7 @@
                 input.form-control(
                     type='text',
                     placeholder='Host',
-                    [disabled]='isCheckLoginSuccess',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
                     [(ngModel)]='form.host',
                 )
 
@@ -32,7 +38,7 @@
                 input.form-control(
                     type='text',
                     placeholder='Location /',
-                    [disabled]='isCheckLoginSuccess',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
                     [(ngModel)]='form.location',
                 )
         .col-md-6.col-sm-12
@@ -43,7 +49,7 @@
                 input.form-control(
                     type='text',
                     placeholder='Username',
-                    [disabled]='isCheckLoginSuccess',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
                     [(ngModel)]='form.username',
                 )
 
@@ -54,10 +60,11 @@
                 input.form-control(
                     type='password',
                     placeholder='******',
-                    [disabled]='isCheckLoginSuccess',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
                     [(ngModel)]='form.password',
                 )
-    .row.mt-3
+
+    .row.mt-3(*ngIf='!isSettingSaved')
         .col-md-12.col-sm-12.pl-0(*ngIf='!isCheckLoginSuccess')
             button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='testConnection()')
                 i.fas.fa-fw.fa-plug.mr-2
@@ -73,3 +80,8 @@
             button.btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='cancelSaveSettings()')
                 i.fas.fa-fw.fa-times-circle.mr-2
                 span Cancel
+
+    .row.mt-3(*ngIf='isSettingSaved')
+        button.btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='removeSavedSettings()')
+            i.fas.fa-fw.fa-times-circle.mr-2
+            span Remove this settings

@@ -3,6 +3,7 @@ import cloudSyncSettingsHelper from '../../../utils/CloudSyncSettingsHelper'
 import Lang from '../../../data/lang'
 import AmazonS3 from '../../../utils/cloud-components/AmazonS3'
 import CloudSyncSettingsData from '../../../data/setting-items'
+import SettingsHelper from "../../../utils/settings-helper";
 
 interface formData {
     appId: string,
@@ -21,14 +22,35 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     @Output() resetFormMessages = new EventEmitter()
     @Output() setFormMessage = new EventEmitter()
 
+    presetData = CloudSyncSettingsData
+    isPreloadingSavedConfig = true
+    isSettingSaved = false
     isServiceAccountCheckPassed = false
     isFormProcessing = false
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.S3] as formData
     s3Regions = []
 
-    ngOnInit (): void {
+    constructor() {
         this.s3Regions = cloudSyncSettingsHelper.getS3regionsList()
         this.form.region = this.s3Regions[0].value
+
+        const fs = require('fs')
+        fs.readFile(SettingsHelper.settingPathFile, 'utf8' , (err, data) => {
+            if (!err && data) {
+                try {
+                    const value = JSON.parse(data)
+                    if (value.adapter === this.presetData.values.S3) {
+                        this.form = value.configs as formData
+                        this.isSettingSaved = true
+                    }
+                } catch (e) {}
+            }
+            this.isPreloadingSavedConfig = false
+        })
+    }
+
+    ngOnInit (): void {
+
     }
 
     performLoginAmazonS3 (): void {
@@ -94,5 +116,9 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     cancelSaveSettings (): void {
         this.resetFormMessages.emit()
         this.isServiceAccountCheckPassed = false
+    }
+
+    removeSavedSettings (): void {
+
     }
 }

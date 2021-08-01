@@ -22,6 +22,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
     @Output() setFormMessage = new EventEmitter()
 
     presetData = CloudSyncSettingsData
+    isPreloadingSavedConfig = true
     isSettingSaved = false
     isCheckLoginSuccess = false
     isFormProcessing = false
@@ -33,10 +34,13 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
             if (!err && data) {
                 try {
                     const value = JSON.parse(data)
-                    this.form = value.configs as formData
-                    this.isSettingSaved = true
+                    if (value.adapter === this.presetData.values.WEBDAV) {
+                        this.form = value.configs as formData
+                        this.isSettingSaved = true
+                    }
                 } catch (e) {}
             }
+            this.isPreloadingSavedConfig = false
         })
     }
 

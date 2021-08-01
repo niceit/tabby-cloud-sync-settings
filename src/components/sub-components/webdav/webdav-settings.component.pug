@@ -1,4 +1,10 @@
-.form-group
+.form-group(*ngIf='isPreloadingSavedConfig')
+    .row
+        .col-md-12
+            span.spinner-border.spinner-border-sm.mr-2
+            span Loading config...
+
+.form-group(*ngIf='!isPreloadingSavedConfig')
     .header.mb-2
         .title Enter your WebDav login credentials
     .row

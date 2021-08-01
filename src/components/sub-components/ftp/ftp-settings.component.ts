@@ -21,6 +21,8 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     @Output() setFormMessage = new EventEmitter()
 
     presetData = CloudSyncSettingsData
+    isPreloadingSavedConfig = true
+    isSettingSaved = false
     isCheckLoginSuccess = false
     isFormProcessing = false
     protocol = [
@@ -29,11 +31,23 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     ]
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.FTP] as formData
 
-    ngOnInit (): void {
-
+    constructor() {
+        const fs = require('fs')
+        fs.readFile(SettingsHelper.settingPathFile, 'utf8' , (err, data) => {
+            if (!err && data) {
+                try {
+                    const value = JSON.parse(data)
+                    if (value.adapter === this.presetData.values.FTP) {
+                        this.form = value.configs as formData
+                        this.isSettingSaved = true
+                    }
+                } catch (e) {}
+            }
+            this.isPreloadingSavedConfig = false
+        })
     }
 
-    performLoginFtp (): void {
+    ngOnInit (): void {
 
     }
 
@@ -116,5 +130,9 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     cancelSaveSettings (): void {
         this.resetFormMessages.emit()
         this.isCheckLoginSuccess = false
+    }
+
+    removeSavedSettings (): void {
+
     }
 }
