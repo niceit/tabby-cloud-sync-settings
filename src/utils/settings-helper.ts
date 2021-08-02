@@ -1,11 +1,10 @@
 import {fsReadFile} from "ts-loader/dist/utils";
 import {PlatformService} from "terminus-core";
+import CloudSyncSettingsData from "../data/setting-items";
 
 const fs = require('fs')
 const path = require('path');
 export class SettingsHelperClass {
-
-    settingPathFile = '/sync-settings.json'
     async saveSettingsToFile (platform: PlatformService, adapter: string, params: any ): Promise<any> {
         const settingsArr = {
             adapter: adapter,
@@ -14,7 +13,8 @@ export class SettingsHelperClass {
         const fileContent = JSON.stringify(settingsArr)
         try {
             const promise = new Promise((resolve, reject) => {
-                return fs.writeFile(path.dirname(platform.getConfigPath()) + this.settingPathFile, fileContent, (err) => {
+                return fs.writeFile(path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename, fileContent,
+                    (err) => {
                     if (err) {
                         reject(false)
                     }
@@ -33,7 +33,7 @@ export class SettingsHelperClass {
 
     readConfigFile(platform: PlatformService) {
         let data = null
-        const filePath = path.dirname(platform.getConfigPath()) + this.settingPathFile
+        const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
         if (fs.existsSync(filePath)) {
             try {
                 let content = fsReadFile(filePath, 'utf8')

@@ -6,6 +6,7 @@ const providerConstantItems = {
 }
 
 const CloudSyncSettingsData = {
+    storedSettingsFilename: '/sync-settings.json',
     values: providerConstantItems,
     serviceProvidersList: [
         { name: 'Builtin Tabby', value: providerConstantItems.BUILT_IN },
