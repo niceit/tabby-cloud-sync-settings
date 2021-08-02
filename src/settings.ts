@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { CloudSyncSettingsComponent } from 'components/CloudSyncSettings.component'
+import { CloudSyncSettingsComponent } from 'components/cloud-sync-settings.component'
 import { SettingsTabProvider } from 'terminus-settings'
 @Injectable()
 export class SyncConfigSettingsTabProvider extends SettingsTabProvider {

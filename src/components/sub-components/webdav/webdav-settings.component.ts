@@ -3,6 +3,7 @@ import CloudSyncSettingsData from '../../../data/setting-items'
 import { AuthType, createClient } from 'webdav'
 import Lang from '../../../data/lang'
 import SettingsHelper from '../../../utils/settings-helper'
+import {fsReadFile} from "ts-loader/dist/utils";
 
 interface formData {
     host: string,
@@ -29,19 +30,14 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.WEBDAV] as formData
 
     ngOnInit (): void {
-        const fs = require('fs')
-        fs.readFile(SettingsHelper.settingPathFile, 'utf8' , (err, data) => {
-            if (!err && data) {
-                try {
-                    const value = JSON.parse(data)
-                    if (value.adapter === this.presetData.values.WEBDAV) {
-                        this.form = value.configs as formData
-                        this.isSettingSaved = true
-                    }
-                } catch (e) {}
-            }
-            this.isPreloadingSavedConfig = false
-        })
+        const configs = SettingsHelper.readConfigFile()
+        if (configs) {
+            if (configs.adapter === this.presetData.values.WEBDAV) {
+                     this.form = configs.configs as formData
+                     this.isSettingSaved = true
+                }
+        }
+        this.isPreloadingSavedConfig = false
     }
 
     async testConnection (): Promise<void> {

@@ -23,6 +23,7 @@ export class CloudSyncSettingsComponent implements OnInit {
         errors: [],
         success: [],
     }
+    syncEnabled = false
     storedSettingsData = {}
 
     form: any = CloudSyncSettingsData.formData
@@ -37,23 +38,20 @@ export class CloudSyncSettingsComponent implements OnInit {
     }
 
     ngOnInit (): void {
-        const fs = require('fs')
-        fs.readFile(SettingsHelper.settingPathFile, 'utf8' , (err, data) => {
-            if (!err && data) {
-                try {
-                    const value = JSON.parse(data)
-                    this.selectedProvider = value.adapter
-                } catch (e) {
-                    this.selectedProvider = this.serviceProviderValues.BUILT_IN
-                }
-            } else {
-                this.selectedProvider = this.serviceProviderValues.BUILT_IN
-            }
-        })
+        const configs = SettingsHelper.readConfigFile()
+        if (configs) {
+            this.selectedProvider = configs.adapter
+        } else {
+            this.selectedProvider = this.serviceProviderValues.BUILT_IN
+        }
     }
 
     onSelectProviderChange (): void {
         this.resetFormMessages()
+    }
+
+    toggleEnableSync(): void {
+
     }
 
     performCheckPluginUpdate (): void {

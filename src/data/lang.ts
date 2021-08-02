@@ -1,5 +1,5 @@
-class CloudSyncLangClass {
-    lang = {
+const CloudSyncLang = {
+    lang: {
         form: {
             error: {
                 required_all: 'Please fill in all fields',
@@ -18,10 +18,10 @@ class CloudSyncLangClass {
         buttons: {
             check_update: 'Check for updates',
         },
-    }
+    },
 
-    trans = (key: string): string => {
-        let dict = this.lang
+    trans: (key: string): string => {
+        let dict = CloudSyncLang.lang
         const objects = key.split('.')
         for (const i in objects) {
             if (typeof dict[objects[i]] !== 'undefined') {
@@ -33,4 +33,4 @@ class CloudSyncLangClass {
     }
 }
 
-export default new CloudSyncLangClass()
+export default CloudSyncLang

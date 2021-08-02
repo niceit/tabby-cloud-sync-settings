@@ -31,24 +31,17 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     ]
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.FTP] as formData
 
-    constructor() {
-        const fs = require('fs')
-        fs.readFile(SettingsHelper.settingPathFile, 'utf8' , (err, data) => {
-            if (!err && data) {
-                try {
-                    const value = JSON.parse(data)
-                    if (value.adapter === this.presetData.values.FTP) {
-                        this.form = value.configs as formData
-                        this.isSettingSaved = true
-                    }
-                } catch (e) {}
-            }
-            this.isPreloadingSavedConfig = false
-        })
-    }
+    constructor() {}
 
     ngOnInit (): void {
-
+        const configs = SettingsHelper.readConfigFile()
+        if (configs) {
+            if (configs.adapter === this.presetData.values.FTP) {
+                this.form = configs.configs as formData
+                this.isSettingSaved = true
+            }
+        }
+        this.isPreloadingSavedConfig = false
     }
 
     async testConnection (): Promise<void> {
@@ -119,6 +112,7 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                     type: 'error',
                 })
             } else {
+                this.isSettingSaved = true
                 this.setFormMessage.emit({
                     message: Lang.trans('settings.amazon.save_settings_success'),
                     type: 'success',

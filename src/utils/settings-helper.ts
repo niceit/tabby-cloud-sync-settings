@@ -1,10 +1,11 @@
+import {fsReadFile} from "ts-loader/dist/utils";
+
 const fs = require('fs')
 const resolve = require('path').resolve
 export class SettingsHelperClass {
 
     settingPathFile = resolve('./tabby-cloud-sync-settings') + '/settings.json'
     async saveSettingsToFile (adapter: string, params: any ): Promise<any> {
-        console.log('file path', this.settingPathFile)
         const settingsArr = {
             adapter: adapter,
             configs: params,
@@ -28,6 +29,18 @@ export class SettingsHelperClass {
         } catch (e) {
             return false
         }
+    }
+
+    readConfigFile() {
+        let data = null
+        if (fs.existsSync(this.settingPathFile)) {
+            try {
+                let content = fsReadFile(this.settingPathFile, 'utf8')
+                data = JSON.parse(content)
+            } catch (e) {}
+        }
+
+        return data
     }
 }
 export default new SettingsHelperClass()

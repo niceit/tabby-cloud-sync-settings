@@ -1,10 +1,20 @@
 h3([textContent]='translate.trans("settings.title")')
-div.mb-3([textContent]='translate.trans("settings.sub_title")')
-div.row.pb-5
+.mb-3([textContent]='translate.trans("settings.sub_title")')
+
+.row
+    .col-md-12
+        i.fab.fa-fw.fa-windows.mr-1
+        i.fab.fa-fw.fa-apple.mr-1
+        i.fab.fa-fw.fa-linux
+
+.row.pb-1.has-border-top.mt-3
     .col-md-12
         .form-line
             .header
-                .title([textContent]='translate.trans("settings.service_label")')
+                .title
+                    i.fas.fa-fw.fa-cog.mr-2
+                    span([textContent]='translate.trans("settings.service_label")')
+
             select.form-control(
                 [(ngModel)]='selectedProvider',
                 (ngModelChange)='onSelectProviderChange()',
@@ -12,7 +22,17 @@ div.row.pb-5
             )
                 option(*ngFor='let item of serviceProviders', [ngValue]='item.value') {{item.name}}
 
+        .form-line.enable-sync
+            .header
+                .title
+                    i.fas.fa-fw.fa-check-circle.mr-2
+                    span Sync enabled
+            toggle(
+                [(ngModel)]='syncEnabled',
+                (ngModelChange)='toggleEnableSync()',
+            )
 
+.row
     .col-md-12(*ngIf='form_messages.errors.length || form_messages.success.length')
         .alert.alert-success(*ngIf='form_messages.success.length')
             p.pb-0.mb-0(*ngFor='let message of form_messages.success') {{message}}

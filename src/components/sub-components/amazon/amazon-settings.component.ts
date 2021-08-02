@@ -30,27 +30,20 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.S3] as formData
     s3Regions = []
 
-    constructor() {
+    constructor() {}
+
+    ngOnInit (): void {
         this.s3Regions = cloudSyncSettingsHelper.getS3regionsList()
         this.form.region = this.s3Regions[0].value
 
-        const fs = require('fs')
-        fs.readFile(SettingsHelper.settingPathFile, 'utf8' , (err, data) => {
-            if (!err && data) {
-                try {
-                    const value = JSON.parse(data)
-                    if (value.adapter === this.presetData.values.S3) {
-                        this.form = value.configs as formData
-                        this.isSettingSaved = true
-                    }
-                } catch (e) {}
+        const configs = SettingsHelper.readConfigFile()
+        if (configs) {
+            if (configs.adapter === this.presetData.values.S3) {
+                this.form = configs.configs as formData
+                this.isSettingSaved = true
             }
-            this.isPreloadingSavedConfig = false
-        })
-    }
-
-    ngOnInit (): void {
-
+        }
+        this.isPreloadingSavedConfig = false
     }
 
     performLoginAmazonS3 (): void {
@@ -105,6 +98,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
                     type: 'error',
                 })
             } else {
+                this.isSettingSaved = true
                 this.setFormMessage.emit({
                     message: Lang.trans('settings.amazon.save_settings_success'),
                     type: 'success',
