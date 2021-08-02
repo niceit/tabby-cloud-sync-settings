@@ -70,10 +70,6 @@ class AmazonS3Class {
 
         return response
     }
-
-    saveSettings = async (params) => {
-        return SettingsHelper.saveSettingsToFile(CloudSyncSettingsData.values.S3, params)
-    }
 }
 
 export default new AmazonS3Class()

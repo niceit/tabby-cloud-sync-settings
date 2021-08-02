@@ -38,12 +38,13 @@ export class CloudSyncSettingsComponent implements OnInit {
     }
 
     ngOnInit (): void {
-        const configs = SettingsHelper.readConfigFile()
+        const configs = SettingsHelper.readConfigFile(this.platform)
         if (configs) {
             this.selectedProvider = configs.adapter
         } else {
             this.selectedProvider = this.serviceProviderValues.BUILT_IN
         }
+        this.toastr.success("Test Toast")
     }
 
     onSelectProviderChange (): void {

@@ -2,6 +2,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core'
 import CloudSyncSettingsData from '../../../data/setting-items'
 import Lang from '../../../data/lang'
 import SettingsHelper from '../../../utils/settings-helper'
+import {ConfigService, PlatformService} from "terminus-core";
 
 interface formData {
     protocol: string,
@@ -31,10 +32,12 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     ]
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.FTP] as formData
 
-    constructor() {}
+    constructor(private config: ConfigService, private platform: PlatformService) {
+
+    }
 
     ngOnInit (): void {
-        const configs = SettingsHelper.readConfigFile()
+        const configs = SettingsHelper.readConfigFile(this.platform)
         if (configs) {
             if (configs.adapter === this.presetData.values.FTP) {
                 this.form = configs.configs as formData
@@ -82,6 +85,8 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                                 message: 'Your setting is valid.',
                                 type: 'success',
                             })
+
+                            client.remove(testFile)
                         } else {
                             this.setFormMessage.emit({
                                 message: 'Connect Ok. But unable to write file at this location!',
@@ -104,7 +109,7 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     saveSettings (): void {
         this.resetFormMessages.emit()
         this.isFormProcessing = true
-        SettingsHelper.saveSettingsToFile(CloudSyncSettingsData.values.FTP, this.form).then(result => {
+        SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.FTP, this.form).then(result => {
             this.isFormProcessing = false
             if (!result) {
                 this.setFormMessage.emit({
@@ -117,6 +122,7 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                     message: Lang.trans('settings.amazon.save_settings_success'),
                     type: 'success',
                 })
+                this.config.requestRestart()
             }
         })
     }

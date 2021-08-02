@@ -4,7 +4,7 @@ import { SyncConfigSettingsTabProvider } from './settings'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
-import { ConfigProvider } from 'terminus-core'
+import {ConfigProvider, ConfigService} from 'terminus-core'
 import { SyncConfigProvider } from 'config'
 import { CloudSyncSettingsComponent } from './components/cloud-sync-settings.component'
 import { ToggleComponent } from 'components/toggle.component'
@@ -36,4 +36,12 @@ import { CloudSyncFtpSettingsComponent } from './components/sub-components/ftp/f
     ],
 })
 
-export default class CloudSyncSettingsModule { }
+export default class CloudSyncSettingsModule {
+    constructor (private configService: ConfigService) {
+        this.configService.changed$.subscribe(() => {
+            if (!this.configService.restartRequested) {
+
+            }
+        })
+    }
+}

@@ -1,20 +1,20 @@
 import {fsReadFile} from "ts-loader/dist/utils";
+import {PlatformService} from "terminus-core";
 
 const fs = require('fs')
-const resolve = require('path').resolve
+const path = require('path');
 export class SettingsHelperClass {
 
-    settingPathFile = resolve('./tabby-cloud-sync-settings') + '/settings.json'
-    async saveSettingsToFile (adapter: string, params: any ): Promise<any> {
+    settingPathFile = '/sync-settings.json'
+    async saveSettingsToFile (platform: PlatformService, adapter: string, params: any ): Promise<any> {
         const settingsArr = {
             adapter: adapter,
             configs: params,
         }
         const fileContent = JSON.stringify(settingsArr)
-
         try {
             const promise = new Promise((resolve, reject) => {
-                return fs.writeFile(this.settingPathFile, fileContent, (err) => {
+                return fs.writeFile(path.dirname(platform.getConfigPath()) + this.settingPathFile, fileContent, (err) => {
                     if (err) {
                         reject(false)
                     }
@@ -31,11 +31,12 @@ export class SettingsHelperClass {
         }
     }
 
-    readConfigFile() {
+    readConfigFile(platform: PlatformService) {
         let data = null
-        if (fs.existsSync(this.settingPathFile)) {
+        const filePath = path.dirname(platform.getConfigPath()) + this.settingPathFile
+        if (fs.existsSync(filePath)) {
             try {
-                let content = fsReadFile(this.settingPathFile, 'utf8')
+                let content = fsReadFile(filePath, 'utf8')
                 data = JSON.parse(content)
             } catch (e) {}
         }

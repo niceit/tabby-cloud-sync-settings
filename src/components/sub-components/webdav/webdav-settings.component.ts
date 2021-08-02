@@ -3,7 +3,7 @@ import CloudSyncSettingsData from '../../../data/setting-items'
 import { AuthType, createClient } from 'webdav'
 import Lang from '../../../data/lang'
 import SettingsHelper from '../../../utils/settings-helper'
-import {fsReadFile} from "ts-loader/dist/utils";
+import {ConfigService, PlatformService} from "terminus-core";
 
 interface formData {
     host: string,
@@ -29,8 +29,12 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
     isFormProcessing = false
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.WEBDAV] as formData
 
+    constructor(private config: ConfigService, private platform: PlatformService) {
+
+    }
+
     ngOnInit (): void {
-        const configs = SettingsHelper.readConfigFile()
+        const configs = SettingsHelper.readConfigFile(this.platform)
         if (configs) {
             if (configs.adapter === this.presetData.values.WEBDAV) {
                      this.form = configs.configs as formData
@@ -69,6 +73,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
                         message: 'Your setting is valid.',
                         type: 'success',
                     })
+                    client.deleteFile(this.form.location + 'test.txt')
                 })
             } catch (e) {
                 this.isFormProcessing = false
@@ -83,7 +88,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
     saveSettings (): void {
         this.resetFormMessages.emit()
         this.isFormProcessing = true
-        SettingsHelper.saveSettingsToFile(CloudSyncSettingsData.values.WEBDAV, this.form).then(result => {
+        SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.WEBDAV, this.form).then(result => {
             this.isFormProcessing = false
             if (!result) {
                 this.setFormMessage.emit({
@@ -96,6 +101,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
                     message: Lang.trans('settings.amazon.save_settings_success'),
                     type: 'success',
                 })
+                this.config.requestRestart()
             }
         })
     }

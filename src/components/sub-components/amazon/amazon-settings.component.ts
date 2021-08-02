@@ -4,6 +4,7 @@ import Lang from '../../../data/lang'
 import AmazonS3 from '../../../utils/cloud-components/AmazonS3'
 import CloudSyncSettingsData from '../../../data/setting-items'
 import SettingsHelper from "../../../utils/settings-helper";
+import {ConfigService, PlatformService} from "terminus-core";
 
 interface formData {
     appId: string,
@@ -30,13 +31,14 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.S3] as formData
     s3Regions = []
 
-    constructor() {}
+    constructor(private config: ConfigService, private platform: PlatformService) {
+    }
 
     ngOnInit (): void {
         this.s3Regions = cloudSyncSettingsHelper.getS3regionsList()
         this.form.region = this.s3Regions[0].value
 
-        const configs = SettingsHelper.readConfigFile()
+        const configs = SettingsHelper.readConfigFile(this.platform)
         if (configs) {
             if (configs.adapter === this.presetData.values.S3) {
                 this.form = configs.configs as formData
@@ -90,7 +92,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     saveAmazonS3Settings (): void {
         this.resetFormMessages.emit()
         this.isFormProcessing = true
-        AmazonS3.saveSettings(this.form).then(result => {
+        SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.S3, this.form).then(result => {
             this.isFormProcessing = false
             if (!result) {
                 this.setFormMessage.emit({
@@ -103,6 +105,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
                     message: Lang.trans('settings.amazon.save_settings_success'),
                     type: 'success',
                 })
+                this.config.requestRestart()
             }
         })
     }
