@@ -3,7 +3,8 @@ import CloudSyncSettingsData from '../../../data/setting-items'
 import { AuthType, createClient } from 'webdav'
 import Lang from '../../../data/lang'
 import SettingsHelper from '../../../utils/settings-helper'
-import {ConfigService, PlatformService} from "terminus-core";
+import {ConfigService, PlatformService} from "terminus-core"
+import {ToastrService} from "ngx-toastr"
 
 interface formData {
     host: string,
@@ -29,7 +30,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
     isFormProcessing = false
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.WEBDAV] as formData
 
-    constructor(private config: ConfigService, private platform: PlatformService) {
+    constructor(private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
 
     }
 
@@ -65,6 +66,12 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
                 password: this.form.password,
             })
             this.isFormProcessing = true
+            if (this.form.location !== '/') {
+                this.form.location = this.form.location.endsWith('/')
+                    ? this.form.location.substr(0,this.form.location.length - 1)
+                    : this.form.location
+            }
+
             try {
                 await client.putFileContents(this.form.location + 'test.txt', 'Test content', { overwrite: true }).then(() => {
                     this.isFormProcessing = false
@@ -111,7 +118,14 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
         this.isCheckLoginSuccess = false
     }
 
-    removeSavedSettings (): void {
-
+    async removeSavedSettings (): Promise<void> {
+        this.resetFormMessages.emit()
+        const result = await SettingsHelper.removeConfirmFile(this.platform, this.toast)
+        if (result) {
+            this.isSettingSaved = false
+            this.isCheckLoginSuccess = false
+            this.isPreloadingSavedConfig = false
+            this.config.requestRestart()
+        }
     }
 }

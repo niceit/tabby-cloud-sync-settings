@@ -14,7 +14,6 @@ import SettingsHelper from "../utils/settings-helper";
 
 export class CloudSyncSettingsComponent implements OnInit {
     translate = Lang
-    presetData = CloudSyncSettingsData
     serviceProviderValues = CloudSyncSettingsData.values
     serviceProviders = CloudSyncSettingsData.serviceProvidersList
     selectedProvider: any = ''
@@ -24,27 +23,27 @@ export class CloudSyncSettingsComponent implements OnInit {
         success: [],
     }
     syncEnabled = false
-    storedSettingsData = {}
+    storedSettingsData = null
 
     form: any = CloudSyncSettingsData.formData
 
 
     constructor (
         public config: ConfigService,
-        private toastr: ToastrService,
+        private toast: ToastrService,
         private platform: PlatformService,
         private passwordStorage: PasswordStorageService
     ) {
     }
 
     ngOnInit (): void {
-        const configs = SettingsHelper.readConfigFile(this.platform)
-        if (configs) {
-            this.selectedProvider = configs.adapter
+        this.storedSettingsData = SettingsHelper.readConfigFile(this.platform)
+        if (this.storedSettingsData) {
+            this.selectedProvider = this.storedSettingsData.adapter
+            this.syncEnabled = this.storedSettingsData.enabled
         } else {
             this.selectedProvider = this.serviceProviderValues.BUILT_IN
         }
-        this.toastr.success("Test Toast")
     }
 
     onSelectProviderChange (): void {
@@ -52,7 +51,7 @@ export class CloudSyncSettingsComponent implements OnInit {
     }
 
     toggleEnableSync(): void {
-
+        SettingsHelper.toggleEnabledPlugin(this.syncEnabled, this.platform, this.toast).then(() => {})
     }
 
     performCheckPluginUpdate (): void {

@@ -3,8 +3,9 @@ import cloudSyncSettingsHelper from '../../../utils/CloudSyncSettingsHelper'
 import Lang from '../../../data/lang'
 import AmazonS3 from '../../../utils/cloud-components/AmazonS3'
 import CloudSyncSettingsData from '../../../data/setting-items'
-import SettingsHelper from "../../../utils/settings-helper";
-import {ConfigService, PlatformService} from "terminus-core";
+import SettingsHelper from "../../../utils/settings-helper"
+import {ConfigService, PlatformService} from "terminus-core"
+import {ToastrService} from "ngx-toastr";
 
 interface formData {
     appId: string,
@@ -31,7 +32,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.S3] as formData
     s3Regions = []
 
-    constructor(private config: ConfigService, private platform: PlatformService) {
+    constructor(private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
     }
 
     ngOnInit (): void {
@@ -63,6 +64,12 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
         }
 
         if (isFormValidated) {
+            if (this.form.location !== '/') {
+                this.form.location = this.form.location.endsWith('/')
+                    ? this.form.location.substr(0,this.form.location.length - 1)
+                    : this.form.location
+            }
+
             this.isFormProcessing = true
             AmazonS3.setConfig(
                 this.form.appId,
@@ -115,7 +122,14 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
         this.isServiceAccountCheckPassed = false
     }
 
-    removeSavedSettings (): void {
-
+    async removeSavedSettings (): Promise<void> {
+        this.resetFormMessages.emit()
+        const result = await SettingsHelper.removeConfirmFile(this.platform, this.toast)
+        if (result) {
+            this.isSettingSaved = false
+            this.isServiceAccountCheckPassed = false
+            this.isPreloadingSavedConfig = false
+            this.config.requestRestart()
+        }
     }
 }

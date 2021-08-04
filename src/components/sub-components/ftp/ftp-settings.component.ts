@@ -2,7 +2,8 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core'
 import CloudSyncSettingsData from '../../../data/setting-items'
 import Lang from '../../../data/lang'
 import SettingsHelper from '../../../utils/settings-helper'
-import {ConfigService, PlatformService} from "terminus-core";
+import {ConfigService, PlatformService} from "terminus-core"
+import {ToastrService} from "ngx-toastr"
 
 interface formData {
     protocol: string,
@@ -32,7 +33,7 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     ]
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.FTP] as formData
 
-    constructor(private config: ConfigService, private platform: PlatformService) {
+    constructor(private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
 
     }
 
@@ -62,6 +63,12 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
         }
 
         if (isFormValidated) {
+            if (this.form.location !== '/') {
+                this.form.location = this.form.location.endsWith('/')
+                    ? this.form.location.substr(0,this.form.location.length - 1)
+                    : this.form.location
+            }
+
             this.isFormProcessing = true
             const ftp = require('basic-ftp')
             const client = new ftp.Client()
@@ -132,7 +139,14 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
         this.isCheckLoginSuccess = false
     }
 
-    removeSavedSettings (): void {
-
+    async removeSavedSettings (): Promise<void> {
+        this.resetFormMessages.emit()
+        const result = await SettingsHelper.removeConfirmFile(this.platform, this.toast)
+        if (result) {
+            this.isSettingSaved = false
+            this.isCheckLoginSuccess = false
+            this.isPreloadingSavedConfig = false
+            this.config.requestRestart()
+        }
     }
 }

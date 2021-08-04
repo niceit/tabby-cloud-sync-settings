@@ -29,6 +29,7 @@ h3([textContent]='translate.trans("settings.title")')
                     span Sync enabled
             toggle(
                 [(ngModel)]='syncEnabled',
+                [disabled]='storedSettingsData === null',
                 (ngModelChange)='toggleEnableSync()',
             )
 
