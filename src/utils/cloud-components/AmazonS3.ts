@@ -6,8 +6,6 @@
  * @licence MIT
  */
 import { S3 } from 'aws-sdk'
-import SettingsHelper from '../settings-helper'
-import CloudSyncSettingsData from '../../data/setting-items'
 
 class AmazonS3Class {
     private appId

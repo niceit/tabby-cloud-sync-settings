@@ -1,7 +1,8 @@
 import {fsReadFile} from "ts-loader/dist/utils"
-import {PlatformService} from "terminus-core"
+import {ConfigService, PlatformService} from "terminus-core"
 import CloudSyncSettingsData from "../data/setting-items"
 import {Toast, ToastrService} from "ngx-toastr";
+import WebDav from "./cloud-components/WebDav";
 
 const fs = require('fs')
 const path = require('path');
@@ -39,13 +40,58 @@ export class SettingsHelperClass {
         }
     }
 
-    readConfigFile(platform: PlatformService) {
+    async syncWithCloud (config: ConfigService, platform: PlatformService, toast: ToastrService, firstInit = false) {
+        const savedConfigs = this.readConfigFile(platform)
+        let result = false
+
+        switch (savedConfigs.adapter) {
+            case CloudSyncSettingsData.values.WEBDAV: {
+                await WebDav.sync(config, platform, toast, savedConfigs.configs, firstInit).then(status => {
+                    result = status
+                })
+                break
+            }
+        }
+
+        return result
+    }
+
+    async syncLocalSettingsToCloud(platform: PlatformService, toast: ToastrService) {
+        const savedConfigs = this.readConfigFile(platform)
+        if (savedConfigs) {
+            switch (savedConfigs.adapter) {
+                case CloudSyncSettingsData.values.WEBDAV: {
+                    await WebDav.syncLocalSettingsToCloud(platform).then(() => {
+                        toast.info('Settings is synced.')
+                    })
+                    break
+                }
+            }
+        } else {
+            toast.error('Your sync config is invalid. Please re-configure it!')
+        }
+    }
+
+    readConfigFile(platform: PlatformService, isRaw = false) {
         let data = null
         const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
         if (fs.existsSync(filePath)) {
             try {
                 let content = fsReadFile(filePath, 'utf8')
-                data = JSON.parse(content)
+                data = isRaw ? content : JSON.parse(content)
+            } catch (e) {}
+        }
+
+        return data
+    }
+
+    readTabbyConfigFile(platform: PlatformService, isRaw = false) {
+        let data = null
+        const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename
+        if (fs.existsSync(filePath)) {
+            try {
+                let content = fsReadFile(filePath, 'utf8')
+                data = isRaw ? content : JSON.parse(content)
             } catch (e) {}
         }
 
