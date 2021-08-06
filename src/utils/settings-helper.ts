@@ -3,6 +3,7 @@ import {ConfigService, PlatformService} from "terminus-core"
 import CloudSyncSettingsData from "../data/setting-items"
 import {Toast, ToastrService} from "ngx-toastr";
 import WebDav from "./cloud-components/WebDav";
+import CloudSyncLang from "../data/lang";
 
 const fs = require('fs')
 const path = require('path');
@@ -43,13 +44,14 @@ export class SettingsHelperClass {
     async syncWithCloud (config: ConfigService, platform: PlatformService, toast: ToastrService, firstInit = false) {
         const savedConfigs = this.readConfigFile(platform)
         let result = false
-
-        switch (savedConfigs.adapter) {
-            case CloudSyncSettingsData.values.WEBDAV: {
-                await WebDav.sync(config, platform, toast, savedConfigs.configs, firstInit).then(status => {
-                    result = status
-                })
-                break
+        if (savedConfigs.enabled) {
+            switch (savedConfigs.adapter) {
+                case CloudSyncSettingsData.values.WEBDAV: {
+                    await WebDav.sync(config, platform, toast, savedConfigs.configs, firstInit).then(status => {
+                        result = status
+                    })
+                    break
+                }
             }
         }
 
@@ -61,14 +63,12 @@ export class SettingsHelperClass {
         if (savedConfigs) {
             switch (savedConfigs.adapter) {
                 case CloudSyncSettingsData.values.WEBDAV: {
-                    await WebDav.syncLocalSettingsToCloud(platform).then(() => {
-                        toast.info('Settings is synced.')
-                    })
+                    await WebDav.syncLocalSettingsToCloud(platform, toast).then(() => {})
                     break
                 }
             }
         } else {
-            toast.error('Your sync config is invalid. Please re-configure it!')
+            toast.error(CloudSyncLang.trans('sync.error_invalid_setting_2'))
         }
     }
 
@@ -101,7 +101,7 @@ export class SettingsHelperClass {
     async toggleEnabledPlugin(value: boolean, platform: PlatformService, toast: ToastrService) {
         const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
         if (!fs.existsSync(filePath)) {
-            toast.error('Please save your config first')
+            toast.error(CloudSyncLang.trans('sync.need_to_save_config'))
             return false
         }
         const savedConfigs = this.readConfigFile(platform)
@@ -120,6 +120,11 @@ export class SettingsHelperClass {
         })
 
         return await promise.then(status => {
+            if (status) {
+                toast.info(CloudSyncLang.trans(value ? 'sync.sync_enabled' : 'sync.sync_disabled'))
+            } else {
+                toast.info(CloudSyncLang.trans('sync.error_save_setting'))
+            }
             return status
         })
     }
@@ -129,23 +134,23 @@ export class SettingsHelperClass {
         try {
             if ((await platform.showMessageBox({
                 type: 'warning',
-                message: 'Are you sure want to remove saved config?',
-                buttons: ['Cancel', 'Yes'],
+                message: CloudSyncLang.trans('sync.confirm_remove_setting'),
+                buttons: [CloudSyncLang.trans('buttons.cancel'), CloudSyncLang.trans('buttons.yes')],
                 defaultId: 1,
             })).response === 1) {
                 const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
                 if (fs.existsSync(filePath)) {
                     try {
                         fs.unlinkSync(path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename)
-                        toast.info('Your settings had been removed.')
+                        toast.info(CloudSyncLang.trans('sync.remove_setting_success'))
                         return true
                     } catch (e) {
-                        toast.info('Can not remove your setting. Try again later!')
+                        toast.error(CloudSyncLang.trans('sync.remove_setting_error'))
                     }
                 }
             }
         } catch (error) {
-            toast.info('Can not remove your setting. Try again later!')
+            toast.error(CloudSyncLang.trans('sync.remove_setting_error'))
         }
 
         return result

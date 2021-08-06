@@ -44,7 +44,7 @@ export default class CloudSyncSettingsModule {
                  private configService: ConfigService) {
         app.ready$.subscribe(async () => {
             await this.syncCloudSettings()
-            configService.ready$.subscribe(() => {
+            configService.ready$.toPromise().then(() => {
                 setTimeout(() => {
                     this.configService.changed$.subscribe(async () => {
                         await SettingsHelper.syncLocalSettingsToCloud(platform, toast)

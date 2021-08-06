@@ -4,15 +4,13 @@ import SettingsHelper from "../settings-helper"
 import {ConfigService, PlatformService} from "terminus-core"
 import * as yaml from 'js-yaml'
 import {ToastrService} from "ngx-toastr"
+import CloudSyncLang from "../../data/lang";
 
+let isSyncingInProgress = false
 class WebDav {
     async sync (config: ConfigService, platform: PlatformService, toast: ToastrService, params, firstInit = false) {
         let result = false
-        const client = createClient(params.host +':'+ params.port, {
-            authType: AuthType.Password,
-            username: params.username,
-            password: params.password,
-        })
+        const client = WebDav.createClient(params)
         const remoteFile = params.location + CloudSyncSettingsData.cloudSettingsFilename
 
         try {
@@ -22,8 +20,8 @@ class WebDav {
                     if (firstInit) {
                         if ((await platform.showMessageBox({
                             type: 'warning',
-                            message: 'We found cloud setting. Please choose the sync direction!',
-                            buttons: ['Sync Cloud Settings', 'Upload Local Settings'],
+                            message: CloudSyncLang.trans('sync.sync_confirmation'),
+                            buttons: [CloudSyncLang.trans('sync.buttons.sync_from_cloud'), CloudSyncLang.trans('sync.sync_from_local')],
                             defaultId: 0,
                         })).response === 1) {
                             await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true), {overwrite: true}).then(() => {})
@@ -34,7 +32,7 @@ class WebDav {
                         config.writeRaw(content)
                     }
                 } catch (_) {
-                    toast.error('Your setting cloud file contains invalid settings. Local file synced up instead!')
+                    toast.error(CloudSyncLang.trans('sync.error_invalid_setting'))
                     await client.moveFile(remoteFile, remoteFile + '_bk' + new Date().getTime())
                     await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true), {overwrite: true}).then(() => {})
                 }
@@ -44,26 +42,40 @@ class WebDav {
             try {
                 await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true), { overwrite: true }).then(() => {})
                 result = true
-            } catch (e) {
-                console.log('exception', e)
-            }
+            } catch (_) { }
         }
 
         return result
     }
 
-    async syncLocalSettingsToCloud (platform: PlatformService) {
-        const savedConfigs = SettingsHelper.readConfigFile(platform)
-        const params = savedConfigs.configs
-        const remoteFile = params.location + CloudSyncSettingsData.cloudSettingsFilename
-        const client = createClient(params.host +':'+ params.port, {
+    async syncLocalSettingsToCloud (platform: PlatformService, toast: ToastrService) {
+        if (!isSyncingInProgress) {
+            isSyncingInProgress = true
+
+            const savedConfigs = SettingsHelper.readConfigFile(platform)
+            const params = savedConfigs.configs
+            const remoteFile = params.location + CloudSyncSettingsData.cloudSettingsFilename
+            const client = WebDav.createClient(params)
+
+            try {
+                await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true), {overwrite: true}).then(() => {
+                    toast.info(CloudSyncLang.trans('sync.sync_success'))
+                    isSyncingInProgress = false
+                })
+            } catch (_) {
+                if (isSyncingInProgress) {
+                    toast.error(CloudSyncLang.trans('sync.sync_error'))
+                }
+            }
+        }
+    }
+
+    private static createClient (params) {
+        return createClient(params.host + ':' + params.port, {
             authType: AuthType.Password,
             username: params.username,
             password: params.password,
         })
-
-        // TODO Tran Check 423 Lock
-        await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true), {overwrite: true}).then(() => {})
     }
 }
 export default new WebDav()
