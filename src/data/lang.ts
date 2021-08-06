@@ -1,5 +1,8 @@
 const CloudSyncLang = {
     lang: {
+        common: {
+            menu_title: 'Settings Sync'
+        },
         form: {
             error: {
                 required_all: 'Please fill in all fields',

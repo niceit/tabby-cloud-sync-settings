@@ -5,7 +5,6 @@ import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { AppService, ConfigProvider, ConfigService, PlatformService } from 'terminus-core'
-import { SyncConfigProvider } from 'config'
 import { CloudSyncSettingsComponent } from './components/cloud-sync-settings.component'
 import { ToggleComponent } from 'components/toggle.component'
 import { CloudSyncAmazonSettingsComponent } from './components/sub-components/amazon/amazon-settings.component'
@@ -23,7 +22,6 @@ import { ToastrService } from "ngx-toastr";
     ],
     providers: [
         { provide: SettingsTabProvider, useClass: SyncConfigSettingsTabProvider, multi: true },
-        { provide: ConfigProvider, useClass: SyncConfigProvider, multi: true },
     ],
     entryComponents: [
         CloudSyncSettingsComponent,
@@ -43,7 +41,6 @@ export default class CloudSyncSettingsModule {
                  private platform: PlatformService,
                  private toast: ToastrService,
                  private configService: ConfigService) {
-        console.log('call sync plugin')
         setTimeout(async () => {
             await this.syncCloudSettings().then(() => {
                 setTimeout(() => {

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import { ConfigService, PlatformService } from 'terminus-core'
 import { ToastrService } from 'ngx-toastr'
-import { PasswordStorageService } from 'services/PasswordStorage.service'
 import CloudSyncSettingsData from '../data/setting-items'
 import Lang from '../data/lang'
 import SettingsHelper from "../utils/settings-helper";
@@ -31,8 +30,7 @@ export class CloudSyncSettingsComponent implements OnInit {
     constructor (
         public config: ConfigService,
         private toast: ToastrService,
-        private platform: PlatformService,
-        private passwordStorage: PasswordStorageService
+        private platform: PlatformService
     ) {
     }
 
