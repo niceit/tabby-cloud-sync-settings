@@ -6,7 +6,16 @@
  * @licence MIT
  */
 import { S3 } from 'aws-sdk'
+import {ConfigService, PlatformService} from "terminus-core";
+import {ToastrService} from "ngx-toastr";
+import CloudSyncSettingsData from "../../data/setting-items";
+import * as yaml from "js-yaml";
+import CloudSyncLang from "../../data/lang";
+import SettingsHelper from "../settings-helper";
+import {AuthType} from "webdav";
+import {AmazonParams} from "../../interface";
 
+let isSyncingInProgress = false
 class AmazonS3Class {
     private appId
     private appSecret
@@ -67,6 +76,117 @@ class AmazonS3Class {
         }
 
         return response
+    }
+
+    async sync (config: ConfigService, platform: PlatformService, toast: ToastrService, params: AmazonParams, firstInit = false) {
+        let result = false
+        const client = this.createClient(params)
+        let remoteFile
+        if (this.path === '') {
+            remoteFile = CloudSyncSettingsData.cloudSettingsFilename.substr(1, CloudSyncSettingsData.cloudSettingsFilename.length)
+        } else {
+            remoteFile = this.path + CloudSyncSettingsData.cloudSettingsFilename
+        }
+
+        const uploadObjectParams = {
+            Bucket: this.bucket,
+            Key: remoteFile,
+            Body: SettingsHelper.readTabbyConfigFile(platform, true),
+            ACL: this.PERMISSIONS.PUBLIC,
+            ContentType: 'application/json',
+        }
+
+        try {
+            const objectParams = { Bucket: params.bucket, Key: remoteFile }
+            await client.getObject(objectParams).promise().then(async (data) => {
+                const content = data.Body.toString()
+                try {
+                    yaml.load(content)
+                    if (firstInit) {
+                        if ((await platform.showMessageBox({
+                            type: 'warning',
+                            message: CloudSyncLang.trans('sync.sync_confirmation'),
+                            buttons: [CloudSyncLang.trans('buttons.sync_from_cloud'), CloudSyncLang.trans('buttons.sync_from_local')],
+                            defaultId: 0,
+                        })).response === 1) {
+                            await client.upload(uploadObjectParams)
+                        } else {
+                            config.writeRaw(content)
+                        }
+                    } else {
+                        config.writeRaw(content)
+                    }
+                } catch (_) {
+                    toast.error(CloudSyncLang.trans('sync.error_invalid_setting'))
+                    const copyObjectParams = {
+                        CopySource: remoteFile,
+                        Bucket: this.bucket,
+                        Key: remoteFile + '_bk' + new Date().getTime()
+                    }
+                    await client.copyObject(copyObjectParams)
+                    await client.upload(uploadObjectParams).promise()
+                }
+                result = true
+            })
+        } catch (_) {
+            console.log(uploadObjectParams)
+            try {
+                await client.upload(uploadObjectParams).promise()
+                result = true
+            } catch (e) {
+                console.log(e)
+            }
+        }
+
+        return result
+    }
+
+    async syncLocalSettingsToCloud (platform: PlatformService, toast: ToastrService) {
+        if (!isSyncingInProgress) {
+            isSyncingInProgress = true
+
+            const savedConfigs = SettingsHelper.readConfigFile(platform)
+            const params = savedConfigs.configs
+            const client = this.createClient(params)
+            let remoteFile
+            if (this.path === '') {
+                remoteFile = CloudSyncSettingsData.cloudSettingsFilename.substr(1, CloudSyncSettingsData.cloudSettingsFilename.length)
+            } else {
+                remoteFile = this.path + CloudSyncSettingsData.cloudSettingsFilename
+            }
+
+            let response: any = {}
+            const uploadObjectParams = {
+                Bucket: this.bucket,
+                Key: remoteFile,
+                Body: SettingsHelper.readTabbyConfigFile(platform, true),
+                ACL: this.PERMISSIONS.PUBLIC,
+                ContentType: 'application/json',
+            }
+            try {
+                response = await client.upload(uploadObjectParams).promise()
+            } catch (_) {
+                if (isSyncingInProgress) {
+                    toast.error(CloudSyncLang.trans('sync.sync_error'))
+                }
+            }
+
+            if (response) {
+                toast.info(CloudSyncLang.trans('sync.sync_success'))
+            }
+            isSyncingInProgress = false
+        }
+    }
+
+    private createClient (params: AmazonParams) {
+        this.setConfig(params.appId, params.appSecret, params.bucket, params.region, params.location)
+        return new S3(
+            {
+                accessKeyId: this.appId,
+                secretAccessKey: this.appSecret,
+                region: this.region,
+            }
+        )
     }
 }
 

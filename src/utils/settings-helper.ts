@@ -1,13 +1,19 @@
 import {fsReadFile} from "ts-loader/dist/utils"
 import {ConfigService, PlatformService} from "terminus-core"
 import CloudSyncSettingsData from "../data/setting-items"
-import {Toast, ToastrService} from "ngx-toastr";
+import {ToastrService} from "ngx-toastr";
 import WebDav from "./cloud-components/WebDav";
 import CloudSyncLang from "../data/lang";
+import AmazonS3 from "./cloud-components/AmazonS3";
 
 const fs = require('fs')
 const path = require('path');
 export class SettingsHelperClass {
+    private adapterHandler = {
+        [CloudSyncSettingsData.values.WEBDAV]: WebDav,
+        [CloudSyncSettingsData.values.S3]: AmazonS3,
+    }
+
     async saveSettingsToFile (platform: PlatformService, adapter: string, params: any): Promise<any> {
         const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
         const settingsArr = {
@@ -45,14 +51,9 @@ export class SettingsHelperClass {
         const savedConfigs = this.readConfigFile(platform)
         let result = false
         if (savedConfigs.enabled) {
-            switch (savedConfigs.adapter) {
-                case CloudSyncSettingsData.values.WEBDAV: {
-                    await WebDav.sync(config, platform, toast, savedConfigs.configs, firstInit).then(status => {
-                        result = status
-                    })
-                    break
-                }
-            }
+            await this.adapterHandler[savedConfigs.adapter].sync(config, platform, toast, savedConfigs.configs, firstInit).then(status => {
+                result = status
+            })
         }
 
         return result
@@ -61,12 +62,7 @@ export class SettingsHelperClass {
     async syncLocalSettingsToCloud(platform: PlatformService, toast: ToastrService) {
         const savedConfigs = this.readConfigFile(platform)
         if (savedConfigs) {
-            switch (savedConfigs.adapter) {
-                case CloudSyncSettingsData.values.WEBDAV: {
-                    await WebDav.syncLocalSettingsToCloud(platform, toast).then(() => {})
-                    break
-                }
-            }
+            await this.adapterHandler[savedConfigs.adapter].syncLocalSettingsToCloud(platform, toast).then(() => {})
         } else {
             toast.error(CloudSyncLang.trans('sync.error_invalid_setting_2'))
         }

@@ -94,7 +94,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
         }
     }
 
-    saveSettings (): void {
+    async saveSettings (): Promise<void> {
         this.resetFormMessages.emit()
         this.isFormProcessing = true
         SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.WEBDAV, this.form).then(result => {
@@ -110,11 +110,16 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
                     message: Lang.trans('settings.amazon.save_settings_success'),
                     type: 'success',
                 })
-                this.isSyncingProgress = true
-                SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then((result) => {
-                    console.log('sync setting result', result)
+                SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
+                    if (result) {
+                        this.isSettingSaved = true
+                        this.config.requestRestart()
+                    } else {
+                        this.isCheckLoginSuccess = false
+                        this.isPreloadingSavedConfig = false
+                        await SettingsHelper.removeConfirmFile(this.platform, this.toast)
+                    }
                     this.isSyncingProgress = false
-                    this.config.requestRestart()
                 })
             }
         })

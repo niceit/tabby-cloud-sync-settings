@@ -82,6 +82,10 @@
                 span Cancel
 
     .row.mt-3(*ngIf='isSettingSaved')
-        button.btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='removeSavedSettings()')
+        .col-md-12(*ngIf='isSyncingProgress')
+            span.spinner-border.spinner-border-sm.mr-2
+            span Syncing with the cloud...
+
+        button(*ngIf='!isSyncingProgress').btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='removeSavedSettings()')
             i.fas.fa-fw.fa-times-circle.mr-2
             span Remove this settings

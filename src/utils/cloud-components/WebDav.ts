@@ -21,7 +21,7 @@ class WebDav {
                         if ((await platform.showMessageBox({
                             type: 'warning',
                             message: CloudSyncLang.trans('sync.sync_confirmation'),
-                            buttons: [CloudSyncLang.trans('sync.buttons.sync_from_cloud'), CloudSyncLang.trans('sync.sync_from_local')],
+                            buttons: [CloudSyncLang.trans('buttons.sync_from_cloud'), CloudSyncLang.trans('buttons.sync_from_local')],
                             defaultId: 0,
                         })).response === 1) {
                             await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true), {overwrite: true}).then(() => {})
@@ -65,6 +65,7 @@ class WebDav {
             } catch (_) {
                 if (isSyncingInProgress) {
                     toast.error(CloudSyncLang.trans('sync.sync_error'))
+                    isSyncingInProgress = false
                 }
             }
         }

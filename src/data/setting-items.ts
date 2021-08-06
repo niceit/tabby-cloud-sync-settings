@@ -27,10 +27,10 @@ const CloudSyncSettingsData = {
             reset_password_email: '',
         },
         [providerConstantItems.S3]: {
-            appId: '',
-            appSecret: '',
+            appId: 'AKIAIHG7SWF3HJZEO6TQ',
+            appSecret: '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',
             location: '/',
-            bucket: '',
+            bucket: 'trantest',
             region: '',
         },
         [providerConstantItems.WEBDAV]: {
