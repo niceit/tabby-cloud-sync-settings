@@ -4,6 +4,7 @@ import Lang from '../../../data/lang'
 import SettingsHelper from '../../../utils/settings-helper'
 import {ConfigService, PlatformService} from "terminus-core"
 import {ToastrService} from "ngx-toastr"
+import CloudSyncLang from "../../../data/lang";
 
 interface formData {
     protocol: string,
@@ -22,6 +23,7 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     @Output() resetFormMessages = new EventEmitter()
     @Output() setFormMessage = new EventEmitter()
 
+    translate = CloudSyncLang
     presetData = CloudSyncSettingsData
     isPreloadingSavedConfig = true
     isSettingSaved = false

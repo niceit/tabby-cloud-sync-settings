@@ -12,7 +12,6 @@ import CloudSyncSettingsData from "../../data/setting-items";
 import * as yaml from "js-yaml";
 import CloudSyncLang from "../../data/lang";
 import SettingsHelper from "../settings-helper";
-import {AuthType} from "webdav";
 import {AmazonParams} from "../../interface";
 
 let isSyncingInProgress = false

@@ -1,7 +1,8 @@
 {
   "name": "tabby-cloud-settings-sync",
   "version": "1.0.0",
-  "description": "Cloud Services sync the Tabby config and connections.",
+  "date": "22 December 2021",
+  "description": "Cloud Services sync the Tabby config and connections across platform devices.",
   "keywords": [
     "tabby-plugin"
   ],
@@ -16,7 +17,9 @@
   "files": [
     "dist"
   ],
-  "author": "TranIT",
+  "author": "TranIT - tranit1209@gmail.com",
+  "support_url": "https://tabby-cloud.tranit.co",
+  "github_url": "https://www.github.com/niceit/tabby-cloud-settings",
   "license": "MIT",
   "devDependencies": {
     "@angular/animations": "^7.2.8",

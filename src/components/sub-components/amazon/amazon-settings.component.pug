@@ -2,11 +2,11 @@
     .row
         .col-md-12
             span.spinner-border.spinner-border-sm.mr-2
-            span Loading config...
+            span([textContent]='translate.trans("sync.loading_config")')
 
 .form-group(*ngIf='!isPreloadingSavedConfig')
     .header.mb-2
-        .title Enter your AppID and Secret token
+        .title([textContent]='translate.trans("s3.title")')
     .row
         .col-md-6.col-sm-12
             .input-group.mb-2
@@ -16,7 +16,7 @@
                 input.form-control(
                     type='text',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
-                    placeholder='Application Id',
+                    [placeholder]='translate.trans("s3.app_id_placeholder")',
                     [(ngModel)]='form.appId',
                 )
 
@@ -27,7 +27,7 @@
                 input.form-control(
                     type='text',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
-                    placeholder='Application Secret',
+                    [placeholder]='translate.trans("s3.app_secret_placeholder")',
                     [(ngModel)]='form.appSecret',
                 )
 
@@ -38,7 +38,7 @@
                 input.form-control(
                     type='text',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
-                    placeholder='Bucket',
+                    [placeholder]='translate.trans("s3.bucket_placeholder")',
                     [(ngModel)]='form.bucket',
                 )
 
@@ -60,7 +60,7 @@
                 input.form-control(
                     type='text',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
-                    placeholder='Location /',
+                    [placeholder]='translate.trans("s3.location_placeholder")',
                     [(ngModel)]='form.location',
                 )
 
@@ -68,24 +68,24 @@
         .col-md-12.col-sm-12.pl-0(*ngIf='!isServiceAccountCheckPassed')
             button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='!isFormProcessing ? performLoginAmazonS3() : null')
                 i.fas.fa-fw.fa-plug.mr-2
-                span(*ngIf='!isFormProcessing') Test Connect
+                span(*ngIf='!isFormProcessing', [textContent]='translate.trans("buttons.test_connection")')
                 span.spinner-border.spinner-border-sm.mr-2(*ngIf='isFormProcessing')
-                span(*ngIf='isFormProcessing') Processing...
+                span(*ngIf='isFormProcessing', [textContent]='translate.trans("buttons.processing")')
 
         .col-md-12.col-sm-12.pl-0(*ngIf='isServiceAccountCheckPassed')
             button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='saveAmazonS3Settings()')
                 i.fas.fa-fw.fa-save.mr-2
-                span Save This Setting
+                span([textContent]='translate.trans("buttons.save_settings")')
 
             button.btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='cancelSaveSettings()')
                 i.fas.fa-fw.fa-times-circle.mr-2
-                span Cancel
+                span([textContent]='translate.trans("buttons.cancel")')
 
     .row.mt-3(*ngIf='isSettingSaved')
         .col-md-12(*ngIf='isSyncingProgress')
             span.spinner-border.spinner-border-sm.mr-2
-            span Syncing with the cloud...
+            span([textContent]='translate.trans("buttons.cloud_syncing_progress")')
 
         button(*ngIf='!isSyncingProgress').btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='removeSavedSettings()')
             i.fas.fa-fw.fa-times-circle.mr-2
-            span Remove this settings
+            span([textContent]='translate.trans("buttons.remove_saved_setting")')
