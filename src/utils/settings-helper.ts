@@ -9,12 +9,15 @@ import FTP from "./cloud-components/FTP";
 
 const fs = require('fs')
 const path = require('path');
+const CryptoJS = require("crypto-js");
+
 export class SettingsHelperClass {
     private adapterHandler = {
         [CloudSyncSettingsData.values.WEBDAV]: WebDav,
         [CloudSyncSettingsData.values.S3]: AmazonS3,
         [CloudSyncSettingsData.values.FTP]: FTP,
     }
+    private generatedCryptoHash = 'tp!&nc3^to8y7^3#4%2%&szufx!'
 
     async saveSettingsToFile (platform: PlatformService, adapter: string, params: any): Promise<any> {
         const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
@@ -27,7 +30,7 @@ export class SettingsHelperClass {
             const savedConfigs = this.readConfigFile(platform)
             settingsArr.enabled = savedConfigs !== null ? savedConfigs['enabled'] : true
         }
-        const fileContent = JSON.stringify(settingsArr)
+        const fileContent = CloudSyncLang.trans('common.config_inject_header') + CryptoJS.AES.encrypt(JSON.stringify(settingsArr), this.generatedCryptoHash).toString()
 
         try {
             const promise = new Promise((resolve, reject) => {
@@ -75,7 +78,8 @@ export class SettingsHelperClass {
         const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
         if (fs.existsSync(filePath)) {
             try {
-                let content = fsReadFile(filePath, 'utf8')
+                const bytes = CryptoJS.AES.decrypt(fsReadFile(filePath, 'utf8').replace(CloudSyncLang.trans('common.config_inject_header'), ''), this.generatedCryptoHash)
+                const content = (bytes.toString(CryptoJS.enc.Utf8))
                 data = isRaw ? content : JSON.parse(content)
             } catch (e) {}
         }
