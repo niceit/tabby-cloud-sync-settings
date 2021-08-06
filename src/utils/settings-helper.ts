@@ -5,6 +5,7 @@ import {ToastrService} from "ngx-toastr";
 import WebDav from "./cloud-components/WebDav";
 import CloudSyncLang from "../data/lang";
 import AmazonS3 from "./cloud-components/AmazonS3";
+import FTP from "./cloud-components/FTP";
 
 const fs = require('fs')
 const path = require('path');
@@ -12,6 +13,7 @@ export class SettingsHelperClass {
     private adapterHandler = {
         [CloudSyncSettingsData.values.WEBDAV]: WebDav,
         [CloudSyncSettingsData.values.S3]: AmazonS3,
+        [CloudSyncSettingsData.values.FTP]: FTP,
     }
 
     async saveSettingsToFile (platform: PlatformService, adapter: string, params: any): Promise<any> {

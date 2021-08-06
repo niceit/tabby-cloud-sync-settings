@@ -60,14 +60,13 @@ class WebDav {
             try {
                 await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true), {overwrite: true}).then(() => {
                     toast.info(CloudSyncLang.trans('sync.sync_success'))
-                    isSyncingInProgress = false
                 })
             } catch (_) {
                 if (isSyncingInProgress) {
                     toast.error(CloudSyncLang.trans('sync.sync_error'))
-                    isSyncingInProgress = false
                 }
             }
+            isSyncingInProgress = false
         }
     }
 

@@ -26,6 +26,8 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     isPreloadingSavedConfig = true
     isSettingSaved = false
     isCheckLoginSuccess = false
+
+    isSyncingProgress = false
     isFormProcessing = false
     protocol = [
         { value: 'ftp', name: 'FTP' },
@@ -109,14 +111,17 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                     type: 'error',
                 })
             }
-            client.close()
+
+            if (!client.closed) {
+                client.close()
+            }
         }
     }
 
-    saveSettings (): void {
+    async saveSettings (): Promise<void> {
         this.resetFormMessages.emit()
         this.isFormProcessing = true
-        SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.FTP, this.form).then(result => {
+        SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.FTP, this.form).then(async result => {
             this.isFormProcessing = false
             if (!result) {
                 this.setFormMessage.emit({
@@ -124,12 +129,27 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                     type: 'error',
                 })
             } else {
-                this.isSettingSaved = true
                 this.setFormMessage.emit({
                     message: Lang.trans('settings.amazon.save_settings_success'),
                     type: 'success',
                 })
-                this.config.requestRestart()
+                this.isSettingSaved = true
+                this.isSyncingProgress = true
+                await SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
+                    if (result) {
+                        this.config.requestRestart()
+                    } else {
+                        this.setFormMessage.emit({
+                            message: Lang.trans('sync.sync_server_failed'),
+                            type: 'error',
+                        })
+                        this.isSettingSaved = false
+                        this.isCheckLoginSuccess = false
+                        this.isPreloadingSavedConfig = false
+                        await SettingsHelper.removeConfirmFile(this.platform, this.toast)
+                    }
+                    this.isSyncingProgress = false
+                })
             }
         })
     }

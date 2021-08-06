@@ -4,7 +4,7 @@ import { SyncConfigSettingsTabProvider } from './settings'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
-import {AppService, ConfigProvider, ConfigService, PlatformService} from 'terminus-core'
+import { AppService, ConfigProvider, ConfigService, PlatformService } from 'terminus-core'
 import { SyncConfigProvider } from 'config'
 import { CloudSyncSettingsComponent } from './components/cloud-sync-settings.component'
 import { ToggleComponent } from 'components/toggle.component'
@@ -13,7 +13,7 @@ import { CloudSyncBuiltinSettingsComponent } from './components/sub-components/b
 import { CloudSyncWebDavSettingsComponent } from './components/sub-components/webdav/webdav-settings.component'
 import { CloudSyncFtpSettingsComponent } from './components/sub-components/ftp/ftp-settings.component'
 import SettingsHelper from './utils/settings-helper'
-import {ToastrService} from "ngx-toastr";
+import { ToastrService } from "ngx-toastr";
 
 @NgModule({
     imports: [
@@ -39,18 +39,23 @@ import {ToastrService} from "ngx-toastr";
 })
 
 export default class CloudSyncSettingsModule {
-    constructor (private app: AppService, private platform: PlatformService,
+    constructor (private app: AppService,
+                 private platform: PlatformService,
                  private toast: ToastrService,
                  private configService: ConfigService) {
-        app.ready$.subscribe(async () => {
-            await this.syncCloudSettings()
-            configService.ready$.toPromise().then(() => {
+        console.log('call sync plugin')
+        setTimeout(async () => {
+            await this.syncCloudSettings().then(() => {
                 setTimeout(() => {
-                    this.configService.changed$.subscribe(async () => {
-                        await SettingsHelper.syncLocalSettingsToCloud(platform, toast)
-                    })
+                    this.subscribeToConfigChangeEvent()
                 }, 2000)
             })
+        })
+    }
+
+    subscribeToConfigChangeEvent() {
+        this.configService.changed$.subscribe(async () => {
+            await SettingsHelper.syncLocalSettingsToCloud(this.platform, this.toast).then(() => {})
         })
     }
 
