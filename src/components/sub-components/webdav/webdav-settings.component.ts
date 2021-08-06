@@ -110,11 +110,16 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
                     message: Lang.trans('settings.amazon.save_settings_success'),
                     type: 'success',
                 })
+                this.isSettingSaved = true
                 SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
                     if (result) {
-                        this.isSettingSaved = true
                         this.config.requestRestart()
                     } else {
+                        this.setFormMessage.emit({
+                            message: Lang.trans('sync.sync_server_failed'),
+                            type: 'error',
+                        })
+                        this.isSettingSaved = false
                         this.isCheckLoginSuccess = false
                         this.isPreloadingSavedConfig = false
                         await SettingsHelper.removeConfirmFile(this.platform, this.toast)

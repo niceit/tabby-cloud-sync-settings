@@ -14,7 +14,7 @@ const CloudSyncSettingsData = {
         { name: 'Builtin Tabby', value: providerConstantItems.BUILT_IN },
         { name: 'Amazon S3', value: providerConstantItems.S3 },
         { name: 'WebDav', value: providerConstantItems.WEBDAV },
-        { name: 'FTP (less secure)', value: providerConstantItems.FTP },
+        { name: 'FTP', value: providerConstantItems.FTP },
     ],
     BuiltinLoginMode: {
         LOGIN: 'Login',

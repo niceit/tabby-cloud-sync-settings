@@ -100,7 +100,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     async saveAmazonS3Settings (): Promise<void> {
         this.resetFormMessages.emit()
         this.isFormProcessing = true
-        SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.S3, this.form).then(result => {
+        SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.S3, this.form).then(async result => {
             this.isFormProcessing = false
             if (!result) {
                 this.setFormMessage.emit({
@@ -113,13 +113,17 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
                     type: 'success',
                 })
 
-                //TODO Tran Check syncing progress
+                this.isSettingSaved = true
                 this.isSyncingProgress = true
-                SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
+                await SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
                     if (result) {
-                        this.isSettingSaved = true
                         this.config.requestRestart()
                     } else {
+                        this.setFormMessage.emit({
+                            message: Lang.trans('sync.sync_server_failed'),
+                            type: 'error',
+                        })
+                        this.isSettingSaved = false
                         this.isServiceAccountCheckPassed = false
                         this.isPreloadingSavedConfig = false
                         await SettingsHelper.removeConfirmFile(this.platform, this.toast)

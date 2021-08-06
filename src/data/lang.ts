@@ -23,6 +23,7 @@ const CloudSyncLang = {
             need_to_save_config: 'Please save your config first',
             sync_success: 'Your saved settings was synced to the cloud.',
             sync_error: 'Unable to sync your setting. Please check the configuration!',
+            sync_server_failed: 'Sync file to the cloud failed. Please check your cloud service!',
             sync_enabled: 'Sync feature enabled.',
             sync_disabled: 'Sync feature disabled.',
             confirm_remove_setting: 'Are you sure want to remove saved config?',
