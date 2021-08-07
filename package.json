@@ -1,6 +1,6 @@
 {
   "name": "@niceit/tabby-cloud-settings-sync",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "date": "22 December 2021",
   "description": "Cloud Services sync the Tabby config and connections across platform devices.",
   "keywords": [

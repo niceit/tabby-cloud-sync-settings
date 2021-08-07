@@ -53,7 +53,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
         this.resetFormMessages.emit()
         let isFormValidated = true
         for (const idx in this.form) {
-            if (this.form[idx].trim() === '') {
+            if (this.form[idx].trim() === '' && idx !== 'port') {
                 this.setFormMessage.emit({
                     message: Lang.trans('form.error.required_all'),
                     type: 'error',
@@ -64,7 +64,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
         }
 
         if (isFormValidated) {
-            const client = createClient(this.form.host +':'+ this.form.port, {
+            const client = createClient(this.form.host + (this.form.port ? (':'+ this.form.port) : ''), {
                 authType: AuthType.Password,
                 username: this.form.username,
                 password: this.form.password,
