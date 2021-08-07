@@ -61,7 +61,7 @@
   "peerDependencies": {
     "@angular/core": "^4.0.1"
   },
-  "repository": "niceit/tabby-cloud-settings-sync",
+  "repository": "git://github.com/niceit/tabby-cloud-sync-settings.git",
   "dependencies": {
     "aws-sdk": "^2.956.0",
     "basic-ftp": "^4.6.6",
