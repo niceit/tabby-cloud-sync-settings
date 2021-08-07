@@ -35,13 +35,13 @@
     "axios": "^0.21.1",
     "clean-webpack-plugin": "^0.1.19",
     "css-loader": "^5.1.1",
-    "electron": "^7.0.0",
+    "electron": "^9.4.4",
     "jest": "^27.0.6",
     "js-yaml": "^4.1.0",
     "keytar": "^7.6.0",
     "ngx-toastr": "^8.8.0",
     "node-sass": "^5.0.0",
-    "pug": "^2.0.3",
+    "pug": "^3.0.2",
     "pug-loader": "^2.4.0",
     "rxjs": "^6.2.1",
     "sass-loader": "^11.0.1",
@@ -69,6 +69,6 @@
     "webdav": "^4.6.0"
   },
   "publishConfig": {
-    "registry":"https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com"
   }
 }
