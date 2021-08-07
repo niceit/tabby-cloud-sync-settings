@@ -15,6 +15,7 @@
     "noUnusedLocals": false,
     "declaration": true,
     "declarationDir": "dist",
+    "resolveJsonModule": true,
     "lib": [
       "dom",
       "es2015",

@@ -26,7 +26,6 @@ export class CloudSyncSettingsComponent implements OnInit {
 
     form: any = CloudSyncSettingsData.formData
 
-
     constructor (
         public config: ConfigService,
         private toast: ToastrService,
@@ -40,7 +39,7 @@ export class CloudSyncSettingsComponent implements OnInit {
             this.selectedProvider = this.storedSettingsData.adapter
             this.syncEnabled = this.storedSettingsData.enabled
         } else {
-            this.selectedProvider = this.serviceProviderValues.BUILT_IN
+            this.selectedProvider = this.serviceProviderValues.S3
         }
     }
 
@@ -50,10 +49,6 @@ export class CloudSyncSettingsComponent implements OnInit {
 
     toggleEnableSync(): void {
         SettingsHelper.toggleEnabledPlugin(this.syncEnabled, this.platform, this.toast).then(() => {})
-    }
-
-    performCheckPluginUpdate (): void {
-
     }
 
     resetFormMessages (): void {

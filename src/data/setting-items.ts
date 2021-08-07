@@ -11,7 +11,7 @@ const CloudSyncSettingsData = {
     cloudSettingsFilename: '/tabby-settings.json',
     values: providerConstantItems,
     serviceProvidersList: [
-        { name: 'Builtin Tabby', value: providerConstantItems.BUILT_IN },
+        // { name: 'Builtin Tabby', value: providerConstantItems.BUILT_IN },
         { name: 'Amazon S3', value: providerConstantItems.S3 },
         { name: 'WebDav', value: providerConstantItems.WEBDAV },
         { name: 'FTP', value: providerConstantItems.FTP },

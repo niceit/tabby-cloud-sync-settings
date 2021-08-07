@@ -13,6 +13,7 @@ import { CloudSyncWebDavSettingsComponent } from './components/sub-components/we
 import { CloudSyncFtpSettingsComponent } from './components/sub-components/ftp/ftp-settings.component'
 import SettingsHelper from './utils/settings-helper'
 import { ToastrService } from "ngx-toastr";
+import { CloudSyncAboutComponent } from "./components/sub-components/about/about.component";
 
 @NgModule({
     imports: [
@@ -32,6 +33,7 @@ import { ToastrService } from "ngx-toastr";
         CloudSyncWebDavSettingsComponent,
         CloudSyncFtpSettingsComponent,
         CloudSyncSettingsComponent,
+        CloudSyncAboutComponent,
         ToggleComponent,
     ],
 })
