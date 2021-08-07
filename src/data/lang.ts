@@ -67,7 +67,7 @@ const CloudSyncLang = {
             ok: 'Ok',
             test_connection: 'Test Connection',
             processing: 'Processing...',
-            save_setting: 'Save This Setting',
+            save_settings: 'Save This Setting',
             cloud_syncing_progress: 'Syncing with the cloud...',
             remove_saved_setting: 'Remove this setting',
         },
