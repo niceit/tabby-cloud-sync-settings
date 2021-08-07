@@ -67,5 +67,8 @@
     "basic-ftp": "^4.6.6",
     "crypto-js": "^4.0.0",
     "webdav": "^4.6.0"
+  },
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com"
   }
 }
