@@ -1,10 +1,10 @@
 {
-  "name": "tabby-cloud-settings-sync",
+  "name": "@niceit/tabby-cloud-settings-sync",
   "version": "1.0.0",
   "date": "22 December 2021",
   "description": "Cloud Services sync the Tabby config and connections across platform devices.",
   "keywords": [
-    "tabby-plugin"
+    "terminus-plugin"
   ],
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -61,7 +61,10 @@
   "peerDependencies": {
     "@angular/core": "^4.0.1"
   },
-  "repository": "git://github.com/niceit/tabby-cloud-sync-settings.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/niceit/tabby-cloud-sync-settings.git"
+  },
   "dependencies": {
     "aws-sdk": "^2.956.0",
     "basic-ftp": "^4.6.6",
@@ -70,5 +73,9 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/niceit/tabby-cloud-sync-settings/issues"
+  },
+  "homepage": "https://github.com/niceit/tabby-cloud-sync-settings#readme"
 }
