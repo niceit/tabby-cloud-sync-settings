@@ -72,7 +72,7 @@
     "webdav": "^4.6.0"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org"
   },
   "bugs": {
     "url": "https://github.com/niceit/tabby-cloud-sync-settings/issues"
