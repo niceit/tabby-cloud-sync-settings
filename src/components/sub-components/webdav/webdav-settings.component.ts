@@ -64,7 +64,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
         }
 
         if (isFormValidated) {
-            const client = createClient(this.form.host + (this.form.port ?? (':'+ this.form.port)), {
+            const client = createClient(this.form.host + (this.form.port ? (':'+ this.form.port) : ''), {
                 authType: AuthType.Password,
                 username: this.form.username,
                 password: this.form.password,

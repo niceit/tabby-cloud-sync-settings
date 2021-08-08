@@ -9,6 +9,7 @@ const CloudSyncSettingsData = {
     tabbySettingsFilename: '/config.yaml',
     storedSettingsFilename: '/sync-settings.json',
     cloudSettingsFilename: '/tabby-settings.json',
+    tabbyLocalEncryptedFile: '/tabby-settings-encrypted.tmp',
     values: providerConstantItems,
     serviceProvidersList: [
         // { name: 'Builtin Tabby', value: providerConstantItems.BUILT_IN },

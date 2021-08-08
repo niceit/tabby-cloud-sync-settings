@@ -52,6 +52,29 @@ export class SettingsHelperClass {
         }
     }
 
+    async generateEncryptedTabbyFileForUpload(platform: PlatformService) {
+        const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbyLocalEncryptedFile
+        try {
+            const tabbyConfig = this.readTabbyConfigFile(platform, true, true)
+            const promise = new Promise((resolve, reject) => {
+                return fs.writeFile(filePath, tabbyConfig,
+                    (err) => {
+                        if (err) {
+                            reject(false)
+                        }
+
+                        resolve(true)
+                    })
+            })
+
+            return await promise.then(status => {
+                return status
+            })
+        } catch (e) {
+            return false
+        }
+    }
+
     async syncWithCloud (config: ConfigService, platform: PlatformService, toast: ToastrService, firstInit = false) {
         const savedConfigs = this.readConfigFile(platform)
         let result = false
@@ -87,13 +110,15 @@ export class SettingsHelperClass {
         return data
     }
 
-    readTabbyConfigFile(platform: PlatformService, isRaw = false) {
+    readTabbyConfigFile(platform: PlatformService, isRaw = false, isEncrypt = false) {
         let data = null
         const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename
         if (fs.existsSync(filePath)) {
             try {
                 let content = fsReadFile(filePath, 'utf8')
-                data = isRaw ? content : JSON.parse(content)
+                data = isRaw
+                    ? (!isEncrypt ? content : (CloudSyncLang.trans('common.config_inject_header') + CryptoJS.AES.encrypt(content, this.generatedCryptoHash).toString()))
+                    : JSON.parse(content)
             } catch (e) {}
         }
 
@@ -156,6 +181,11 @@ export class SettingsHelperClass {
         }
 
         return result
+    }
+
+    doDescryption (content) {
+        const bytes = CryptoJS.AES.decrypt(content.replace(CloudSyncLang.trans('common.config_inject_header'), ''), this.generatedCryptoHash)
+        return (bytes.toString(CryptoJS.enc.Utf8))
     }
 }
 export default new SettingsHelperClass()

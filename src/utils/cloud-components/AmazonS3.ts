@@ -90,7 +90,7 @@ class AmazonS3Class {
         const uploadObjectParams = {
             Bucket: this.bucket,
             Key: remoteFile,
-            Body: SettingsHelper.readTabbyConfigFile(platform, true),
+            Body: SettingsHelper.readTabbyConfigFile(platform, true, true),
             ACL: this.PERMISSIONS.PUBLIC,
             ContentType: 'application/json',
         }
@@ -110,10 +110,10 @@ class AmazonS3Class {
                         })).response === 1) {
                             await client.upload(uploadObjectParams)
                         } else {
-                            config.writeRaw(content)
+                            config.writeRaw(SettingsHelper.doDescryption(content))
                         }
                     } else {
-                        config.writeRaw(content)
+                        config.writeRaw(SettingsHelper.doDescryption(content))
                     }
                 } catch (_) {
                     toast.error(CloudSyncLang.trans('sync.error_invalid_setting'))
@@ -158,7 +158,7 @@ class AmazonS3Class {
             const uploadObjectParams = {
                 Bucket: this.bucket,
                 Key: remoteFile,
-                Body: SettingsHelper.readTabbyConfigFile(platform, true),
+                Body: SettingsHelper.readTabbyConfigFile(platform, true, true),
                 ACL: this.PERMISSIONS.PUBLIC,
                 ContentType: 'application/json',
             }

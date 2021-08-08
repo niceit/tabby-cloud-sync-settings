@@ -1,4 +1,3 @@
-import { AuthType, createClient } from 'webdav'
 import CloudSyncSettingsData from "../../data/setting-items"
 import SettingsHelper from "../settings-helper"
 import {ConfigService, PlatformService} from "terminus-core"
@@ -31,47 +30,46 @@ class FTP {
                             buttons: [CloudSyncLang.trans('buttons.sync_from_cloud'), CloudSyncLang.trans('buttons.sync_from_local')],
                             defaultId: 0,
                         })).response === 1) {
-                            await client.uploadFrom(path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename, remoteFile).then(result => {
-                                if (result.code !== 226) {
-                                    toast.error(CloudSyncLang.trans('sync.sync_error'))
-                                }
-                            })
+                            await this.uploadLocalSettings(params, client, platform, toast)
                         } else {
-                            config.writeRaw(content)
+                            config.writeRaw(SettingsHelper.doDescryption(content))
                         }
                     } else {
-                        config.writeRaw(content)
+                        config.writeRaw(SettingsHelper.doDescryption(content))
                     }
                 } catch (_) {
                     toast.error(CloudSyncLang.trans('sync.error_invalid_setting'))
                     await client.rename(remoteFile, remoteFile + '_bk' + new Date().getTime())
-                    await client.uploadFrom(path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename, remoteFile).then(result => {
-                        if (result.code !== 226) {
-                            toast.error(CloudSyncLang.trans('sync.sync_error'))
-                        }
-                    })
+                    await this.uploadLocalSettings(params, client, platform, toast)
                 }
                 result = true
                 fs.unlinkSync(tempFileLocal)
             } else {
-                await client.uploadFrom(path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename, remoteFile).then(result => {
-                    if (result.code !== 226) {
-                        toast.error(CloudSyncLang.trans('sync.sync_error'))
-                    }
-                })
+                await this.uploadLocalSettings(params, client, platform, toast)
             }
         } catch (_) {
             try {
-                await client.uploadFrom(path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename, remoteFile).then(result => {
-                    if (result.code !== 226) {
-                        toast.error(CloudSyncLang.trans('sync.sync_error'))
-                    }
-                })
+                await this.uploadLocalSettings(params, client, platform, toast)
                 result = true
             } catch (_) {}
         }
 
         return result
+    }
+
+    private async uploadLocalSettings (params, client, platform, toast) {
+        const remoteFile = params.location + CloudSyncSettingsData.cloudSettingsFilename
+        await SettingsHelper.generateEncryptedTabbyFileForUpload(platform).then(async status => {
+            if (status) {
+                await client.uploadFrom(path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbyLocalEncryptedFile, remoteFile).then(result => {
+                    if (result.code !== 226) {
+                        toast.error(CloudSyncLang.trans('sync.sync_error'))
+                    }
+                })
+            } else {
+                toast.error(CloudSyncLang.trans('sync.sync_error'))
+            }
+        })
     }
 
     async syncLocalSettingsToCloud (platform: PlatformService, toast: ToastrService) {
@@ -80,15 +78,25 @@ class FTP {
 
             const savedConfigs = SettingsHelper.readConfigFile(platform)
             const params = savedConfigs.configs
+            const localFile = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbyLocalEncryptedFile
             const remoteFile = params.location + CloudSyncSettingsData.cloudSettingsFilename
             const client: Client = await FTP.createClient(params)
 
             try {
-                await client.uploadFrom(path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename, remoteFile).then(result => {
-                    if (result.code !== 226) {
+                await SettingsHelper.generateEncryptedTabbyFileForUpload(platform).then(async status => {
+                    if (status) {
+                        await client.uploadFrom(localFile, remoteFile).then(result => {
+                            if (result.code !== 226) {
+                                toast.error(CloudSyncLang.trans('sync.sync_error'))
+                            }
+                            fs.unlinkSync(localFile)
+                            console.log(result)
+                        })
+                    } else {
                         toast.error(CloudSyncLang.trans('sync.sync_error'))
                     }
                 })
+
             } catch (_) {
                 if (isSyncingInProgress) {
                     toast.error(CloudSyncLang.trans('sync.sync_error'))

@@ -24,23 +24,23 @@ class WebDav {
                             buttons: [CloudSyncLang.trans('buttons.sync_from_cloud'), CloudSyncLang.trans('buttons.sync_from_local')],
                             defaultId: 0,
                         })).response === 1) {
-                            await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true), {overwrite: true}).then(() => {})
+                            await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true, true), {overwrite: true}).then(() => {})
                         } else {
-                            config.writeRaw(content)
+                            config.writeRaw(SettingsHelper.doDescryption(content))
                         }
                     } else {
-                        config.writeRaw(content)
+                        config.writeRaw(SettingsHelper.doDescryption(content))
                     }
                 } catch (_) {
                     toast.error(CloudSyncLang.trans('sync.error_invalid_setting'))
                     await client.moveFile(remoteFile, remoteFile + '_bk' + new Date().getTime())
-                    await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true), {overwrite: true}).then(() => {})
+                    await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true, true), {overwrite: true}).then(() => {})
                 }
                 result = true
             })
         } catch (_) {
             try {
-                await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true), { overwrite: true }).then(() => {})
+                await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true, true), { overwrite: true }).then(() => {})
                 result = true
             } catch (_) { }
         }
@@ -58,7 +58,7 @@ class WebDav {
             const client = WebDav.createClient(params)
 
             try {
-                await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true), {overwrite: true}).then(() => {
+                await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true, true), {overwrite: true}).then(() => {
                     toast.info(CloudSyncLang.trans('sync.sync_success'))
                 })
             } catch (_) {
@@ -71,7 +71,7 @@ class WebDav {
     }
 
     private static createClient (params) {
-        return createClient(params.host + (params.port ?? (':' + params.port)), {
+        return createClient(params.host + (params.port ? (':' + params.port) : ''), {
             authType: AuthType.Password,
             username: params.username,
             password: params.password,
