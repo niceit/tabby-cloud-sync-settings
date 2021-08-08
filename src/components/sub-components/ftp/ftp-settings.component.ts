@@ -93,14 +93,14 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                         if (result.code === 226) {
                             this.isCheckLoginSuccess = true
                             this.setFormMessage.emit({
-                                message: 'Your setting is valid.',
+                                message: Lang.trans('sync.setting_valid'),
                                 type: 'success',
                             })
 
                             client.remove(testFile)
                         } else {
                             this.setFormMessage.emit({
-                                message: 'Connect Ok. But unable to write file at this location!',
+                                message: Lang.trans('sync.error_setting_save_file'),
                                 type: 'error',
                             })
                         }
@@ -109,7 +109,7 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                 console.log(err)
                 this.isFormProcessing = false
                 this.setFormMessage.emit({
-                    message: 'Unable to connect with your settings',
+                    message: Lang.trans('sync.error_connection'),
                     type: 'error',
                 })
             }

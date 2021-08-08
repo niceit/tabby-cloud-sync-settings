@@ -71,7 +71,7 @@ class WebDav {
     }
 
     private static createClient (params) {
-        return createClient(params.host + ':' + params.port, {
+        return createClient(params.host + (params.port ?? (':' + params.port)), {
             authType: AuthType.Password,
             username: params.username,
             password: params.password,

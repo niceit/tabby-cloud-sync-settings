@@ -22,6 +22,9 @@ const CloudSyncLang = {
         sync: {
             loading_config: 'Loading config...',
             sync_confirmation: 'We found cloud setting. Please choose the sync direction!',
+            setting_valid: 'Your setting is valid.',
+            error_setting_save_file: 'Connect Ok. But unable to write file at this location!',
+            error_connection: 'Unable to connect with your settings',
             error_invalid_setting: 'Your setting cloud file contains invalid settings. Local file synced up instead!',
             error_invalid_setting_2: 'Your sync config is invalid. Please re-configure it!',
             error_save_setting: 'Something wrong! unable to save settings.',

@@ -64,7 +64,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
         }
 
         if (isFormValidated) {
-            const client = createClient(this.form.host + (this.form.port ? (':'+ this.form.port) : ''), {
+            const client = createClient(this.form.host + (this.form.port ?? (':'+ this.form.port)), {
                 authType: AuthType.Password,
                 username: this.form.username,
                 password: this.form.password,
@@ -81,7 +81,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
                     this.isFormProcessing = false
                     this.isCheckLoginSuccess = true
                     this.setFormMessage.emit({
-                        message: 'Your setting is valid.',
+                        message: Lang.trans('sync.setting_valid'),
                         type: 'success',
                     })
                     client.deleteFile(this.form.location + 'test.txt')
@@ -89,7 +89,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
             } catch (e) {
                 this.isFormProcessing = false
                 this.setFormMessage.emit({
-                    message: 'Unable to connect with your settings',
+                    message: Lang.trans('sync.error_connection'),
                     type: 'error',
                 })
             }
