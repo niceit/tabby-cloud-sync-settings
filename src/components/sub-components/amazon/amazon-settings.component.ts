@@ -81,7 +81,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
                 this.form.region,
                 this.form.location,
             )
-            AmazonS3.testConnection().then(response => {
+            AmazonS3.testConnection(this.platform).then(response => {
                 this.isFormProcessing = false
                 if (response.hasOwnProperty('code') && !response.code) {
                     this.setFormMessage.emit({

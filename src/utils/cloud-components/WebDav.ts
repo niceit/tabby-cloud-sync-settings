@@ -4,11 +4,13 @@ import SettingsHelper from "../settings-helper"
 import {ConfigService, PlatformService} from "terminus-core"
 import * as yaml from 'js-yaml'
 import {ToastrService} from "ngx-toastr"
-import CloudSyncLang from "../../data/lang";
+import CloudSyncLang from "../../data/lang"
+import Logger from '../../utils/Logger'
 
 let isSyncingInProgress = false
 class WebDav {
     async sync (config: ConfigService, platform: PlatformService, toast: ToastrService, params, firstInit = false) {
+        const logger = new Logger(platform)
         let result = false
         const client = WebDav.createClient(params)
         const remoteFile = params.location + CloudSyncSettingsData.cloudSettingsFilename
@@ -31,24 +33,29 @@ class WebDav {
                     } else {
                         config.writeRaw(SettingsHelper.doDescryption(content))
                     }
-                } catch (_) {
+                } catch (e) {
                     toast.error(CloudSyncLang.trans('sync.error_invalid_setting'))
                     await client.moveFile(remoteFile, remoteFile + '_bk' + new Date().getTime())
                     await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true, true), {overwrite: true}).then(() => {})
+                    logger.log(CloudSyncLang.trans('log.read_cloud_settings') + ' | Exception: ' + e.toString(), 'error')
                 }
                 result = true
             })
-        } catch (_) {
+        } catch (e) {
+            logger.log(CloudSyncLang.trans('log.read_cloud_settings') + ' | Exception: ' + e.toString())
             try {
                 await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true, true), { overwrite: true }).then(() => {})
                 result = true
-            } catch (_) { }
+            } catch (e) {
+                logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
+            }
         }
 
         return result
     }
 
     async syncLocalSettingsToCloud (platform: PlatformService, toast: ToastrService) {
+        const logger = new Logger(platform)
         if (!isSyncingInProgress) {
             isSyncingInProgress = true
 
@@ -61,7 +68,8 @@ class WebDav {
                 await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true, true), {overwrite: true}).then(() => {
                     toast.info(CloudSyncLang.trans('sync.sync_success'))
                 })
-            } catch (_) {
+            } catch (e) {
+                logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
                 if (isSyncingInProgress) {
                     toast.error(CloudSyncLang.trans('sync.sync_error'))
                 }

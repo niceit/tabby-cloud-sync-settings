@@ -5,7 +5,8 @@ import Lang from '../../../data/lang'
 import SettingsHelper from '../../../utils/settings-helper'
 import {ConfigService, PlatformService} from "terminus-core"
 import {ToastrService} from "ngx-toastr"
-import CloudSyncLang from "../../../data/lang";
+import CloudSyncLang from "../../../data/lang"
+import Logger from '../../../utils/Logger'
 
 interface formData {
     host: string,
@@ -50,6 +51,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
     }
 
     async testConnection (): Promise<void> {
+        const logger = new Logger(this.platform)
         this.resetFormMessages.emit()
         let isFormValidated = true
         for (const idx in this.form) {
@@ -92,6 +94,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
                     message: Lang.trans('sync.error_connection'),
                     type: 'error',
                 })
+                logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + e.toString(), 'error')
             }
         }
     }

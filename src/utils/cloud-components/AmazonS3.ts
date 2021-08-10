@@ -13,6 +13,7 @@ import * as yaml from "js-yaml";
 import CloudSyncLang from "../../data/lang";
 import SettingsHelper from "../settings-helper";
 import {AmazonParams} from "../../interface";
+import Logger from '../../utils/Logger'
 
 let isSyncingInProgress = false
 class AmazonS3Class {
@@ -44,7 +45,8 @@ class AmazonS3Class {
      *
      * @return Object
      * */
-    testConnection = async () => {
+    testConnection = async (platform: PlatformService) => {
+        const logger = new Logger(platform)
         const amazonS3 = new S3(
             {
                 accessKeyId: this.appId,
@@ -60,17 +62,19 @@ class AmazonS3Class {
             ACL: this.PERMISSIONS.PUBLIC,
             ContentType: this.TEST_FILE.type,
         }
-        let response: any = {}
+        let response: any
 
         try {
             response = await amazonS3.upload(params, (err, data) => {
                 if (err) {
+                    logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + err.message, 'error')
                     return { code: 0, message: err.message }
                 } else {
                     return { code: 1, data: data }
                 }
             }).promise()
         } catch (e) {
+            logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + e.toString(), 'error')
             response = { code: 0, message: e.toString() }
         }
 
@@ -78,6 +82,7 @@ class AmazonS3Class {
     }
 
     async sync (config: ConfigService, platform: PlatformService, toast: ToastrService, params: AmazonParams, firstInit = false) {
+        const logger = new Logger(platform)
         let result = false
         const client = this.createClient(params)
         let remoteFile
@@ -115,7 +120,7 @@ class AmazonS3Class {
                     } else {
                         config.writeRaw(SettingsHelper.doDescryption(content))
                     }
-                } catch (_) {
+                } catch (e) {
                     toast.error(CloudSyncLang.trans('sync.error_invalid_setting'))
                     const copyObjectParams = {
                         CopySource: remoteFile,
@@ -124,16 +129,17 @@ class AmazonS3Class {
                     }
                     await client.copyObject(copyObjectParams)
                     await client.upload(uploadObjectParams).promise()
+                    logger.log(CloudSyncLang.trans('log.read_cloud_settings') + ' | Exception: ' + e.toString(), 'error')
                 }
                 result = true
             })
-        } catch (_) {
-            console.log(uploadObjectParams)
+        } catch (e) {
+            logger.log(CloudSyncLang.trans('log.read_cloud_settings') + ' | Exception: ' + e.toString())
             try {
                 await client.upload(uploadObjectParams).promise()
                 result = true
             } catch (e) {
-                console.log(e)
+                logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
             }
         }
 
@@ -141,6 +147,7 @@ class AmazonS3Class {
     }
 
     async syncLocalSettingsToCloud (platform: PlatformService, toast: ToastrService) {
+        const logger = new Logger(platform)
         if (!isSyncingInProgress) {
             isSyncingInProgress = true
 
@@ -164,7 +171,8 @@ class AmazonS3Class {
             }
             try {
                 response = await client.upload(uploadObjectParams).promise()
-            } catch (_) {
+            } catch (e) {
+                logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
                 if (isSyncingInProgress) {
                     toast.error(CloudSyncLang.trans('sync.sync_error'))
                 }

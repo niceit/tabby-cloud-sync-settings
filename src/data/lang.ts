@@ -38,6 +38,12 @@ const CloudSyncLang = {
             remove_setting_success: 'Your settings had been removed.',
             remove_setting_error: 'Can not remove your setting. Try again later!',
         },
+        log: {
+            invalid_cloud_settings: 'Invalid cloud settings syncing',
+            read_cloud_settings: 'Reading cloud settings',
+            error_upload_settings: 'Upload settings file from local',
+            error_test_connection: 'Connection error.',
+        },
         s3: {
             title: 'Enter your AppID and Secret token',
             app_id_placeholder: 'Application Id',

@@ -87,6 +87,6 @@
             span.spinner-border.spinner-border-sm.mr-2
             span([textContent]='translate.trans("buttons.cloud_syncing_progress")')
 
-        button(*ngIf='!isSyncingProgress').btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='removeSavedSettings()')
+        button.btn.btn-danger.flex-shrink-0.ml-3.mb-2(*ngIf='!isSyncingProgress', (click)='removeSavedSettings()')
             i.fas.fa-fw.fa-times-circle.mr-2
             span([textContent]='translate.trans("buttons.remove_saved_setting")')

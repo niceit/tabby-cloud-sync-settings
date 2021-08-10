@@ -7,12 +7,14 @@ import CloudSyncLang from "../../data/lang";
 import {FtpParams} from "../../interface";
 import {fsReadFile} from "ts-loader/dist/utils";
 import {Client} from "basic-ftp";
+import Logger from '../../utils/Logger'
 
 const fs = require('fs')
 const path = require('path')
 let isSyncingInProgress = false
 class FTP {
     async sync (config: ConfigService, platform: PlatformService, toast: ToastrService, params, firstInit = false) {
+        const logger = new Logger(platform)
         let result = false
         const client: Client = await FTP.createClient(params)
         const remoteFile = params.location + CloudSyncSettingsData.cloudSettingsFilename
@@ -37,21 +39,25 @@ class FTP {
                     } else {
                         config.writeRaw(SettingsHelper.doDescryption(content))
                     }
-                } catch (_) {
+                } catch (e) {
                     toast.error(CloudSyncLang.trans('sync.error_invalid_setting'))
                     await client.rename(remoteFile, remoteFile + '_bk' + new Date().getTime())
                     await this.uploadLocalSettings(params, client, platform, toast)
+                    logger.log(CloudSyncLang.trans('log.read_cloud_settings') + ' | Exception: ' + e.toString(), 'error')
                 }
                 result = true
                 fs.unlinkSync(tempFileLocal)
             } else {
                 await this.uploadLocalSettings(params, client, platform, toast)
             }
-        } catch (_) {
+        } catch (e) {
+            logger.log(CloudSyncLang.trans('log.read_cloud_settings') + ' | Exception: ' + e.toString())
             try {
                 await this.uploadLocalSettings(params, client, platform, toast)
                 result = true
-            } catch (_) {}
+            } catch (e) {
+                logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
+            }
         }
 
         return result
@@ -73,6 +79,7 @@ class FTP {
     }
 
     async syncLocalSettingsToCloud (platform: PlatformService, toast: ToastrService) {
+        const logger = new Logger(platform)
         if (!isSyncingInProgress) {
             isSyncingInProgress = true
 
@@ -97,7 +104,8 @@ class FTP {
                     }
                 })
 
-            } catch (_) {
+            } catch (e) {
+                logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
                 if (isSyncingInProgress) {
                     toast.error(CloudSyncLang.trans('sync.sync_error'))
                 }
