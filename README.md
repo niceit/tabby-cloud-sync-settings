@@ -5,6 +5,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/terminus-cloud-settings-sync"><img alt="npm" src="https://img.shields.io/npm/v/terminus-cloud-settings-sync?label=npmjs"></a> 
   <a href="https://tabby-cloud.tranit.co/"><img src="https://img.shields.io/static/v1?label=Support URL&message=Visit TranIt.co&color=#333"/></a> &nbsp;  
+  <img alt="GitHub" src="https://img.shields.io/github/license/niceit/tabby-cloud-sync-settings">  
 </p>
 
 With this plugin you could sync your settings (Including saved SSH Sessions) automatically across devices.
