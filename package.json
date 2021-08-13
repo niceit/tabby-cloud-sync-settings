@@ -1,7 +1,7 @@
 {
   "name": "terminus-cloud-settings-sync",
-  "version": "1.0.5",
-  "date": "8th August 2021",
+  "version": "1.0.6",
+  "date": "13th August 2021",
   "description": "Cloud Services sync the Tabby config and connections across platform devices.",
   "keywords": [
     "terminus-plugin"
@@ -66,7 +66,8 @@
     "url": "git+https://github.com/niceit/tabby-cloud-sync-settings.git"
   },
   "dependencies": {
-    "aws-sdk": "^2.956.0",
+    "@types/node": "^16.6.1",
+    "aws-sdk": "^2.967.0",
     "basic-ftp": "^4.6.6",
     "crypto-js": "^4.0.0",
     "webdav": "^4.6.0"
