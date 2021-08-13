@@ -16,10 +16,6 @@
     "declaration": true,
     "declarationDir": "dist",
     "resolveJsonModule": true,
-    "types": ["node"],
-    "typeRoots": [
-      "node_modules/@types"
-    ],
     "lib": [
       "dom",
       "es2015",
