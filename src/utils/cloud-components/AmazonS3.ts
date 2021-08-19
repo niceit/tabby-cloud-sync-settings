@@ -52,7 +52,7 @@ class AmazonS3Class {
      * */
     testConnection = async (platform: PlatformService, s3_params) => {
         const logger = new Logger(platform)
-        let amazonS3 = this.createClient(s3_params)
+        let amazonS3 = this.createClient(s3_params, platform)
 
         const params = {
             Bucket: this.bucket,
@@ -84,7 +84,7 @@ class AmazonS3Class {
     async sync (config: ConfigService, platform: PlatformService, toast: ToastrService, params: AmazonParams, firstInit = false) {
         const logger = new Logger(platform)
         let result = false
-        const client = this.createClient(params)
+        const client = this.createClient(params, platform)
         let remoteFile
         if (this.path === '') {
             remoteFile = CloudSyncSettingsData.cloudSettingsFilename.substr(1, CloudSyncSettingsData.cloudSettingsFilename.length)
@@ -154,7 +154,7 @@ class AmazonS3Class {
             const savedConfigs = SettingsHelper.readConfigFile(platform)
             this.setProvider(savedConfigs.adapter)
             const params = savedConfigs.configs
-            const client = this.createClient(params)
+            const client = this.createClient(params, platform)
             let remoteFile
             if (this.path === '') {
                 remoteFile = CloudSyncSettingsData.cloudSettingsFilename.substr(1, CloudSyncSettingsData.cloudSettingsFilename.length)
@@ -186,11 +186,12 @@ class AmazonS3Class {
         }
     }
 
-    private createClient (params: AmazonParams) {
+    private createClient (params: AmazonParams, platform: PlatformService) {
         this.setConfig(params.appId, params.appSecret, params.bucket, params.region, params.location)
+        const logger = new Logger(platform)
         switch (this.provider) {
             case CloudSyncSettingsData.values.WASABI: {
-                console.log("Fetch Wasabi instance")
+                logger.log("Fetch Wasabi instance", 'info')
                 return new S3(
                     {
                         accessKeyId: this.appId,
@@ -201,7 +202,7 @@ class AmazonS3Class {
                 )
             }
             default: {
-                console.log("Fetch Amazon instance")
+                logger.log("Fetch Amazon instance", 'info')
                 return new S3(
                     {
                         accessKeyId: this.appId,
