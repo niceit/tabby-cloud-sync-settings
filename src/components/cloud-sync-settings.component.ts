@@ -38,6 +38,8 @@ export class CloudSyncSettingsComponent implements OnInit {
         if (this.storedSettingsData) {
             this.selectedProvider = this.storedSettingsData.adapter
             this.syncEnabled = this.storedSettingsData.enabled
+
+            console.log('storedSettingsData', this.storedSettingsData)
         } else {
             this.selectedProvider = this.serviceProviderValues.S3
         }

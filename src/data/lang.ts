@@ -14,7 +14,7 @@ const CloudSyncLang = {
             sub_title: 'Here you could login to your cloud account and sync the settings across devices.',
             service_label: 'Services',
             amazon: {
-                connected: 'S3 Service Connected!',
+                connected: 'Cloud Service Connected!',
                 save_settings_failed: 'An error occurred when trying to save config.',
                 save_settings_success: 'Your settings is saved.',
             },

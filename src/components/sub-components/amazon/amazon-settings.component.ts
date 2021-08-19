@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core'
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core'
 import cloudSyncSettingsHelper from '../../../utils/CloudSyncSettingsHelper'
 import Lang from '../../../data/lang'
 import AmazonS3 from '../../../utils/cloud-components/AmazonS3'
@@ -24,9 +24,9 @@ interface formData {
 export class CloudSyncAmazonSettingsComponent implements OnInit {
     @Output() resetFormMessages = new EventEmitter()
     @Output() setFormMessage = new EventEmitter()
+    @Input() provider: string
 
     translate = CloudSyncLang
-    presetData = CloudSyncSettingsData
     isPreloadingSavedConfig = true
     isSettingSaved = false
     isServiceAccountCheckPassed = false
@@ -36,20 +36,22 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     s3Regions = []
 
     constructor(private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
+
     }
 
     ngOnInit (): void {
-        this.s3Regions = cloudSyncSettingsHelper.getS3regionsList()
+        this.s3Regions = cloudSyncSettingsHelper.getS3regionsList(this.provider)
         this.form.region = this.s3Regions[0].value
 
         const configs = SettingsHelper.readConfigFile(this.platform)
         if (configs) {
-            if (configs.adapter === this.presetData.values.S3) {
+            if (configs.adapter === this.provider) {
                 this.form = configs.configs as formData
                 this.isSettingSaved = true
             }
         }
         this.isPreloadingSavedConfig = false
+        AmazonS3.setProvider(this.provider)
     }
 
     performLoginAmazonS3 (): void {
@@ -74,15 +76,16 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
             }
 
             this.isFormProcessing = true
-            AmazonS3.setConfig(
-                this.form.appId,
-                this.form.appSecret,
-                this.form.bucket,
-                this.form.region,
-                this.form.location,
-            )
-            AmazonS3.testConnection(this.platform).then(response => {
+            const params = {
+                appId: this.form.appId,
+                appSecret: this.form.appSecret,
+                bucket: this.form.bucket,
+                region: this.form.region,
+                location: this.form.location,
+            }
+            AmazonS3.testConnection(this.platform, params).then(response => {
                 this.isFormProcessing = false
+                console.log('Response | ', response)
                 if (response.hasOwnProperty('code') && !response.code) {
                     this.setFormMessage.emit({
                         message: response.message,
@@ -95,6 +98,9 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
                     })
                     this.isServiceAccountCheckPassed = true
                 }
+            }).catch((err) => {
+                console.log('error | ', err)
+                this.isFormProcessing = false
             })
         }
     }
@@ -102,7 +108,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     async saveAmazonS3Settings (): Promise<void> {
         this.resetFormMessages.emit()
         this.isFormProcessing = true
-        SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.S3, this.form).then(async result => {
+        SettingsHelper.saveSettingsToFile(this.platform, this.provider, this.form).then(async result => {
             this.isFormProcessing = false
             if (!result) {
                 this.setFormMessage.emit({

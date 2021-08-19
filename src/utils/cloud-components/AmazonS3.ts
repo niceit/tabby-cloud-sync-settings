@@ -5,7 +5,7 @@
  * @author Tran IT <tranit1209@gmail.com>
  * @licence MIT
  */
-import { S3 } from 'aws-sdk'
+import {Endpoint, S3, SharedIniFileCredentials} from 'aws-sdk'
 import {ConfigService, PlatformService} from "terminus-core";
 import {ToastrService} from "ngx-toastr";
 import CloudSyncSettingsData from "../../data/setting-items";
@@ -17,6 +17,7 @@ import Logger from '../../utils/Logger'
 
 let isSyncingInProgress = false
 class AmazonS3Class {
+    private provider = CloudSyncSettingsData.values.S3
     private appId
     private appSecret
     private bucket
@@ -32,6 +33,10 @@ class AmazonS3Class {
         content: 'This is test file',
     }
 
+    setProvider(provider: string) {
+        this.provider = provider
+    }
+
     setConfig (appId, appSecret, bucket, region, path) {
         this.appId = appId
         this.appSecret = appSecret
@@ -45,15 +50,9 @@ class AmazonS3Class {
      *
      * @return Object
      * */
-    testConnection = async (platform: PlatformService) => {
+    testConnection = async (platform: PlatformService, s3_params) => {
         const logger = new Logger(platform)
-        const amazonS3 = new S3(
-            {
-                accessKeyId: this.appId,
-                secretAccessKey: this.appSecret,
-                region: this.region,
-            }
-        )
+        let amazonS3 = this.createClient(s3_params)
 
         const params = {
             Bucket: this.bucket,
@@ -67,14 +66,15 @@ class AmazonS3Class {
         try {
             response = await amazonS3.upload(params, (err, data) => {
                 if (err) {
-                    logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + err.message, 'error')
+                    console.log(err)
+                    logger.log(CloudSyncLang.trans('log.error_test_connection') + ' #1 | Exception: ' + err.message, 'error')
                     return { code: 0, message: err.message }
                 } else {
                     return { code: 1, data: data }
                 }
             }).promise()
         } catch (e) {
-            logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + e.toString(), 'error')
+            logger.log(CloudSyncLang.trans('log.error_test_connection') + ' #2 | Exception: ' + e.toString(), 'error')
             response = { code: 0, message: e.toString() }
         }
 
@@ -152,6 +152,7 @@ class AmazonS3Class {
             isSyncingInProgress = true
 
             const savedConfigs = SettingsHelper.readConfigFile(platform)
+            this.setProvider(savedConfigs.adapter)
             const params = savedConfigs.configs
             const client = this.createClient(params)
             let remoteFile
@@ -187,13 +188,29 @@ class AmazonS3Class {
 
     private createClient (params: AmazonParams) {
         this.setConfig(params.appId, params.appSecret, params.bucket, params.region, params.location)
-        return new S3(
-            {
-                accessKeyId: this.appId,
-                secretAccessKey: this.appSecret,
-                region: this.region,
+        switch (this.provider) {
+            case CloudSyncSettingsData.values.WASABI: {
+                console.log("Fetch Wasabi instance")
+                return new S3(
+                    {
+                        accessKeyId: this.appId,
+                        secretAccessKey: this.appSecret,
+                        region: this.region,
+                        endpoint: new Endpoint(CloudSyncSettingsData.amazonEndpoints.WASABI),
+                    }
+                )
             }
-        )
+            default: {
+                console.log("Fetch Amazon instance")
+                return new S3(
+                    {
+                        accessKeyId: this.appId,
+                        secretAccessKey: this.appSecret,
+                        region: this.region,
+                    }
+                )
+            }
+        }
     }
 }
 

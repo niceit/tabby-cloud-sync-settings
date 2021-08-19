@@ -50,7 +50,15 @@ h3([textContent]='translate.trans("settings.title")')
     .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.S3')
         amazon-settings(
             (resetFormMessages)='resetFormMessages()',
-            (setFormMessage)='setFormMessage($event)'
+            (setFormMessage)='setFormMessage($event)',
+            [provider]='serviceProviderValues.S3'
+        )
+
+    .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.WASABI')
+        amazon-settings(
+            (resetFormMessages)='resetFormMessages()',
+            (setFormMessage)='setFormMessage($event)',
+            [provider]='serviceProviderValues.WASABI'
         )
 
     .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.WEBDAV')
