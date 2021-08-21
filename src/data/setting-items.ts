@@ -4,12 +4,14 @@ const providerConstantItems = {
     BUILT_IN: 'builtin-tabby',
     S3: 'amazon-s3',
     WASABI: 'wasabi',
+    DIGITAL_OCEAN: 'digital-ocean',
     WEBDAV: 'webdav',
     FTP: 'ftp',
 }
 
 const amazonCompatibilityEndpoints = {
-    WASABI: 's3.wasabisys.com'
+    WASABI: 's3.wasabisys.com',
+    DIGITAL_OCEAN: '{REGION}.digitaloceanspaces.com'
 }
 
 const DevEnv = DevEnvConstants
@@ -24,6 +26,7 @@ const CloudSyncSettingsData = {
         // { name: 'Builtin Tabby', value: providerConstantItems.BUILT_IN },
         { name: 'Amazon S3', value: providerConstantItems.S3 },
         { name: 'Wasabi', value: providerConstantItems.WASABI },
+        { name: 'DigitalOcean Space', value: providerConstantItems.DIGITAL_OCEAN },
         { name: 'WebDav', value: providerConstantItems.WEBDAV },
         { name: 'FTP', value: providerConstantItems.FTP },
     ],
@@ -45,6 +48,13 @@ const CloudSyncSettingsData = {
             region: '',
         },
         [providerConstantItems.WASABI]: {
+            appId: '',
+            appSecret: '',
+            location: '/',
+            bucket: '',
+            region: '',
+        },
+        [providerConstantItems.DIGITAL_OCEAN]: {
             appId: '',
             appSecret: '',
             location: '/',

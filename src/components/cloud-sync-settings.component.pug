@@ -61,6 +61,13 @@ h3([textContent]='translate.trans("settings.title")')
             [provider]='serviceProviderValues.WASABI'
         )
 
+    .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.DIGITAL_OCEAN')
+        amazon-settings(
+            (resetFormMessages)='resetFormMessages()',
+            (setFormMessage)='setFormMessage($event)',
+            [provider]='serviceProviderValues.DIGITAL_OCEAN'
+        )
+
     .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.WEBDAV')
         webdav-settings(
             (resetFormMessages)='resetFormMessages()',

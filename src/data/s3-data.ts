@@ -25,11 +25,25 @@ const AmazonData = {
         { text: 'South America (São Paulo) sa-east-1', value: 'sa-east-1' },
     ],
     wasabi: [
-        { text: 'us-west-1', value: 'us-west-1' },
-        { text: 'ap-southeast-1', value: 'ap-northeast-1' },
-        { text: 'eu-central-1', value: 'eu-central-1' },
-        { text: 'us-central-1', value: 'us-central-1' },
-        { text: 'us-east-2', value: 'us-east-2' },
+        { text: 'US West (N. California) us-west-1', value: 'us-west-1' },
+        { text: 'Asia Pacific (Tokyo) ap-southeast-1', value: 'ap-northeast-1' },
+        { text: 'Europe (Frankfurt) eu-central-1', value: 'eu-central-1' },
+        { text: 'US Central us-central-1', value: 'us-central-1' },
+        { text: 'US East (Ohio) us-east-2', value: 'us-east-2' },
+    ],
+    DIGITAL_OCEAN: [
+        { text: 'New York City, United States - nyc1', value: 'nyc1' },
+        { text: 'New York City, United States - nyc2', value: 'nyc2' },
+        { text: 'New York City, United States - nyc3', value: 'nyc3' },
+        { text: 'Amsterdam, the Netherlands - ams3', value: 'ams3' },
+        { text: 'San Francisco, United States - sfo1', value: 'sfo1' },
+        { text: 'San Francisco, United States - sfo2', value: 'sfo2' },
+        { text: 'San Francisco, United States - sfo3', value: 'sfo3' },
+        { text: 'Singapore - sgp1', value: 'sgp1' },
+        { text: 'London, United Kingdom - lon1', value: 'lon1' },
+        { text: 'Frankfurt, Germany - fra1', value: 'fra1' },
+        { text: 'Toronto, Canada - tor1', value: 'tor1' },
+        { text: 'Bangalore, India - blr1', value: 'blr1' },
     ]
 }
 export default AmazonData
