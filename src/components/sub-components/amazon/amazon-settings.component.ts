@@ -27,6 +27,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     @Input() provider: string
 
     translate = CloudSyncLang
+    presetData = CloudSyncSettingsData
     isPreloadingSavedConfig = true
     isSettingSaved = false
     isServiceAccountCheckPassed = false
@@ -52,6 +53,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
         }
         this.isPreloadingSavedConfig = false
         AmazonS3.setProvider(this.provider)
+        console.log("Inside instance => ", this.provider)
     }
 
     performLoginAmazonS3 (): void {
@@ -86,7 +88,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
             AmazonS3.testConnection(this.platform, params).then(response => {
                 this.isFormProcessing = false
                 console.log('Response | ', response)
-                if (response.hasOwnProperty('code') && !response.code) {
+                if (response.hasOwnProperty('code') && parseInt(response.code) === 0) {
                     this.setFormMessage.emit({
                         message: response.message,
                         type: 'error',

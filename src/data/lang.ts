@@ -46,6 +46,7 @@ const CloudSyncLang = {
         },
         s3: {
             title: 'Enter your AppID and Secret token',
+            title_blackblaze: 'Enter your KeyID and Application Key',
             app_id_placeholder: 'Application Id',
             app_secret_placeholder: 'Application Secret',
             bucket_placeholder: 'Bucket',

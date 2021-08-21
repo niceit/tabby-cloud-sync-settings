@@ -6,7 +6,8 @@
 
 .form-group(*ngIf='!isPreloadingSavedConfig')
     .header.mb-2
-        .title([textContent]='translate.trans("s3.title")')
+        .title(*ngIf='provider === presetData.values.S3 || provider === presetData.values.WASABI', [textContent]='translate.trans("s3.title")')
+        .title(*ngIf='provider === presetData.values.BLACKBLAZE', [textContent]='translate.trans("s3.title_blackblaze")')
     .row
         .col-md-6.col-sm-12
             .input-group.mb-2

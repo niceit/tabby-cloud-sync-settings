@@ -201,6 +201,17 @@ class AmazonS3Class {
                     }
                 )
             }
+            case CloudSyncSettingsData.values.BLACKBLAZE: {
+                logger.log("Fetch Blackblaze instance", 'info')
+                return new S3(
+                    {
+                        accessKeyId: this.appId,
+                        secretAccessKey: this.appSecret,
+                        region: this.region,
+                        endpoint: new Endpoint(CloudSyncSettingsData.amazonEndpoints.BLACKBLAZE),
+                    }
+                )
+            }
             default: {
                 logger.log("Fetch Amazon instance", 'info')
                 return new S3(

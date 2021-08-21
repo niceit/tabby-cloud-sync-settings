@@ -16,6 +16,7 @@ export class SettingsHelperClass {
         [CloudSyncSettingsData.values.WEBDAV]: WebDav,
         [CloudSyncSettingsData.values.S3]: AmazonS3,
         [CloudSyncSettingsData.values.WASABI]: AmazonS3,
+        [CloudSyncSettingsData.values.BLACKBLAZE]: AmazonS3,
         [CloudSyncSettingsData.values.FTP]: FTP,
     }
     private generatedCryptoHash = 'tp!&nc3^to8y7^3#4%2%&szufx!'
