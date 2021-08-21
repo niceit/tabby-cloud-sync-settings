@@ -41,3 +41,39 @@ Hope you will like this plugin for your productivity work.
 Love the plugin? Buy me a coffee.
 
 [![Donate to TranIT](https://tranit.co/donate-tranit.png)](https://donorbox.org/tabby-cloud-sync-settings-donation)
+
+# Changelog
+Keep tracking of version release change logs
+
+## [v1.2.1] - 2021-08-21
+
+## Added
+
+- Add support for [Digital Ocean Space](https://www.digitalocean.com/products/spaces/).
+
+## [v1.2.0] - 2021-08-19
+
+## Added
+
+- Add support for [Wasabi Cloud Storage](https://wasabi.com/).
+
+## [v1.1.3] - 2021-08-14
+
+### Fixes
+
+- Add logger.
+- Minor fixes and bugs.
+
+## [v1.0.2] - 2021-08-07
+
+### Fixes
+
+- Optimize for security setting file encryption.
+- Fixing bugs.
+
+## [v1.0.0] - 2021-08-01
+
+### Added
+
+- Initial the plugin package
+- Added Support for Amazon S3, FTP, WebDav
