@@ -15,7 +15,15 @@ Current platforms supported: **MacOS** **Windows** **Linux**
 
 This plugin is **FREE** of use under public license MIT.
 
-Checkout some screenshots
+## Current supported Cloud Services
+
+![](./screenshots/cloud-services/cloud-services-s3.png)
+![](./screenshots/cloud-services/cloud-services-webdav.png)
+![](./screenshots/cloud-services/cloud-services-ftp.png)
+![](./screenshots/cloud-services/cloud-services-wasabi.png)
+![](./screenshots/cloud-services/cloud-services-digitalocean.png)
+
+## Checkout some screenshots
 
 ![](./screenshots/2021-08-07_11-12-03.png)
 
