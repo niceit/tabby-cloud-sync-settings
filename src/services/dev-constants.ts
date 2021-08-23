@@ -1,4 +1,4 @@
 const DevEnvConstants = {
-    ENABLE_DEBUG: true
+    ENABLE_DEBUG: false
 }
 export default DevEnvConstants
