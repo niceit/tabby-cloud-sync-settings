@@ -50,6 +50,7 @@ const CloudSyncLang = {
             app_id_placeholder: 'Application Id',
             app_secret_placeholder: 'Application Secret',
             bucket_placeholder: 'Bucket',
+            blackblaze_bucket_placeholder: 'Enter your BlackBlaze B2 region',
             location_placeholder: 'Location /',
         },
         ftp: {

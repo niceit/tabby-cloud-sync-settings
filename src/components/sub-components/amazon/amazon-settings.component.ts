@@ -28,7 +28,6 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
 
     presetData = CloudSyncSettingsData
     translate = CloudSyncLang
-    presetData = CloudSyncSettingsData
     isPreloadingSavedConfig = true
     isSettingSaved = false
     isServiceAccountCheckPassed = false
@@ -43,7 +42,11 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
 
     ngOnInit (): void {
         this.s3Regions = cloudSyncSettingsHelper.getS3regionsList(this.provider)
-        this.form.region = this.s3Regions[0].value
+        if (this.provider !== this.presetData.values.BLACKBLAZE) {
+            this.form.region = this.s3Regions[0].value
+        } else {
+            this.form.region = ''
+        }
 
         const configs = SettingsHelper.readConfigFile(this.platform)
         if (configs) {
@@ -148,6 +151,10 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     cancelSaveSettings (): void {
         this.resetFormMessages.emit()
         this.isServiceAccountCheckPassed = false
+    }
+
+    openBlackBlazeRegionHelp() {
+        this.platform.openExternal(this.presetData.external_urls.BlackBlazeHelp)
     }
 
     async removeSavedSettings (): Promise<void> {

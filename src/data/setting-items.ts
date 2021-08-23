@@ -13,7 +13,7 @@ const providerConstantItems = {
 const amazonCompatibilityEndpoints = {
     WASABI: 's3.wasabisys.com',
     DIGITAL_OCEAN: '{REGION}.digitaloceanspaces.com',
-    BLACKBLAZE: 's3.backblazeb2.com'
+    BLACKBLAZE: 's3.{REGION}.backblazeb2.com',
 }
 
 const DevEnv = DevEnvConstants
@@ -86,5 +86,8 @@ const CloudSyncSettingsData = {
             location: '/',
         },
     },
+    external_urls: {
+        BlackBlazeHelp: 'https://tabby-cloud.tranit.co/how-to-get-blackblaze-regtion-code/'
+    }
 }
 export default CloudSyncSettingsData

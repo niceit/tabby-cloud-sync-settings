@@ -25,6 +25,7 @@ class AmazonS3Class {
     private path
 
     private PERMISSIONS = {
+        PRIVATE: 'private',
         PUBLIC: 'public-read',
     }
     private TEST_FILE = {
@@ -58,7 +59,7 @@ class AmazonS3Class {
             Bucket: this.bucket,
             Key: this.path + this.TEST_FILE.name,
             Body: this.TEST_FILE.content,
-            ACL: this.PERMISSIONS.PUBLIC,
+            ACL: this.PERMISSIONS.PRIVATE,
             ContentType: this.TEST_FILE.type,
         }
         let response: any
@@ -96,7 +97,7 @@ class AmazonS3Class {
             Bucket: this.bucket,
             Key: remoteFile,
             Body: SettingsHelper.readTabbyConfigFile(platform, true, true),
-            ACL: this.PERMISSIONS.PUBLIC,
+            ACL: this.PERMISSIONS.PRIVATE,
             ContentType: 'application/json',
         }
 
@@ -167,7 +168,7 @@ class AmazonS3Class {
                 Bucket: this.bucket,
                 Key: remoteFile,
                 Body: SettingsHelper.readTabbyConfigFile(platform, true, true),
-                ACL: this.PERMISSIONS.PUBLIC,
+                ACL: this.PERMISSIONS.PRIVATE,
                 ContentType: 'application/json',
             }
             try {
@@ -207,17 +208,14 @@ class AmazonS3Class {
                 s3Params['endpoint'] = new Endpoint(CloudSyncSettingsData.amazonEndpoints.DIGITAL_OCEAN.replace('{REGION}', this.region))
                 break
             }
+
             case CloudSyncSettingsData.values.BLACKBLAZE: {
                 logger.log("Fetch Blackblaze instance", 'info')
-                return new S3(
-                    {
-                        accessKeyId: this.appId,
-                        secretAccessKey: this.appSecret,
-                        region: this.region,
-                        endpoint: new Endpoint(CloudSyncSettingsData.amazonEndpoints.BLACKBLAZE),
-                    }
-                )
+                delete s3Params.region
+                s3Params['endpoint'] = new Endpoint(CloudSyncSettingsData.amazonEndpoints.BLACKBLAZE.replace('{REGION}', this.region))
+                break
             }
+
             default: {
                 logger.log("Fetch Amazon instance", 'info')
             }
