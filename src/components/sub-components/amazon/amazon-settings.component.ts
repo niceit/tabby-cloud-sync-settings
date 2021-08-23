@@ -26,6 +26,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     @Output() setFormMessage = new EventEmitter()
     @Input() provider: string
 
+    presetData = CloudSyncSettingsData
     translate = CloudSyncLang
     presetData = CloudSyncSettingsData
     isPreloadingSavedConfig = true

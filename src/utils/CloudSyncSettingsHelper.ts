@@ -8,6 +8,10 @@ class CloudSyncSettingsHelper {
                 return AmazonData.wasabi
             }
 
+            case CloudSyncSettingsData.values.DIGITAL_OCEAN: {
+                return AmazonData.DIGITAL_OCEAN
+            }
+
             default: {
                 return AmazonData.regions
             }

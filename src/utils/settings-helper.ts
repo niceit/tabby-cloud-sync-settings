@@ -16,6 +16,7 @@ export class SettingsHelperClass {
         [CloudSyncSettingsData.values.WEBDAV]: WebDav,
         [CloudSyncSettingsData.values.S3]: AmazonS3,
         [CloudSyncSettingsData.values.WASABI]: AmazonS3,
+        [CloudSyncSettingsData.values.DIGITAL_OCEAN]: AmazonS3,
         [CloudSyncSettingsData.values.BLACKBLAZE]: AmazonS3,
         [CloudSyncSettingsData.values.FTP]: FTP,
     }
@@ -81,7 +82,10 @@ export class SettingsHelperClass {
         const savedConfigs = this.readConfigFile(platform)
         let result = false
         if (savedConfigs.enabled) {
-            if (savedConfigs.adapter === CloudSyncSettingsData.values.S3 || savedConfigs.adapter === CloudSyncSettingsData.values.WASABI) {
+            if (savedConfigs.adapter === CloudSyncSettingsData.values.S3
+                || savedConfigs.adapter === CloudSyncSettingsData.values.DIGITAL_OCEAN
+                || savedConfigs.adapter === CloudSyncSettingsData.values.BLACKBLAZE
+                || savedConfigs.adapter === CloudSyncSettingsData.values.WASABI) {
                 AmazonS3.setProvider(savedConfigs.adapter)
             }
             await this.adapterHandler[savedConfigs.adapter].sync(config, platform, toast, savedConfigs.configs, firstInit).then(status => {

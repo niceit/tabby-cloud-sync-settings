@@ -189,17 +189,23 @@ class AmazonS3Class {
     private createClient (params: AmazonParams, platform: PlatformService) {
         this.setConfig(params.appId, params.appSecret, params.bucket, params.region, params.location)
         const logger = new Logger(platform)
+        const s3Params = {
+            accessKeyId: this.appId,
+            secretAccessKey: this.appSecret,
+            region: this.region,
+        }
         switch (this.provider) {
             case CloudSyncSettingsData.values.WASABI: {
                 logger.log("Fetch Wasabi instance", 'info')
-                return new S3(
-                    {
-                        accessKeyId: this.appId,
-                        secretAccessKey: this.appSecret,
-                        region: this.region,
-                        endpoint: new Endpoint(CloudSyncSettingsData.amazonEndpoints.WASABI),
-                    }
-                )
+                s3Params['endpoint'] = new Endpoint(CloudSyncSettingsData.amazonEndpoints.WASABI)
+                break
+            }
+
+            case CloudSyncSettingsData.values.DIGITAL_OCEAN: {
+                logger.log("Fetch Digital instance", 'info')
+                delete s3Params.region
+                s3Params['endpoint'] = new Endpoint(CloudSyncSettingsData.amazonEndpoints.DIGITAL_OCEAN.replace('{REGION}', this.region))
+                break
             }
             case CloudSyncSettingsData.values.BLACKBLAZE: {
                 logger.log("Fetch Blackblaze instance", 'info')
@@ -214,15 +220,12 @@ class AmazonS3Class {
             }
             default: {
                 logger.log("Fetch Amazon instance", 'info')
-                return new S3(
-                    {
-                        accessKeyId: this.appId,
-                        secretAccessKey: this.appSecret,
-                        region: this.region,
-                    }
-                )
             }
         }
+
+        logger.log(s3Params, 'info')
+
+        return new S3(s3Params)
     }
 }
 
