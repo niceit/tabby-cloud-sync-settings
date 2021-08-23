@@ -89,20 +89,33 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
                 region: this.form.region,
                 location: this.form.location,
             }
-            AmazonS3.testConnection(this.platform, params).then(response => {
+
+            let isTimedOut = false
+            const timeOutConnectionCheck = setTimeout(() => {
+                isTimedOut = true
                 this.isFormProcessing = false
-                console.log('Response | ', response)
-                if (response.hasOwnProperty('code') && parseInt(response.code) === 0) {
-                    this.setFormMessage.emit({
-                        message: response.message,
-                        type: 'error',
-                    })
-                } else {
-                    this.setFormMessage.emit({
-                        message: Lang.trans('settings.amazon.connected'),
-                        type: 'success',
-                    })
-                    this.isServiceAccountCheckPassed = true
+                this.setFormMessage.emit({
+                    message: Lang.trans('settings.error_connection_timeout'),
+                    type: 'error',
+                })
+            }, 15000)
+            AmazonS3.testConnection(this.platform, params).then(response => {
+                if (!isTimedOut) {
+                    clearTimeout(timeOutConnectionCheck)
+                    this.isFormProcessing = false
+                    console.log('Response | ', response)
+                    if (response.hasOwnProperty('code') && parseInt(response.code) === 0) {
+                        this.setFormMessage.emit({
+                            message: response.message,
+                            type: 'error',
+                        })
+                    } else {
+                        this.setFormMessage.emit({
+                            message: Lang.trans('settings.amazon.connected'),
+                            type: 'success',
+                        })
+                        this.isServiceAccountCheckPassed = true
+                    }
                 }
             }).catch((err) => {
                 console.log('error | ', err)

@@ -10,6 +10,11 @@ const providerConstantItems = {
     FTP: 'ftp',
 }
 
+const amazonS3CompatibilityInstances = [
+    providerConstantItems.S3, providerConstantItems.WASABI,
+    providerConstantItems.DIGITAL_OCEAN, providerConstantItems.BLACKBLAZE
+]
+
 const amazonCompatibilityEndpoints = {
     WASABI: 's3.wasabisys.com',
     DIGITAL_OCEAN: '{REGION}.digitaloceanspaces.com',
@@ -88,6 +93,9 @@ const CloudSyncSettingsData = {
     },
     external_urls: {
         BlackBlazeHelp: 'https://tabby-cloud.tranit.co/how-to-get-blackblaze-regtion-code/'
+    },
+    isCloudStorageS3Compatibility(provider: string) {
+        return amazonS3CompatibilityInstances.includes(provider)
     }
 }
 export default CloudSyncSettingsData

@@ -18,6 +18,7 @@ const CloudSyncLang = {
                 save_settings_failed: 'An error occurred when trying to save config.',
                 save_settings_success: 'Your settings is saved.',
             },
+            error_connection_timeout: 'Connection timed out.'
         },
         sync: {
             loading_config: 'Loading config...',

@@ -82,10 +82,7 @@ export class SettingsHelperClass {
         const savedConfigs = this.readConfigFile(platform)
         let result = false
         if (savedConfigs.enabled) {
-            if (savedConfigs.adapter === CloudSyncSettingsData.values.S3
-                || savedConfigs.adapter === CloudSyncSettingsData.values.DIGITAL_OCEAN
-                || savedConfigs.adapter === CloudSyncSettingsData.values.BLACKBLAZE
-                || savedConfigs.adapter === CloudSyncSettingsData.values.WASABI) {
+            if (CloudSyncSettingsData.isCloudStorageS3Compatibility(savedConfigs.adapter)) {
                 AmazonS3.setProvider(savedConfigs.adapter)
             }
             await this.adapterHandler[savedConfigs.adapter].sync(config, platform, toast, savedConfigs.configs, firstInit).then(status => {
