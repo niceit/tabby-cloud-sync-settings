@@ -22,6 +22,7 @@ This plugin is **FREE** of use under public license MIT.
 ![](./screenshots/cloud-services/cloud-services-ftp.png)
 ![](./screenshots/cloud-services/cloud-services-wasabi.png)
 ![](./screenshots/cloud-services/cloud-services-digitalocean.png)
+![](./screenshots/cloud-services/cloud-services-blackblaze.png)
 
 ## Checkout some screenshots
 
@@ -44,6 +45,12 @@ Love the plugin? Buy me a coffee.
 
 # Changelog
 Keep tracking of version release change logs
+
+## [v1.2.2] - 2021-08-24
+
+## Added
+
+- Add support for [Blackblaze B2 Storage](https://www.backblaze.com/b2/cloud-storage.html).
 
 ## [v1.2.1] - 2021-08-21
 
