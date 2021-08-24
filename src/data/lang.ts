@@ -50,6 +50,8 @@ const CloudSyncLang = {
             title_blackblaze: 'Enter your KeyID and Application Key',
             app_id_placeholder: 'Application Id',
             app_secret_placeholder: 'Application Secret',
+            blackblaze_key_placeholder: 'Your Key ID',
+            blackblaze_app_key_placeholder: 'Your Application Key Id',
             bucket_placeholder: 'Bucket',
             blackblaze_bucket_placeholder: 'Enter your BlackBlaze B2 region',
             location_placeholder: 'Location /',

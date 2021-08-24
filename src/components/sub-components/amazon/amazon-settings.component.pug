@@ -6,7 +6,7 @@
 
 .form-group(*ngIf='!isPreloadingSavedConfig')
     .header.mb-2
-        .title(*ngIf='provider === presetData.values.S3 || provider === presetData.values.WASABI || provider === presetData.values.DIGITAL_OCEAN', [textContent]='translate.trans("s3.title")')
+        .title(*ngIf='provider !== presetData.values.BLACKBLAZE', [textContent]='translate.trans("s3.title")')
         .title(*ngIf='provider === presetData.values.BLACKBLAZE', [textContent]='translate.trans("s3.title_blackblaze")')
     .row
         .col-md-6.col-sm-12
@@ -17,7 +17,7 @@
                 input.form-control(
                     type='text',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
-                    [placeholder]='translate.trans("s3.app_id_placeholder")',
+                    [placeholder]='provider === presetData.values.BLACKBLAZE ? translate.trans("s3.blackblaze_key_placeholder") : translate.trans("s3.app_id_placeholder")',
                     [(ngModel)]='form.appId',
                 )
 
@@ -28,7 +28,7 @@
                 input.form-control(
                     type='text',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
-                    [placeholder]='translate.trans("s3.app_secret_placeholder")',
+                    [placeholder]='provider === presetData.values.BLACKBLAZE ? translate.trans("s3.blackblaze_app_key_placeholder") : translate.trans("s3.app_secret_placeholder")',
                     [(ngModel)]='form.appSecret',
                 )
 

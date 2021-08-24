@@ -60,7 +60,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
         console.log("Inside instance => ", this.provider)
     }
 
-    performLoginAmazonS3 (): void {
+    validateFormInput() {
         this.resetFormMessages.emit()
         let isFormValidated = true
         for (const idx in this.form) {
@@ -74,22 +74,12 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
             }
         }
 
-        if (isFormValidated) {
-            if (this.form.location !== '/') {
-                this.form.location = this.form.location.endsWith('/')
-                    ? this.form.location.substr(0,this.form.location.length - 1)
-                    : this.form.location
-            }
+        return isFormValidated
+    }
 
+    performLoginAmazonS3 (): void {
+        if (this.validateFormInput()) {
             this.isFormProcessing = true
-            const params = {
-                appId: this.form.appId,
-                appSecret: this.form.appSecret,
-                bucket: this.form.bucket,
-                region: this.form.region,
-                location: this.form.location,
-            }
-
             let isTimedOut = false
             const timeOutConnectionCheck = setTimeout(() => {
                 isTimedOut = true
@@ -99,7 +89,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
                     type: 'error',
                 })
             }, 15000)
-            AmazonS3.testConnection(this.platform, params).then(response => {
+            AmazonS3.testConnection(this.platform, this.form).then(response => {
                 if (!isTimedOut) {
                     clearTimeout(timeOutConnectionCheck)
                     this.isFormProcessing = false
