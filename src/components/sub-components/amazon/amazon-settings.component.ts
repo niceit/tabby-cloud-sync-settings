@@ -77,8 +77,17 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
         return isFormValidated
     }
 
+    correctLocationPath() {
+        if (this.form.location !== '/') {
+            this.form.location = this.form.location.endsWith('/')
+                ? this.form.location.substr(0,this.form.location.length - 1)
+                : this.form.location
+        }
+    }
+
     performLoginAmazonS3 (): void {
         if (this.validateFormInput()) {
+            this.correctLocationPath()
             this.isFormProcessing = true
             let isTimedOut = false
             const timeOutConnectionCheck = setTimeout(() => {

@@ -55,12 +55,6 @@ class AmazonS3Class {
         const logger = new Logger(platform)
         let amazonS3 = this.createClient(s3_params, platform)
 
-        if (s3_params.location !== '/') {
-            s3_params.location = s3_params.location.endsWith('/')
-                ? s3_params.location.substr(0,s3_params.location.length - 1)
-                : s3_params.location
-        }
-
         const params = {
             Bucket: this.bucket,
             Key: this.path + this.TEST_FILE.name,
