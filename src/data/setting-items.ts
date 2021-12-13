@@ -8,6 +8,7 @@ const providerConstantItems = {
     BLACKBLAZE: 'blackblaze',
     WEBDAV: 'webdav',
     FTP: 'ftp',
+    MINIO: 'Minio'
 }
 
 const amazonS3CompatibilityInstances = [
@@ -19,6 +20,7 @@ const amazonCompatibilityEndpoints = {
     WASABI: 's3.wasabisys.com',
     DIGITAL_OCEAN: '{REGION}.digitaloceanspaces.com',
     BLACKBLAZE: 's3.{REGION}.backblazeb2.com',
+    MINIO: ''
 }
 
 const DevEnv = DevEnvConstants
@@ -37,6 +39,7 @@ const CloudSyncSettingsData = {
         { name: 'Blackblaze', value: providerConstantItems.BLACKBLAZE },
         { name: 'WebDav', value: providerConstantItems.WEBDAV },
         { name: 'FTP', value: providerConstantItems.FTP },
+        { name: 'Minio', value: providerConstantItems.MINIO },
     ],
     BuiltinLoginMode: {
         LOGIN: 'Login',
@@ -89,6 +92,14 @@ const CloudSyncSettingsData = {
             username: '',
             password: '',
             location: '/',
+        },
+        [providerConstantItems.MINIO]: {
+            endPointUrl: '',
+            appId: '',
+            appSecret: '',
+            location: '/',
+            bucket: '',
+            region: '',
         },
     },
     external_urls: {

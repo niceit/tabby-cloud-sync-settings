@@ -6,8 +6,9 @@
 
 .form-group(*ngIf='!isPreloadingSavedConfig')
     .header.mb-2
-        .title(*ngIf='provider !== presetData.values.BLACKBLAZE', [textContent]='translate.trans("s3.title")')
+        .title(*ngIf='provider !== presetData.values.BLACKBLAZE && provider !== presetData.values.MINIO', [textContent]='translate.trans("s3.title")')
         .title(*ngIf='provider === presetData.values.BLACKBLAZE', [textContent]='translate.trans("s3.title_blackblaze")')
+        .title(*ngIf='provider === presetData.values.MINIO', [textContent]='translate.trans("s3.title_minio")')
     .row
         .col-md-6.col-sm-12
             .input-group.mb-2
@@ -44,19 +45,29 @@
                 )
 
         .col-md-6.col-sm-12
+            .input-group.mb-2(*ngIf='provider === presetData.values.MINIO')
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-globe
+
+                input.form-control(
+                    [disabled]='isSettingSaved || isServiceAccountCheckPassed',
+                    [placeholder]='translate.trans("s3.endPointUrl")',
+                    [(ngModel)]='form.endPointUrl')
+
             .input-group.mb-2
                 .input-group-prepend
                     .input-group-text
                         i.fas.fa-fw.fa-globe
-                select.form-control(*ngIf='provider !== presetData.values.BLACKBLAZE',
+                select.form-control(*ngIf='provider !== presetData.values.BLACKBLAZE && provider !== presetData.values.MINIO',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
                     [(ngModel)]='form.region'
                 )
                     option(*ngFor='let item of s3Regions', [ngValue]='item.value') {{item.text}}
 
-                input.form-control(*ngIf='provider === presetData.values.BLACKBLAZE',
+                input.form-control(*ngIf='provider === presetData.values.BLACKBLAZE || provider === presetData.values.MINIO',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
-                    [placeholder]='translate.trans("s3.blackblaze_bucket_placeholder")',
+                    [placeholder]='provider === presetData.values.BLACKBLAZE ? translate.trans("s3.blackblaze_bucket_placeholder") : translate.trans("s3.aws_region_placeholder")',
                     [(ngModel)]='form.region')
 
             .input-group.mb-2

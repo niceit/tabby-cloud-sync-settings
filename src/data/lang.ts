@@ -48,13 +48,16 @@ const CloudSyncLang = {
         s3: {
             title: 'Enter your AppID and Secret token',
             title_blackblaze: 'Enter your KeyID and Application Key',
+            title_minio: 'Minio - Enter your Endpoint URL, AppID and Secret token',
             app_id_placeholder: 'Application Id',
             app_secret_placeholder: 'Application Secret',
             blackblaze_key_placeholder: 'Your Key ID',
             blackblaze_app_key_placeholder: 'Your Application Key Id',
             bucket_placeholder: 'Bucket',
             blackblaze_bucket_placeholder: 'Enter your BlackBlaze B2 region',
+            aws_region_placeholder: 'Enter your region',
             location_placeholder: 'Location /',
+            endPointUrl: 'Endpoint URL'
         },
         ftp: {
             title: 'Enter your FTP login credentials',

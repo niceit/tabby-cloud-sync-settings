@@ -13,6 +13,7 @@ interface formData {
     appSecret: string,
     bucket: string,
     region: string,
+    endPointUrl: string,
     location: string,
 }
 
@@ -65,6 +66,9 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
         let isFormValidated = true
         for (const idx in this.form) {
             if (this.form[idx].trim() === '') {
+                if (this.provider === this.presetData.values.MINIO && idx === 'region') {
+                    continue
+                }
                 this.setFormMessage.emit({
                     message: Lang.trans('form.error.required_all'),
                     type: 'error',

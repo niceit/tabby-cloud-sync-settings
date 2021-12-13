@@ -23,6 +23,7 @@ class AmazonS3Class {
     private bucket
     private region
     private path
+    private endPointUrl
 
     private PERMISSIONS = {
         PRIVATE: 'private',
@@ -38,12 +39,16 @@ class AmazonS3Class {
         this.provider = provider
     }
 
-    setConfig (appId, appSecret, bucket, region, path) {
+    setConfig (appId, appSecret, bucket, region, path, endPointUrl = '') {
         this.appId = appId
         this.appSecret = appSecret
         this.bucket = bucket
         this.region = region
         this.path = path === '/' ? '' : path
+
+        if (endPointUrl) {
+            this.endPointUrl = endPointUrl
+        }
     }
 
     /**
@@ -188,12 +193,13 @@ class AmazonS3Class {
     }
 
     private createClient (params: AmazonParams, platform: PlatformService) {
-        this.setConfig(params.appId, params.appSecret, params.bucket, params.region, params.location)
+        const endPointUrl = typeof params['endPointUrl'] !== 'undefined' ? params['endPointUrl'] : ''
+        this.setConfig(params.appId, params.appSecret, params.bucket, params.region, params.location, endPointUrl)
         const logger = new Logger(platform)
         const s3Params = {
             accessKeyId: this.appId,
             secretAccessKey: this.appSecret,
-            region: this.region,
+            region: this.region
         }
         switch (this.provider) {
             case CloudSyncSettingsData.values.WASABI: {
@@ -213,6 +219,12 @@ class AmazonS3Class {
                 logger.log("Fetch Blackblaze instance", 'info')
                 delete s3Params.region
                 s3Params['endpoint'] = new Endpoint(CloudSyncSettingsData.amazonEndpoints.BLACKBLAZE.replace('{REGION}', this.region))
+                break
+            }
+
+            case CloudSyncSettingsData.values.MINIO: {
+                logger.log("Fetch Minio instance", 'info')
+                s3Params['endpoint'] = new Endpoint(params['endPointUrl'])
                 break
             }
 
