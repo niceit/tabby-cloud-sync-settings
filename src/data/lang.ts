@@ -61,7 +61,8 @@ const CloudSyncLang = {
             host_placeholder: 'Host',
             location_placeholder: 'Location /',
             username_placeholder: 'Username',
-            password_placeholder: '******'
+            password_placeholder: '******',
+            port_placeholder: 'Port',
         },
         webdav: {
             title: 'Enter your WebDav login credentials',
