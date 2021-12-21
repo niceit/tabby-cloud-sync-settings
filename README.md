@@ -46,6 +46,11 @@ Love the plugin? Buy me a coffee.
 # Changelog
 Keep tracking of version release change logs
 
+## [v1.3] - 2021-12-21
+
+-- Support FTP / FTPs Port setting
+-- Add support for [Google Cloud Storage](https://cloud.google.com/storage)
+
 ## [v1.2.2] - 2021-08-24
 
 ## Added
