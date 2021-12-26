@@ -87,8 +87,10 @@ h3([textContent]='translate.trans("settings.title")')
             (setFormMessage)='setFormMessage($event)'
         )
 
+    .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.GIST')
+        gist-settings(
+            (resetFormMessages)='resetFormMessages()',
+            (setFormMessage)='setFormMessage($event)'
+        )
+
     cloud-sync-about
-
-
-
-

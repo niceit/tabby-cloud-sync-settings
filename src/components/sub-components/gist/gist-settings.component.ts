@@ -6,21 +6,22 @@ import {ConfigService, PlatformService} from "terminus-core"
 import {ToastrService} from "ngx-toastr"
 import CloudSyncLang from "../../../data/lang"
 import Logger from '../../../utils/Logger'
+import Github from "../../../utils/cloud-components/gists/github";
+import SettingItems from "../../../data/setting-items";
 
 interface formData {
-    protocol: string,
-    host: string,
-    username: string,
-    password: string,
-    location: string,
+    type: string,
+    name: string,
+    accessToken: string,
+    id: string,
 }
 
 @Component({
-    selector: 'ftp-settings',
-    template: require('./ftp-settings.component.pug'),
-    styles: [require('./ftp-settings.component.scss')],
+    selector: 'gist-settings',
+    template: require('./gist-settings.component.pug'),
+    styles: [require('./gist-settings.component.scss')],
 })
-export class CloudSyncFtpSettingsComponent implements OnInit {
+export class CloudSyncGistSettingsComponent implements OnInit {
     @Output() resetFormMessages = new EventEmitter()
     @Output() setFormMessage = new EventEmitter()
 
@@ -29,14 +30,19 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     isPreloadingSavedConfig = true
     isSettingSaved = false
     isCheckLoginSuccess = false
+    createGistIfNotExist = true
 
     isSyncingProgress = false
     isFormProcessing = false
-    protocol = [
-        { value: 'ftp', name: 'FTP' },
-        { value: 'sftp', name: 'sFTP' },
+
+    passwordFieldType = 'password'
+    gistTypeChoices = [
+        { value: 'github', name: 'Github' },
+        { value: 'gitee', name: 'Gitee' },
+        { value: 'gitlab', name: 'Giblab' },
+        { value: 'bitbucket_snippet', name: 'Bitbucket Snippet' },
     ]
-    form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.FTP] as formData
+    form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.GIST] as formData
 
     constructor(private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
 
@@ -45,7 +51,7 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     ngOnInit (): void {
         const configs = SettingsHelper.readConfigFile(this.platform)
         if (configs) {
-            if (configs.adapter === this.presetData.values.FTP) {
+            if (configs.adapter === this.presetData.values.GIST) {
                 this.form = configs.configs as formData
                 this.isSettingSaved = true
             }
@@ -53,12 +59,16 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
         this.isPreloadingSavedConfig = false
     }
 
+    toggleViewPassword() {
+        this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
+    }
+
     async testConnection (): Promise<void> {
         const logger = new Logger(this.platform)
         this.resetFormMessages.emit()
         let isFormValidated = true
         for (const idx in this.form) {
-            if (this.form[idx].trim() === '') {
+            if (this.form[idx].trim() === '' && ['name', 'id'].indexOf(idx) < 0) {
                 this.setFormMessage.emit({
                     message: Lang.trans('form.error.required_all'),
                     type: 'error',
@@ -69,42 +79,45 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
         }
 
         if (isFormValidated) {
-            if (this.form.location !== '/') {
-                this.form.location = this.form.location.endsWith('/')
-                    ? this.form.location.substr(0,this.form.location.length - 1)
-                    : this.form.location
-            }
-
             this.isFormProcessing = true
-            const ftp = require('basic-ftp')
-            const client = new ftp.Client()
-            client.ftp.verbose = true
             try {
-                await client.access({
-                    host: this.form.host,
-                    user: this.form.username,
-                    password: this.form.password,
-                    secure: this.form.protocol !== 'ftp',
-                })
+                let $component = null
+                switch (this.form.type) {
+                    case 'github': {
+                        $component = new Github(this.form.id, this.form.accessToken)
+                        break;
+                    }
+                }
 
-                await client.uploadFrom('Test Content', this.form.location + 'test.txt')
-                    .then(result => {
+                if ($component) {
+                    $component.testConnection(this.platform, this.createGistIfNotExist).then(response => {
                         this.isFormProcessing = false
-                        if (result.code === 226) {
-                            this.isCheckLoginSuccess = true
+                        console.info('Test Result', response)
+                        if (response.hasOwnProperty('code') && parseInt(response.code) === 0) {
                             this.setFormMessage.emit({
-                                message: Lang.trans('sync.setting_valid'),
-                                type: 'success',
-                            })
-
-                            client.remove(this.form.location + 'test.txt')
-                        } else {
-                            this.setFormMessage.emit({
-                                message: Lang.trans('sync.error_setting_save_file'),
+                                message: response.message,
                                 type: 'error',
                             })
+                        } else {
+                            this.setFormMessage.emit({
+                                message: Lang.trans('settings.amazon.connected'),
+                                type: 'success',
+                            })
+                            this.isCheckLoginSuccess = true
+                            if (!this.form.id) {
+                                this.form.id = response.data.id
+                            }
                         }
+                    }).catch((err) => {
+                        console.log('error | ', err)
+                        this.isFormProcessing = false
                     })
+                } else {
+                    this.setFormMessage.emit({
+                        message: Lang.trans('gist.invalid_provider'),
+                        type: 'success',
+                    })
+                }
             } catch (e) {
                 this.isFormProcessing = false
                 this.setFormMessage.emit({
@@ -113,17 +126,13 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                 })
                 logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + e.toString(), 'error')
             }
-
-            if (!client.closed) {
-                client.close()
-            }
         }
     }
 
     async saveSettings (): Promise<void> {
         this.resetFormMessages.emit()
         this.isFormProcessing = true
-        SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.FTP, this.form).then(async result => {
+        SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.GIST, this.form).then(async result => {
             this.isFormProcessing = false
             if (!result) {
                 this.setFormMessage.emit({
@@ -141,6 +150,7 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                     if (result) {
                         this.config.requestRestart()
                     } else {
+                        this.resetFormMessages.emit()
                         this.setFormMessage.emit({
                             message: Lang.trans('sync.sync_server_failed'),
                             type: 'error',
@@ -148,7 +158,7 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                         this.isSettingSaved = false
                         this.isCheckLoginSuccess = false
                         this.isPreloadingSavedConfig = false
-                        await SettingsHelper.removeConfirmFile(this.platform, this.toast)
+                        await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
                     }
                     this.isSyncingProgress = false
                 })
@@ -169,6 +179,14 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
             this.isCheckLoginSuccess = false
             this.isPreloadingSavedConfig = false
             this.config.requestRestart()
+        }
+    }
+
+    viewGistUrl() {
+        if (this.form.id) {
+            this.platform.openExternal(SettingItems.gistUrls.viewItems.github + this.form.id)
+        } else {
+            this.toast.error(this.translate.trans('gist.enter_id'))
         }
     }
 }

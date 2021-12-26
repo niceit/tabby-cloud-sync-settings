@@ -13,3 +13,10 @@ export interface FtpParams {
     password: string,
     location: string,
 }
+
+export interface GistParams {
+    type: string,
+    name: string,
+    id: string,
+    accessToken: string
+}

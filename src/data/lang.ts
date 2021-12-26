@@ -71,6 +71,14 @@ const CloudSyncLang = {
             port_placeholder: 'Port',
             location_placeholder: 'Location /',
         },
+        gist: {
+            name: 'Friendly name (optional)',
+            id: 'Gist ID (Leave empty to create a new one)',
+            token: 'Gist token',
+            invalid_provider: 'Invalid service provider.',
+            enter_id: 'Enter your Gist ID',
+            error_create_gist: 'Unable to create new gist. Check your token permission!'
+        },
         buttons: {
             sync_from_cloud: 'Sync Cloud Settings',
             sync_from_local: 'Upload Local Settings',
@@ -79,6 +87,7 @@ const CloudSyncLang = {
             cancel: 'Cancel',
             no: 'No',
             ok: 'Ok',
+            view: 'View',
             test_connection: 'Test Connection',
             processing: 'Processing...',
             save_settings: 'Save This Setting',
