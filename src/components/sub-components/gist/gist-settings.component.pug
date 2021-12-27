@@ -6,7 +6,7 @@
 
 .form-group(*ngIf='!isPreloadingSavedConfig')
     .header.mb-2
-        .title([textContent]='translate.trans("ftp.title")')
+        .title([textContent]='translate.trans("gist.title")')
     .row
         .col-md-6.col-sm-12
             .input-group.mb-2
@@ -58,7 +58,7 @@
                     i.fas.fa-eye-slash(*ngIf='passwordFieldType !== "password"')
 
     .row.mt-3
-        .col-md-6.col-sm-12
+        .col-md-6.col-sm-12.pl-0
             button.btn.btn-info.flex-shrink-0.ml-3.mb-2((click)='viewGistUrl()')
                 i.fas.fa-eye
                 span([textContent]='translate.trans("buttons.view")')
@@ -91,4 +91,5 @@
 
     .row-mt-3
         .col-md-12
-            small.help-text Gists are one feature of GitHub, which defines them as "a simple way to share snippets and pastes with others."
+            small.help-text(*ngIf="form.type === 'github'", (click)="goToHelpLink('github')") Gists are one feature of GitHub, which defines them as "a simple way to share snippets and pastes with others."
+            small.help-text(*ngIf="form.type === 'gitee'", (click)="goToHelpLink('gitee')") Collaboration platform for software development & code hosting, has over 6 million registered members and 15 million projects hosted. Providing Enterprise Services since 2016, been a leading SAAS provider in developer business.

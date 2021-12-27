@@ -11,6 +11,15 @@ class Gist {
         this.id = id
         this.accessToken = accessToken
     }
+
+    getSyncTextDateTime() {
+        const dt = new Date()
+        return "Tabby sync config " + dt.toLocaleString()
+    }
+
+    getDummyContent() {
+        return 'tabby config will sync here.'
+    }
 }
 
 export default Gist

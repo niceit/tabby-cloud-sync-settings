@@ -107,9 +107,12 @@ const CloudSyncSettingsData = {
     },
     gistUrls: {
         viewItems: {
-            github: 'https://gist.github.com/'
+            github: 'https://gist.github.com/',
+            gitee: 'https://gist.github.com/',
         },
-        github: 'https://api.github.com/gists'
+        github: 'https://api.github.com/gists',
+        gitee: 'https://gitee.com/api/v5/gists',
+
     }
 }
 export default CloudSyncSettingsData

@@ -189,4 +189,18 @@ export class CloudSyncGistSettingsComponent implements OnInit {
             this.toast.error(this.translate.trans('gist.enter_id'))
         }
     }
+
+    goToHelpLink(type) {
+        switch (type) {
+            case 'github': {
+                this.platform.openExternal(SettingItems.gistUrls.viewItems.github)
+                break
+            }
+
+            case 'gitee': {
+                this.platform.openExternal(SettingItems.gistUrls.viewItems.gitee)
+                break
+            }
+        }
+    }
 }

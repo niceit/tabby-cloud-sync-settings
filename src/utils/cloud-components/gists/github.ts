@@ -18,8 +18,8 @@ class Github extends Gist {
         const logger = new Logger(platform)
         if (!this.id) {
             const createGist = await axios.post(this.baseRequestUrl, {
-                files: {'tabby-sync-settings': {content: 'tabby config will sync here.'}},
-                description: "Tabby sync config",
+                files: {'tabby-sync-settings': {content: this.getDummyContent()}},
+                description: this.getSyncTextDateTime(),
                 public: false
             }, {
                 headers: {
@@ -140,7 +140,7 @@ class Github extends Gist {
                 result = await axios.patch(`${component.baseRequestUrl}/${component.id}`, {
                     gist_id: component.id,
                     files: gitFileParams,
-                    description: "Tabby sync config"
+                    description: this.getSyncTextDateTime()
                 },{
                     headers: {
                         Accept: 'application/vnd.github.v3+json',
@@ -159,7 +159,6 @@ class Github extends Gist {
             } else {
                 result = false
             }
-
 
             isSyncingInProgress = false
         }

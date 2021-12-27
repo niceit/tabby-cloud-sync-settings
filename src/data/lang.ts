@@ -72,6 +72,7 @@ const CloudSyncLang = {
             location_placeholder: 'Location /',
         },
         gist: {
+            title: "Enter your Gist credentials",
             name: 'Friendly name (optional)',
             id: 'Gist ID (Leave empty to create a new one)',
             token: 'Gist token',
