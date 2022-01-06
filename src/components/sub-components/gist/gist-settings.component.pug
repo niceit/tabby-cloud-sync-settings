@@ -1,0 +1,95 @@
+.form-group(*ngIf='isPreloadingSavedConfig')
+    .row
+        .col-md-12
+            span.spinner-border.spinner-border-sm.mr-2
+            span([textContent]='translate.trans("sync.loading_config")')
+
+.form-group(*ngIf='!isPreloadingSavedConfig')
+    .header.mb-2
+        .title([textContent]='translate.trans("gist.title")')
+    .row
+        .col-md-6.col-sm-12
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-globe
+                select.form-control(
+                    [(ngModel)]='form.type',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
+
+                )
+                    option(*ngFor='let item of gistTypeChoices', [ngValue]='item.value') {{item.name}}
+
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-tag
+                input.form-control(
+                    type='text',
+                    [placeholder]='translate.trans("gist.name")',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
+                    [(ngModel)]='form.name',
+                )
+
+        .col-md-6.col-sm-12
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-user
+                input.form-control(
+                    type='text',
+                    [placeholder]='translate.trans("gist.id")',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
+                    [(ngModel)]='form.id',
+                )
+
+            .input-group.mb-2.relative
+                .input-group-prepend
+                    .input-group-text
+                        i.fas.fa-fw.fa-lock
+                input.form-control(
+                    [type]='passwordFieldType',
+                    [placeholder]='translate.trans("gist.token")',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
+                    [(ngModel)]='form.accessToken',
+                )
+                span((click)="toggleViewPassword()").toggle-view-password
+                    i.fas.fa-eye(*ngIf='passwordFieldType === "password"')
+                    i.fas.fa-eye-slash(*ngIf='passwordFieldType !== "password"')
+
+    .row.mt-3
+        .col-md-6.col-sm-12.pl-0
+            button.btn.btn-info.flex-shrink-0.ml-3.mb-2((click)='viewGistUrl()')
+                i.fas.fa-eye
+                span([textContent]='translate.trans("buttons.view")')
+
+    .row.mt-3(*ngIf='!isSettingSaved')
+        .col-md-12.col-sm-12.pl-0(*ngIf='!isCheckLoginSuccess')
+            button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='testConnection()')
+                i.fas.fa-fw.fa-plug.mr-2
+                span(*ngIf='!isFormProcessing', [textContent]='translate.trans("buttons.test_connection")')
+                span.spinner-border.spinner-border-sm.mr-2(*ngIf='isFormProcessing')
+                span(*ngIf='isFormProcessing', [textContent]='translate.trans("buttons.processing")')
+
+        .col-md-12.col-sm-12.pl-0(*ngIf='isCheckLoginSuccess')
+            button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='saveSettings()')
+                i.fas.fa-fw.fa-save.mr-2
+                span([textContent]='translate.trans("buttons.save_settings")')
+
+            button.btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='cancelSaveSettings()')
+                i.fas.fa-fw.fa-times-circle.mr-2
+                span([textContent]='translate.trans("buttons.cancel")')
+
+    .row.mt-3(*ngIf='isSettingSaved')
+        .col-md-12(*ngIf='isSyncingProgress')
+            span.spinner-border.spinner-border-sm.mr-2
+            span([textContent]='translate.trans("buttons.cloud_syncing_progress")')
+
+        button.btn.btn-danger.flex-shrink-0.ml-3.mb-2(*ngIf='!isSyncingProgress', (click)='removeSavedSettings()')
+            i.fas.fa-fw.fa-times-circle.mr-2
+            span([textContent]='translate.trans("buttons.remove_saved_setting")')
+
+    .row-mt-3
+        .col-md-12
+            small.help-text(*ngIf="form.type === 'github'", (click)="goToHelpLink('github')") Gists are one feature of GitHub, which defines them as "a simple way to share snippets and pastes with others."
+            small.help-text(*ngIf="form.type === 'gitee'", (click)="goToHelpLink('gitee')") Collaboration platform for software development & code hosting, has over 6 million registered members and 15 million projects hosted. Providing Enterprise Services since 2016, been a leading SAAS provider in developer business.

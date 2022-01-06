@@ -6,6 +6,7 @@ import WebDav from "./cloud-components/WebDav";
 import CloudSyncLang from "../data/lang";
 import AmazonS3 from "./cloud-components/AmazonS3";
 import FTP from "./cloud-components/FTP";
+import Gists from "./cloud-components/gists/gists";
 
 const fs = require('fs')
 const path = require('path');
@@ -19,6 +20,7 @@ export class SettingsHelperClass {
         [CloudSyncSettingsData.values.DIGITAL_OCEAN]: AmazonS3,
         [CloudSyncSettingsData.values.BLACKBLAZE]: AmazonS3,
         [CloudSyncSettingsData.values.FTP]: FTP,
+        [CloudSyncSettingsData.values.GIST]: Gists,
     }
     private generatedCryptoHash = 'tp!&nc3^to8y7^3#4%2%&szufx!'
 
@@ -81,13 +83,19 @@ export class SettingsHelperClass {
     async syncWithCloud (config: ConfigService, platform: PlatformService, toast: ToastrService, firstInit = false) {
         const savedConfigs = this.readConfigFile(platform)
         let result = false
+
         if (savedConfigs.enabled) {
             if (CloudSyncSettingsData.isCloudStorageS3Compatibility(savedConfigs.adapter)) {
                 AmazonS3.setProvider(savedConfigs.adapter)
             }
-            await this.adapterHandler[savedConfigs.adapter].sync(config, platform, toast, savedConfigs.configs, firstInit).then(status => {
-                result = status
-            })
+
+            try {
+                await this.adapterHandler[savedConfigs.adapter].sync(config, platform, toast, savedConfigs.configs, firstInit).then(status => {
+                    result = status
+                })
+            } catch (e) {
+                toast.error(e.toString())
+            }
         }
 
         return result
@@ -162,25 +170,20 @@ export class SettingsHelperClass {
         })
     }
 
-    async removeConfirmFile(platform: PlatformService, toast): Promise<boolean> {
+    async removeConfirmFile(platform: PlatformService, toast, needConfirm = true): Promise<boolean> {
         let result = false
         try {
-            if ((await platform.showMessageBox({
-                type: 'warning',
-                message: CloudSyncLang.trans('sync.confirm_remove_setting'),
-                buttons: [CloudSyncLang.trans('buttons.cancel'), CloudSyncLang.trans('buttons.yes')],
-                defaultId: 1,
-            })).response === 1) {
-                const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
-                if (fs.existsSync(filePath)) {
-                    try {
-                        fs.unlinkSync(path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename)
-                        toast.info(CloudSyncLang.trans('sync.remove_setting_success'))
-                        return true
-                    } catch (e) {
-                        toast.error(CloudSyncLang.trans('sync.remove_setting_error'))
-                    }
+            if (needConfirm) {
+                if ((await platform.showMessageBox({
+                    type: 'warning',
+                    message: CloudSyncLang.trans('sync.confirm_remove_setting'),
+                    buttons: [CloudSyncLang.trans('buttons.cancel'), CloudSyncLang.trans('buttons.yes')],
+                    defaultId: 1,
+                })).response === 1) {
+                    result = await this._removeSavedConfig(platform, toast)
                 }
+            } else {
+                result = await this._removeSavedConfig(platform, toast)
             }
         } catch (error) {
             toast.error(CloudSyncLang.trans('sync.remove_setting_error'))
@@ -189,9 +192,28 @@ export class SettingsHelperClass {
         return result
     }
 
+    _removeSavedConfig(platform, toast) {
+        const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
+        if (fs.existsSync(filePath)) {
+            try {
+                fs.unlinkSync(path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename)
+                toast.info(CloudSyncLang.trans('sync.remove_setting_success'))
+                return true
+            } catch (e) {
+                toast.error(CloudSyncLang.trans('sync.remove_setting_error'))
+            }
+        }
+
+        return false
+    }
+
     doDescryption (content) {
         const bytes = CryptoJS.AES.decrypt(content.replace(CloudSyncLang.trans('common.config_inject_header'), ''), this.generatedCryptoHash)
         return (bytes.toString(CryptoJS.enc.Utf8))
+    }
+
+    verifyServerConfigIsValid (configRawData) {
+        return configRawData.includes(CloudSyncLang.trans('common.verifyConfigString'))
     }
 }
 export default new SettingsHelperClass()

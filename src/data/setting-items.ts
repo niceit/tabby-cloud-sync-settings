@@ -8,6 +8,7 @@ const providerConstantItems = {
     BLACKBLAZE: 'blackblaze',
     WEBDAV: 'webdav',
     FTP: 'ftp',
+    GIST: 'gists'
 }
 
 const amazonS3CompatibilityInstances = [
@@ -36,6 +37,7 @@ const CloudSyncSettingsData = {
         { name: 'DigitalOcean Space', value: providerConstantItems.DIGITAL_OCEAN },
         { name: 'Blackblaze', value: providerConstantItems.BLACKBLAZE },
         { name: 'WebDav', value: providerConstantItems.WEBDAV },
+        { name: 'Gists', value: providerConstantItems.GIST },
         { name: 'FTP / FTPS', value: providerConstantItems.FTP },
     ],
     BuiltinLoginMode: {
@@ -91,12 +93,29 @@ const CloudSyncSettingsData = {
             location: '/',
             port: 21
         },
+        [providerConstantItems.GIST]: {
+            type: 'github',
+            name: '',
+            accessToken: '',
+            id: '',
+        },
     },
     external_urls: {
         BlackBlazeHelp: 'https://tabby-cloud.tranit.co/how-to-get-blackblaze-regtion-code/'
     },
     isCloudStorageS3Compatibility(provider: string) {
         return amazonS3CompatibilityInstances.includes(provider)
+    },
+    gistUrls: {
+        viewItems: {
+            github: 'https://gist.github.com/',
+            gitee: 'https://gist.github.com/',
+            gitlab: 'https://gitlab.com/-/snippets/',
+        },
+        github: 'https://api.github.com/gists',
+        gitee: 'https://gitee.com/api/v5/gists',
+        gitlab: 'https://gitlab.com/api/v4/snippets',
+
     }
 }
 export default CloudSyncSettingsData
