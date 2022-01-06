@@ -9,32 +9,35 @@ import {GistParams} from "../../../interface";
 import SettingsHelper from "../../settings-helper";
 
 let isSyncingInProgress = false
-class Github extends Gist {
+class Gitlab extends Gist {
     constructor(id: string, accessToken: string) {
-        super(CloudSyncSettingsData.gistUrls.github, id, accessToken);
+        super(CloudSyncSettingsData.gistUrls.gitlab, id, accessToken);
     }
 
     testConnection = async (platform: PlatformService) : Promise<any> => {
         const logger = new Logger(platform)
         if (!this.id) {
             const createGist = await axios.post(this.baseRequestUrl, {
-                files: {'tabby-sync-settings': {content: this.getDummyContent()}},
+                title: "Tabby sync configs",
+                files: [{
+                    file_path: 'tabby-sync-settings.txt',
+                    content: this.getDummyContent()
+                }],
                 description: this.getSyncTextDateTime(),
-                public: false
+                visibility: 'private'
             }, {
                 headers: {
-                    Accept: 'application/vnd.github.v3+json',
-                    Authorization: `Bearer ${this.accessToken}`
+                    'PRIVATE-TOKEN': `${this.accessToken}`
                 }
             }).then((data) => {
                 return {code: 1, data: data.data}
-            }).catch(() => {
-                return {code: 0}
+            }).catch((e) => {
+                return {code: 0, message: e.toString()}
             })
 
             if (!createGist.code) {
                 logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + CloudSyncLang.trans('gist.error_create_gist'), 'error')
-                return {code: 0, message: CloudSyncLang.trans('gist.error_create_gist')}
+                return {code: 0, message: createGist['message']}
             }
             this.id = createGist['data'].id
         }
@@ -42,7 +45,7 @@ class Github extends Gist {
 
         return await axios.get(url, {
             headers: {
-                Authorization: `Bearer ${this.accessToken}`
+                'PRIVATE-TOKEN': `${this.accessToken}`
             }}).then(data => {
             return {code: 1, data: data.data}
         }).catch(async e => {
@@ -53,16 +56,16 @@ class Github extends Gist {
 
     sync = async (config: ConfigService, platform: PlatformService, toast: ToastrService, params: GistParams, firstInit = false) => {
         const logger = new Logger(platform)
-        let result = false
+        let result = {result: false, message: ''}
 
-        const url = `${this.baseRequestUrl}/${params.id}`;
-        const gistContent: {
+        const url = `${this.baseRequestUrl}/${params.id}/raw`;
+        const gistContent :{
             code: number,
             data: any,
             message: string
         } = await axios.get(url, {
             headers: {
-                Authorization: `Bearer ${params.accessToken}`
+                'PRIVATE-TOKEN': `${params.accessToken}`
             }}).then(data => {
             return {code: 1, data: data.data, message: ''}
         }).catch(e => {
@@ -71,14 +74,7 @@ class Github extends Gist {
         })
 
         if (gistContent.code) {
-            const gistFiles = {}
-            let serverTabbyContent = ''
-            for (const idx in gistContent['data']['files']) {
-                gistFiles[idx] = gistContent['data']['files'][idx].content
-                if (!serverTabbyContent) {
-                    serverTabbyContent = gistContent['data']['files'][idx].content
-                }
-            }
+            let serverTabbyContent = gistContent.data
 
             if (firstInit) {
                 if ((await platform.showMessageBox({
@@ -87,7 +83,7 @@ class Github extends Gist {
                     buttons: [CloudSyncLang.trans('buttons.sync_from_cloud'), CloudSyncLang.trans('buttons.sync_from_local')],
                     defaultId: 0,
                 })).response === 1) {
-                    result = await this.syncLocalSettingsToCloud(platform, toast, gistFiles)
+                    result['result'] = await this.syncLocalSettingsToCloud(platform, toast)
                 } else {
                     if (SettingsHelper.verifyServerConfigIsValid(serverTabbyContent)) {
                         config.writeRaw(SettingsHelper.doDescryption(serverTabbyContent))
@@ -108,7 +104,7 @@ class Github extends Gist {
         return result
     }
 
-    async syncLocalSettingsToCloud(platform: PlatformService, toast: ToastrService, gistFiles) {
+    async syncLocalSettingsToCloud(platform: PlatformService, toast: ToastrService) {
         const logger = new Logger(platform)
         let result = false
         if (!isSyncingInProgress) {
@@ -117,59 +113,31 @@ class Github extends Gist {
             const savedConfigs = SettingsHelper.readConfigFile(platform)
             const params = savedConfigs.configs as GistParams
             const localSettingContent = SettingsHelper.readTabbyConfigFile(platform, true, true)
-            const component = new Github(params.id, params.accessToken)
+            const component = new Gitlab(params.id, params.accessToken)
 
-            if (!gistFiles) {
-                const url = `${this.baseRequestUrl}/${params.id}`;
-                const gistContent = await axios.get(url, {
-                    headers: {
-                        Authorization: `Bearer ${params.accessToken}`
-                    }}).then(data => {
-                    return {code: 1, data: data.data}
-                }).catch(e => {
-                    logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + e.toString(), 'error')
+            result = await axios.put(`${component.baseRequestUrl}/${component.id}`, {
+                gist_id: component.id,
+                files: [{
+                    file_path: 'tabby-sync-settings.txt',
+                    content: localSettingContent,
+                    action: 'update'
+                }],
+                description: this.getSyncTextDateTime()
+            },{
+                headers: {
+                    'PRIVATE-TOKEN': `${component.accessToken}`
+                }
+            }).then(() => {
+                toast.info(CloudSyncLang.trans('sync.sync_success'))
+                return true
+            }).catch(e => {
+                logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
+                if (isSyncingInProgress) {
                     toast.error(CloudSyncLang.trans('sync.sync_error'))
-                    return { code: 0, message: e.toString() }
-                })
-
-                if (gistContent.code) {
-                    gistFiles = {}
-                    for (const idx in gistContent['data']['files']) {
-                        gistFiles[idx] = gistContent['data']['files'][idx].content
-                    }
                 }
-            }
+                return false
+            })
 
-            if (gistFiles) {
-                const gitFileParams = {}
-                for (const idx in gistFiles) {
-                    gitFileParams[idx] = {
-                        content: localSettingContent
-                    }
-                }
-
-                result = await axios.patch(`${component.baseRequestUrl}/${component.id}`, {
-                    gist_id: component.id,
-                    files: gitFileParams,
-                    description: this.getSyncTextDateTime()
-                },{
-                    headers: {
-                        Accept: 'application/vnd.github.v3+json',
-                        Authorization: `Bearer ${component.accessToken}`
-                    }
-                }).then(() => {
-                    toast.info(CloudSyncLang.trans('sync.sync_success'))
-                    return true
-                }).catch(e => {
-                    logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
-                    if (isSyncingInProgress) {
-                        toast.error(CloudSyncLang.trans('sync.sync_error'))
-                    }
-                    return false
-                })
-            } else {
-                result = false
-            }
 
             isSyncingInProgress = false
         }
@@ -178,4 +146,4 @@ class Github extends Gist {
     }
 }
 
-export default Github
+export default Gitlab

@@ -93,7 +93,9 @@ export class SettingsHelperClass {
                 await this.adapterHandler[savedConfigs.adapter].sync(config, platform, toast, savedConfigs.configs, firstInit).then(status => {
                     result = status
                 })
-            } catch (e) {}
+            } catch (e) {
+                toast.error(e.toString())
+            }
         }
 
         return result
@@ -208,6 +210,10 @@ export class SettingsHelperClass {
     doDescryption (content) {
         const bytes = CryptoJS.AES.decrypt(content.replace(CloudSyncLang.trans('common.config_inject_header'), ''), this.generatedCryptoHash)
         return (bytes.toString(CryptoJS.enc.Utf8))
+    }
+
+    verifyServerConfigIsValid (configRawData) {
+        return configRawData.includes(CloudSyncLang.trans('common.verifyConfigString'))
     }
 }
 export default new SettingsHelperClass()

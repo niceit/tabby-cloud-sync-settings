@@ -109,9 +109,11 @@ const CloudSyncSettingsData = {
         viewItems: {
             github: 'https://gist.github.com/',
             gitee: 'https://gist.github.com/',
+            gitlab: 'https://gitlab.com/-/snippets/',
         },
         github: 'https://api.github.com/gists',
         gitee: 'https://gitee.com/api/v5/gists',
+        gitlab: 'https://gitlab.com/api/v4/snippets',
 
     }
 }

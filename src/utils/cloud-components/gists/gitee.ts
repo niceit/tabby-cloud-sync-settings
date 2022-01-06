@@ -9,9 +9,9 @@ import {GistParams} from "../../../interface";
 import SettingsHelper from "../../settings-helper";
 
 let isSyncingInProgress = false
-class Github extends Gist {
+class Gitee extends Gist {
     constructor(id: string, accessToken: string) {
-        super(CloudSyncSettingsData.gistUrls.github, id, accessToken);
+        super(CloudSyncSettingsData.gistUrls.gitee, id, accessToken);
     }
 
     testConnection = async (platform: PlatformService) : Promise<any> => {
@@ -20,12 +20,9 @@ class Github extends Gist {
             const createGist = await axios.post(this.baseRequestUrl, {
                 files: {'tabby-sync-settings': {content: this.getDummyContent()}},
                 description: this.getSyncTextDateTime(),
-                public: false
-            }, {
-                headers: {
-                    Accept: 'application/vnd.github.v3+json',
-                    Authorization: `Bearer ${this.accessToken}`
-                }
+                public: false,
+                access_token: this.accessToken,
+                id: ''
             }).then((data) => {
                 return {code: 1, data: data.data}
             }).catch(() => {
@@ -40,10 +37,10 @@ class Github extends Gist {
         }
         const url = `${this.baseRequestUrl}/${this.id}`;
 
-        return await axios.get(url, {
-            headers: {
-                Authorization: `Bearer ${this.accessToken}`
-            }}).then(data => {
+        return await axios.patch(url, {
+            access_token: this.accessToken,
+            id: this.id
+        }).then(data => {
             return {code: 1, data: data.data}
         }).catch(async e => {
             logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + e.toString(), 'error')
@@ -56,18 +53,14 @@ class Github extends Gist {
         let result = false
 
         const url = `${this.baseRequestUrl}/${params.id}`;
-        const gistContent: {
-            code: number,
-            data: any,
-            message: string
-        } = await axios.get(url, {
+        const gistContent = await axios.get(url, {
             headers: {
                 Authorization: `Bearer ${params.accessToken}`
             }}).then(data => {
-            return {code: 1, data: data.data, message: ''}
+            return {code: 1, data: data.data}
         }).catch(e => {
             logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + e.toString(), 'error')
-            return { code: 0, message: e.toString(), data: null }
+            return { code: 0, message: e.toString() }
         })
 
         if (gistContent.code) {
@@ -89,20 +82,13 @@ class Github extends Gist {
                 })).response === 1) {
                     result = await this.syncLocalSettingsToCloud(platform, toast, gistFiles)
                 } else {
-                    if (SettingsHelper.verifyServerConfigIsValid(serverTabbyContent)) {
-                        config.writeRaw(SettingsHelper.doDescryption(serverTabbyContent))
-                        return true
-                    } else {
-                        result['result'] = false
-                        result['message'] = CloudSyncLang.trans('common.errors.invalidServerConfig')
-                    }
+                    config.writeRaw(SettingsHelper.doDescryption(serverTabbyContent))
                 }
             } else {
                 config.writeRaw(SettingsHelper.doDescryption(serverTabbyContent))
-                return true
             }
         } else {
-            result['message'] = gistContent.message
+            result = false
         }
 
         return result
@@ -117,7 +103,7 @@ class Github extends Gist {
             const savedConfigs = SettingsHelper.readConfigFile(platform)
             const params = savedConfigs.configs as GistParams
             const localSettingContent = SettingsHelper.readTabbyConfigFile(platform, true, true)
-            const component = new Github(params.id, params.accessToken)
+            const component = new Gitee(params.id, params.accessToken)
 
             if (!gistFiles) {
                 const url = `${this.baseRequestUrl}/${params.id}`;
@@ -178,4 +164,4 @@ class Github extends Gist {
     }
 }
 
-export default Github
+export default Gitee

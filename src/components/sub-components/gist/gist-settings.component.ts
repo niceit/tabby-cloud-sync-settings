@@ -8,6 +8,8 @@ import CloudSyncLang from "../../../data/lang"
 import Logger from '../../../utils/Logger'
 import Github from "../../../utils/cloud-components/gists/github";
 import SettingItems from "../../../data/setting-items";
+import Gitee from "../../../utils/cloud-components/gists/gitee";
+import Gitlab from "../../../utils/cloud-components/gists/gitlab";
 
 interface formData {
     type: string,
@@ -39,8 +41,8 @@ export class CloudSyncGistSettingsComponent implements OnInit {
     gistTypeChoices = [
         { value: 'github', name: 'Github' },
         { value: 'gitee', name: 'Gitee' },
-        { value: 'gitlab', name: 'Giblab' },
-        { value: 'bitbucket_snippet', name: 'Bitbucket Snippet' },
+        { value: 'gitlab', name: 'Gitlab' },
+        { value: 'bitbucket', name: 'Bitbucket' },
     ]
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.GIST] as formData
 
@@ -85,6 +87,16 @@ export class CloudSyncGistSettingsComponent implements OnInit {
                 switch (this.form.type) {
                     case 'github': {
                         $component = new Github(this.form.id, this.form.accessToken)
+                        break;
+                    }
+
+                    case 'gitee': {
+                        $component = new Gitee(this.form.id, this.form.accessToken)
+                        break;
+                    }
+
+                    case 'gitlab': {
+                        $component = new Gitlab(this.form.id, this.form.accessToken)
                         break;
                     }
                 }
@@ -147,12 +159,13 @@ export class CloudSyncGistSettingsComponent implements OnInit {
                 this.isSettingSaved = true
                 this.isSyncingProgress = true
                 await SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
-                    if (result) {
+                    const resultCheck = typeof result === 'boolean' ? result : result['result']
+                    if (resultCheck) {
                         this.config.requestRestart()
                     } else {
                         this.resetFormMessages.emit()
                         this.setFormMessage.emit({
-                            message: Lang.trans('sync.sync_server_failed'),
+                            message: typeof result !== 'boolean' ? result['message'] : Lang.trans('sync.sync_server_failed'),
                             type: 'error',
                         })
                         this.isSettingSaved = false
@@ -180,11 +193,19 @@ export class CloudSyncGistSettingsComponent implements OnInit {
             this.isPreloadingSavedConfig = false
             this.config.requestRestart()
         }
+        // TODO Tran Remove git data
     }
 
     viewGistUrl() {
         if (this.form.id) {
-            this.platform.openExternal(SettingItems.gistUrls.viewItems.github + this.form.id)
+            let platformViewUrl = SettingItems.gistUrls.viewItems.github
+            switch (this.form.type) {
+                case 'gitlab': {
+                    platformViewUrl = SettingItems.gistUrls.viewItems.gitlab
+                    break
+                }
+            }
+            this.platform.openExternal(platformViewUrl + this.form.id)
         } else {
             this.toast.error(this.translate.trans('gist.enter_id'))
         }

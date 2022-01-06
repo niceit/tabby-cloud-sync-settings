@@ -1,18 +1,23 @@
 const path = require('path')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin')
 
 module.exports = {
   target: 'node',
   entry: 'src/index.ts',
-  devtool: 'source-map',
+  devtool: 'eval',
   context: __dirname,
-  mode: 'development',
+  mode: 'production',
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin()],
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'index.js',
     pathinfo: true,
     libraryTarget: 'umd',
-    devtoolModuleFilenameTemplate: 'webpack-terminus-sync-config:///[resource-path]',
+    devtoolModuleFilenameTemplate: 'webpack-terminus-cloud-sync-settings:///[resource-path]',
   },
   resolve: {
     modules: ['.', 'src', 'node_modules'].map(x => path.join(__dirname, x)),
@@ -45,6 +50,8 @@ module.exports = {
     /^terminus-/,
   ],
   plugins: [
-    new CleanWebpackPlugin(['dist'])
+    new CleanWebpackPlugin(['dist'], {
+        verbose: false,
+    })
   ]
 }
