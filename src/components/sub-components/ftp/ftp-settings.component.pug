@@ -45,6 +45,17 @@
             .input-group.mb-2
                 .input-group-prepend
                     .input-group-text
+                        i.fas.fa-fw.fa-plug
+                input.form-control(
+                    type='text',
+                    [placeholder]='translate.trans("ftp.port_placeholder")',
+                    [disabled]='isSettingSaved || isCheckLoginSuccess',
+                    [(ngModel)]='form.port',
+                )
+
+            .input-group.mb-2
+                .input-group-prepend
+                    .input-group-text
                         i.fas.fa-fw.fa-user
                 input.form-control(
                     type='text',
@@ -53,16 +64,19 @@
                     [(ngModel)]='form.username',
                 )
 
-            .input-group.mb-2
+            .input-group.mb-2.relative
                 .input-group-prepend
                     .input-group-text
                         i.fas.fa-fw.fa-lock
                 input.form-control(
-                    type='password',
+                    [type]='passwordFieldType',
                     [placeholder]='translate.trans("ftp.password_placeholder")',
                     [disabled]='isSettingSaved || isCheckLoginSuccess',
                     [(ngModel)]='form.password',
                 )
+                span((click)="toggleViewPassword()").toggle-view-password
+                    i.fas.fa-eye(*ngIf='passwordFieldType === "password"')
+                    i.fas.fa-eye-slash(*ngIf='passwordFieldType !== "password"')
 
     .row.mt-3(*ngIf='!isSettingSaved')
         .col-md-12.col-sm-12.pl-0(*ngIf='!isCheckLoginSuccess')
