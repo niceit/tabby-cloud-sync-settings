@@ -37,8 +37,8 @@ const CloudSyncSettingsData = {
         { name: 'DigitalOcean Space', value: providerConstantItems.DIGITAL_OCEAN },
         { name: 'Blackblaze', value: providerConstantItems.BLACKBLAZE },
         { name: 'WebDav', value: providerConstantItems.WEBDAV },
-        { name: 'FTP', value: providerConstantItems.FTP },
         { name: 'Gists', value: providerConstantItems.GIST },
+        { name: 'FTP / FTPS', value: providerConstantItems.FTP },
     ],
     BuiltinLoginMode: {
         LOGIN: 'Login',
@@ -91,6 +91,7 @@ const CloudSyncSettingsData = {
             username: '',
             password: '',
             location: '/',
+            port: 21
         },
         [providerConstantItems.GIST]: {
             type: 'github',

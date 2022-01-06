@@ -13,6 +13,7 @@ interface formData {
     username: string,
     password: string,
     location: string,
+    port: string
 }
 
 @Component({
@@ -32,9 +33,11 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
 
     isSyncingProgress = false
     isFormProcessing = false
+    passwordFieldType = 'password'
+
     protocol = [
         { value: 'ftp', name: 'FTP' },
-        { value: 'sftp', name: 'sFTP' },
+        { value: 'ftps', name: 'FTPS' },
     ]
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.FTP] as formData
 
@@ -53,12 +56,16 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
         this.isPreloadingSavedConfig = false
     }
 
+    toggleViewPassword() {
+        this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
+    }
+
     async testConnection (): Promise<void> {
         const logger = new Logger(this.platform)
         this.resetFormMessages.emit()
         let isFormValidated = true
         for (const idx in this.form) {
-            if (this.form[idx].trim() === '') {
+            if (this.form[idx].toString().trim() === '') {
                 this.setFormMessage.emit({
                     message: Lang.trans('form.error.required_all'),
                     type: 'error',
@@ -77,14 +84,15 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
 
             this.isFormProcessing = true
             const ftp = require('basic-ftp')
-            const client = new ftp.Client()
+            const client = new ftp.Client(10000)
             client.ftp.verbose = true
             try {
                 await client.access({
                     host: this.form.host,
+                    port: this.form.port,
                     user: this.form.username,
                     password: this.form.password,
-                    secure: this.form.protocol !== 'ftp',
+                    secure: this.form.protocol !== 'ftp'
                 })
 
                 await client.uploadFrom('Test Content', this.form.location + 'test.txt')
