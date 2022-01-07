@@ -56,7 +56,7 @@ class Gitlab extends Gist {
 
     sync = async (config: ConfigService, platform: PlatformService, toast: ToastrService, params: GistParams, firstInit = false) => {
         const logger = new Logger(platform)
-        let result = {result: false, message: ''}
+        let result
 
         const url = `${this.baseRequestUrl}/${params.id}/raw`;
         const gistContent :{

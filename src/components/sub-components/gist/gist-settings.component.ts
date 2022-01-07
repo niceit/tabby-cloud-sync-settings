@@ -40,9 +40,9 @@ export class CloudSyncGistSettingsComponent implements OnInit {
     passwordFieldType = 'password'
     gistTypeChoices = [
         { value: 'github', name: 'Github' },
-        { value: 'gitee', name: 'Gitee' },
+        // { value: 'gitee', name: 'Gitee' }, // TODO Tran Implement
         { value: 'gitlab', name: 'Gitlab' },
-        { value: 'bitbucket', name: 'Bitbucket' },
+        // { value: 'bitbucket', name: 'Bitbucket' }, // TODO Tran Implement
     ]
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.GIST] as formData
 

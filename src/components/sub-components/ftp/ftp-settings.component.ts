@@ -95,17 +95,15 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                     secure: this.form.protocol !== 'ftp'
                 })
 
-                await client.uploadFrom('Test Content', this.form.location + 'test.txt')
+                await client.connect(this.form.host, this.form.port)
                     .then(result => {
                         this.isFormProcessing = false
-                        if (result.code === 226) {
+                        if (result.code === 220) {
                             this.isCheckLoginSuccess = true
                             this.setFormMessage.emit({
                                 message: Lang.trans('sync.setting_valid'),
                                 type: 'success',
                             })
-
-                            client.remove(this.form.location + 'test.txt')
                         } else {
                             this.setFormMessage.emit({
                                 message: Lang.trans('sync.error_setting_save_file'),
@@ -146,11 +144,12 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                 this.isSettingSaved = true
                 this.isSyncingProgress = true
                 await SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
-                    if (result) {
+                    const resultCheck = typeof result === 'boolean' ? result : result['result']
+                    if (resultCheck) {
                         this.config.requestRestart()
                     } else {
                         this.setFormMessage.emit({
-                            message: Lang.trans('sync.sync_server_failed'),
+                            message: typeof result !== 'boolean' ? result['message'] : Lang.trans('sync.sync_server_failed'),
                             type: 'error',
                         })
                         this.isSettingSaved = false

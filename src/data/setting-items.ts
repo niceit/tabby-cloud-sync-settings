@@ -31,7 +31,7 @@ const CloudSyncSettingsData = {
     values: providerConstantItems,
     amazonEndpoints: amazonCompatibilityEndpoints,
     serviceProvidersList: [
-        // { name: 'Builtin Tabby', value: providerConstantItems.BUILT_IN },
+        // { name: 'Builtin Tabby', value: providerConstantItems.BUILT_IN }, // TODO Tran Implement
         { name: 'Amazon S3', value: providerConstantItems.S3 },
         { name: 'Wasabi', value: providerConstantItems.WASABI },
         { name: 'DigitalOcean Space', value: providerConstantItems.DIGITAL_OCEAN },

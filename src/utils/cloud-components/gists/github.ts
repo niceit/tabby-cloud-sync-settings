@@ -53,7 +53,7 @@ class Github extends Gist {
 
     sync = async (config: ConfigService, platform: PlatformService, toast: ToastrService, params: GistParams, firstInit = false) => {
         const logger = new Logger(platform)
-        let result = false
+        let result = {result: false, message: ''}
 
         const url = `${this.baseRequestUrl}/${params.id}`;
         const gistContent: {
@@ -87,7 +87,7 @@ class Github extends Gist {
                     buttons: [CloudSyncLang.trans('buttons.sync_from_cloud'), CloudSyncLang.trans('buttons.sync_from_local')],
                     defaultId: 0,
                 })).response === 1) {
-                    result = await this.syncLocalSettingsToCloud(platform, toast, gistFiles)
+                    result['result'] = await this.syncLocalSettingsToCloud(platform, toast, gistFiles)
                 } else {
                     if (SettingsHelper.verifyServerConfigIsValid(serverTabbyContent)) {
                         config.writeRaw(SettingsHelper.doDescryption(serverTabbyContent))

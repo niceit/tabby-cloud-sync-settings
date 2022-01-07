@@ -142,11 +142,12 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
                 this.isSettingSaved = true
                 this.isSyncingProgress = true
                 await SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
-                    if (result) {
+                    const resultCheck = typeof result === 'boolean' ? result : result['result']
+                    if (resultCheck) {
                         this.config.requestRestart()
                     } else {
                         this.setFormMessage.emit({
-                            message: Lang.trans('sync.sync_server_failed'),
+                            message: typeof result !== 'boolean' ? result['message'] : Lang.trans('sync.sync_server_failed'),
                             type: 'error',
                         })
                         this.isSettingSaved = false

@@ -84,7 +84,7 @@ class AmazonS3Class {
 
     async sync (config: ConfigService, platform: PlatformService, toast: ToastrService, params: AmazonParams, firstInit = false) {
         const logger = new Logger(platform)
-        let result = false
+        let result = {result: false, message: ''}
         const client = this.createClient(params, platform)
         let remoteFile
         if (this.path === '') {
@@ -116,12 +116,21 @@ class AmazonS3Class {
                         })).response === 1) {
                             await client.upload(uploadObjectParams)
                         } else {
-                            config.writeRaw(SettingsHelper.doDescryption(content))
+                            if (SettingsHelper.verifyServerConfigIsValid(content)) {
+                                config.writeRaw(SettingsHelper.doDescryption(content))
+                                result['result'] = true
+                            } else {
+                                result['result'] = false
+                                result['message'] = CloudSyncLang.trans('common.errors.invalidServerConfig')
+                            }
                         }
                     } else {
                         config.writeRaw(SettingsHelper.doDescryption(content))
+                        result['result'] = true
                     }
                 } catch (e) {
+                    result['result'] = false
+                    result['message'] = e.toString()
                     toast.error(CloudSyncLang.trans('sync.error_invalid_setting'))
                     const copyObjectParams = {
                         CopySource: remoteFile,
@@ -132,14 +141,15 @@ class AmazonS3Class {
                     await client.upload(uploadObjectParams).promise()
                     logger.log(CloudSyncLang.trans('log.read_cloud_settings') + ' | Exception: ' + e.toString(), 'error')
                 }
-                result = true
             })
         } catch (e) {
             logger.log(CloudSyncLang.trans('log.read_cloud_settings') + ' | Exception: ' + e.toString())
             try {
                 await client.upload(uploadObjectParams).promise()
-                result = true
+                result['result'] = true
             } catch (e) {
+                result['result'] = false
+                result['message'] = e.toString()
                 logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
             }
         }
