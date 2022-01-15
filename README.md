@@ -23,6 +23,8 @@ This plugin is **FREE** of use under public license MIT.
 ![](./screenshots/cloud-services/cloud-services-wasabi.png)
 ![](./screenshots/cloud-services/cloud-services-digitalocean.png)
 ![](./screenshots/cloud-services/cloud-services-blackblaze.png)
+![](./screenshots/cloud-services/cloud-services-github.png)
+![](./screenshots/cloud-services/cloud-services-gitlab.png)
 
 ## Checkout some screenshots
 
@@ -46,10 +48,12 @@ Love the plugin? Buy me a coffee.
 # Changelog
 Keep tracking of version release change logs
 
-## [v1.3] - 2021-12-21
+## [v1.3.0] - 2021-12-21
 
--- Support FTP / FTPs Port setting
--- Add support for [Google Cloud Storage](https://cloud.google.com/storage)
+- Support FTP / FTPs Port setting
+- Add support for Gists (GitHub, GitLab)
+- Backup the Tabby settings for first time sync.
+- Minor fixes and bugs.
 
 ## [v1.2.2] - 2021-08-24
 
