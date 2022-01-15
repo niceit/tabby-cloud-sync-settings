@@ -56,7 +56,7 @@ class Gitlab extends Gist {
 
     sync = async (config: ConfigService, platform: PlatformService, toast: ToastrService, params: GistParams, firstInit = false) => {
         const logger = new Logger(platform)
-        let result
+        let result = {result: false, message: ''}
 
         const url = `${this.baseRequestUrl}/${params.id}/raw`;
         const gistContent :{
@@ -86,6 +86,7 @@ class Gitlab extends Gist {
                     result['result'] = await this.syncLocalSettingsToCloud(platform, toast)
                 } else {
                     if (SettingsHelper.verifyServerConfigIsValid(serverTabbyContent)) {
+                        await SettingsHelper.backupTabbyConfigFile(platform)
                         config.writeRaw(SettingsHelper.doDescryption(serverTabbyContent))
                         return true
                     } else {

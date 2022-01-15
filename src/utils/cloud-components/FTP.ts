@@ -35,6 +35,7 @@ class FTP {
                             await this.uploadLocalSettings(params, client, platform, toast)
                         } else {
                             if (SettingsHelper.verifyServerConfigIsValid(content)) {
+                                await SettingsHelper.backupTabbyConfigFile(platform)
                                 config.writeRaw(SettingsHelper.doDescryption(content))
                                 return true
                             } else {

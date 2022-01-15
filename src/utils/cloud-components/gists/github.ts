@@ -90,6 +90,7 @@ class Github extends Gist {
                     result['result'] = await this.syncLocalSettingsToCloud(platform, toast, gistFiles)
                 } else {
                     if (SettingsHelper.verifyServerConfigIsValid(serverTabbyContent)) {
+                        await SettingsHelper.backupTabbyConfigFile(platform)
                         config.writeRaw(SettingsHelper.doDescryption(serverTabbyContent))
                         return true
                     } else {

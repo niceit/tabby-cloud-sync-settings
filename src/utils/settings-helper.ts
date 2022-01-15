@@ -139,6 +139,34 @@ export class SettingsHelperClass {
         return data
     }
 
+    async backupTabbyConfigFile(platform: PlatformService) {
+        const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename
+        if (fs.existsSync(filePath)) {
+            try {
+                let content = fsReadFile(filePath, 'utf8')
+                try {
+                    const backupFilePath =  path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename + '.backup'
+                    const promise = new Promise((resolve, reject) => {
+                        return fs.writeFile(backupFilePath, content,
+                            (err) => {
+                                if (err) {
+                                    reject(false)
+                                }
+
+                                resolve(true)
+                            })
+                    })
+
+                    return await promise.then(status => {
+                        return status
+                    })
+                } catch (e) {
+                    return false
+                }
+            } catch (e) {}
+        }
+    }
+
     async toggleEnabledPlugin(value: boolean, platform: PlatformService, toast: ToastrService) {
         const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
         if (!fs.existsSync(filePath)) {

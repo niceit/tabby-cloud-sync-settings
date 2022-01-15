@@ -29,6 +29,7 @@ class WebDav {
                             await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true, true), {overwrite: true}).then(() => {})
                         } else {
                             if (SettingsHelper.verifyServerConfigIsValid(content)) {
+                                await SettingsHelper.backupTabbyConfigFile(platform)
                                 config.writeRaw(SettingsHelper.doDescryption(content))
                                 result['result'] = true
                             } else {

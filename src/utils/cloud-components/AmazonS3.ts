@@ -117,6 +117,7 @@ class AmazonS3Class {
                             await client.upload(uploadObjectParams)
                         } else {
                             if (SettingsHelper.verifyServerConfigIsValid(content)) {
+                                await SettingsHelper.backupTabbyConfigFile(platform)
                                 config.writeRaw(SettingsHelper.doDescryption(content))
                                 result['result'] = true
                             } else {
