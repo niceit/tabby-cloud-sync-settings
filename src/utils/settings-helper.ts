@@ -101,6 +101,15 @@ export class SettingsHelperClass {
         return result
     }
 
+    async syncWithCloudSettings(platform: PlatformService, toast: ToastrService) {
+        const savedConfigs = this.readConfigFile(platform)
+        if (savedConfigs) {
+            await this.adapterHandler[savedConfigs.adapter].syncLocalSettingsToCloud(platform, toast).then(() => {})
+        } else {
+            toast.error(CloudSyncLang.trans('sync.error_invalid_setting_2'))
+        }
+    }
+
     async syncLocalSettingsToCloud(platform: PlatformService, toast: ToastrService) {
         const savedConfigs = this.readConfigFile(platform)
         if (savedConfigs) {

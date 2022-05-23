@@ -1,6 +1,6 @@
 {
   "name": "terminus-cloud-settings-sync",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "date": "21st December 2021",
   "description": "Cloud Services sync the Tabby config and connections across platform devices.",
   "keywords": [
@@ -12,6 +12,7 @@
     "build": "webpack --progress --color --mode=production",
     "watch": "webpack --progress --color --watch",
     "prepublishOnly": "npm run build --mode=production",
+    "lint": "eslint --ext ts */src */lib",
     "test": "jest"
   },
   "files": [
@@ -31,14 +32,20 @@
     "@types/jest": "^26.0.23",
     "@types/js-yaml": "^4.0.0",
     "@types/webpack-env": "^1.16.0",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
     "apply-loader": "^2.0.0",
+    "aws-sdk": "niceit/aws-sdk-js",
     "axios": "^0.21.1",
+    "basic-ftp": "^4.6.6",
     "clean-webpack-plugin": "^0.1.19",
     "css-loader": "^5.1.1",
-    "electron": "^9.4.4",
+    "electron": "^14.2.7",
+    "eslint": "^7.32.0",
     "jest": "^27.0.6",
     "js-yaml": "^4.1.0",
     "keytar": "^7.6.0",
+    "moment": "^2.29.3",
     "ngx-toastr": "^8.8.0",
     "node-sass": "^5.0.0",
     "pug": "^3.0.2",
@@ -54,12 +61,11 @@
     "ts-jest": "^27.0.3",
     "ts-loader": "^9.2.3",
     "typescript": "^4.3.5",
+    "webdav": "^4.6.0",
     "webpack": "^5.24.4",
     "webpack-cli": "^4.5.0",
-    "winston": "^3.3.3",
-    "aws-sdk": "niceit/aws-sdk-js",
-    "basic-ftp": "^4.6.6",
-    "webdav": "^4.6.0"
+    "acorn-import-assertions": "^1.8.0",
+    "winston": "^3.3.3"
   },
   "peerDependencies": {
     "@angular/core": "^4.0.1"

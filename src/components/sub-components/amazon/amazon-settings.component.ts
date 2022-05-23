@@ -1,12 +1,13 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core'
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
 import cloudSyncSettingsHelper from '../../../utils/CloudSyncSettingsHelper'
-import Lang from '../../../data/lang'
 import AmazonS3 from '../../../utils/cloud-components/AmazonS3'
 import CloudSyncSettingsData from '../../../data/setting-items'
-import SettingsHelper from "../../../utils/settings-helper"
-import {ConfigService, PlatformService} from "terminus-core"
-import {ToastrService} from "ngx-toastr";
-import CloudSyncLang from "../../../data/lang";
+import SettingsHelper from '../../../utils/settings-helper'
+import { ConfigService, PlatformService } from 'terminus-core'
+import { ToastrService } from 'ngx-toastr'
+import CloudSyncLang from '../../../data/lang'
+import Logger from '../../../utils/Logger'
 
 interface formData {
     appId: string,
@@ -36,11 +37,9 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.S3] as formData
     s3Regions = []
 
-    constructor(private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
-
-    }
-
+    constructor (private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {}
     ngOnInit (): void {
+        const logger = new Logger(this.platform)
         this.s3Regions = cloudSyncSettingsHelper.getS3regionsList(this.provider)
         if (this.provider !== this.presetData.values.BLACKBLAZE) {
             this.form.region = this.s3Regions[0].value
@@ -57,16 +56,16 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
         }
         this.isPreloadingSavedConfig = false
         AmazonS3.setProvider(this.provider)
-        console.log("Inside instance => ", this.provider)
+        logger.log('Inside instance => ' + this.provider)
     }
 
-    validateFormInput() {
+    validateFormInput (): boolean {
         this.resetFormMessages.emit()
         let isFormValidated = true
         for (const idx in this.form) {
             if (this.form[idx].trim() === '') {
                 this.setFormMessage.emit({
-                    message: Lang.trans('form.error.required_all'),
+                    message: CloudSyncLang.trans('form.error.required_all'),
                     type: 'error',
                 })
                 isFormValidated = false
@@ -77,10 +76,10 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
         return isFormValidated
     }
 
-    correctLocationPath() {
+    correctLocationPath (): void {
         if (this.form.location !== '/') {
             this.form.location = this.form.location.endsWith('/')
-                ? this.form.location.substr(0,this.form.location.length - 1)
+                ? this.form.location.substr(0, this.form.location.length - 1)
                 : this.form.location
         }
     }
@@ -94,7 +93,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
                 isTimedOut = true
                 this.isFormProcessing = false
                 this.setFormMessage.emit({
-                    message: Lang.trans('settings.error_connection_timeout'),
+                    message: CloudSyncLang.trans('settings.error_connection_timeout'),
                     type: 'error',
                 })
             }, 15000)
@@ -110,7 +109,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
                         })
                     } else {
                         this.setFormMessage.emit({
-                            message: Lang.trans('settings.amazon.connected'),
+                            message: CloudSyncLang.trans('settings.amazon.connected'),
                             type: 'success',
                         })
                         this.isServiceAccountCheckPassed = true
@@ -130,30 +129,32 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
             this.isFormProcessing = false
             if (!result) {
                 this.setFormMessage.emit({
-                    message: Lang.trans('settings.amazon.save_settings_failed'),
+                    message: CloudSyncLang.trans('settings.amazon.save_settings_failed'),
                     type: 'error',
                 })
             } else {
                 this.setFormMessage.emit({
-                    message: Lang.trans('settings.amazon.save_settings_success'),
+                    message: CloudSyncLang.trans('settings.amazon.save_settings_success'),
                     type: 'success',
                 })
 
                 this.isSettingSaved = true
                 this.isSyncingProgress = true
-                await SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
-                    const resultCheck = typeof result === 'boolean' ? result : result['result']
+                await SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (subResult: any) => {
+                    const resultCheck = typeof subResult === 'boolean' ? subResult : subResult['result']
                     if (resultCheck) {
                         this.config.requestRestart()
                     } else {
                         this.setFormMessage.emit({
-                            message: typeof result !== 'boolean' ? result['message'] : Lang.trans('sync.sync_server_failed'),
+                            message: typeof subResult !== 'boolean' && subResult['message']
+                                ? subResult['message']
+                                : CloudSyncLang.trans('sync.sync_server_failed'),
                             type: 'error',
                         })
                         this.isSettingSaved = false
                         this.isServiceAccountCheckPassed = false
                         this.isPreloadingSavedConfig = false
-                        await SettingsHelper.removeConfirmFile(this.platform, this.toast)
+                        await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
                     }
                     this.isSyncingProgress = false
                 })
@@ -166,7 +167,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
         this.isServiceAccountCheckPassed = false
     }
 
-    openBlackBlazeRegionHelp() {
+    openBlackBlazeRegionHelp (): void {
         this.platform.openExternal(this.presetData.external_urls.BlackBlazeHelp)
     }
 

@@ -48,6 +48,12 @@ Love the plugin? Buy me a coffee.
 # Changelog
 Keep tracking of version release change logs
 
+## [v1.4.0] - 2022-05-22
+
+- Auto sync support (Detect sync settings from other machine from cloud.)
+- Critical bugs fix.
+- Minor fixes and bugs.
+
 ## [v1.3.0] - 2021-12-21
 
 - Support FTP / FTPs Port setting

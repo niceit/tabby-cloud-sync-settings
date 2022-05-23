@@ -1,9 +1,10 @@
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 import { Component, OnInit } from '@angular/core'
 import { ConfigService, PlatformService } from 'terminus-core'
 import { ToastrService } from 'ngx-toastr'
 import CloudSyncSettingsData from '../data/setting-items'
 import Lang from '../data/lang'
-import SettingsHelper from "../utils/settings-helper";
+import SettingsHelper from '../utils/settings-helper'
 
 /** @hidden */
 @Component({
@@ -47,7 +48,7 @@ export class CloudSyncSettingsComponent implements OnInit {
         this.resetFormMessages()
     }
 
-    toggleEnableSync(): void {
+    toggleEnableSync (): void {
         SettingsHelper.toggleEnabledPlugin(this.syncEnabled, this.platform, this.toast).then(() => {})
     }
 
@@ -56,6 +57,7 @@ export class CloudSyncSettingsComponent implements OnInit {
         this.form_messages.success = []
     }
 
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     setFormMessage (params: any): void {
         switch (params.type) {
             case 'success': {
