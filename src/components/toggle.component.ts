@@ -4,16 +4,16 @@ import { CheckboxComponent } from './checkbox.component'
 
 /** @hidden */
 @Component({
-  selector: 'toggle',
-  template: `
+    selector: 'toggle',
+    template: `
     <div class="custom-control custom-switch">
       <input type="checkbox" class="custom-control-input" [(ngModel)]='model'>
       <label class="custom-control-label"></label>
     </div>
     `,
-  providers: [
-    { provide: NG_VALUE_ACCESSOR, useExisting: ToggleComponent, multi: true },
-  ],
+    providers: [
+        { provide: NG_VALUE_ACCESSOR, useExisting: ToggleComponent, multi: true },
+    ],
 })
 export class ToggleComponent extends CheckboxComponent {
 }

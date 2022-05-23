@@ -1,5 +1,6 @@
 import winston from "winston";
 import {PlatformService} from "terminus-core";
+import DevConstants from "../services/dev-constants";
 
 const path = require('path')
 export default class Logger {
@@ -21,6 +22,10 @@ export default class Logger {
 
     log (content, level = 'info') {
         const time = new Date()
+        if (DevConstants.ENABLE_DEBUG) {
+            console.log(time.toString() + ' ', content);
+        }
+
         this.logger.log({
             level: level,
             time: time.toLocaleString(),

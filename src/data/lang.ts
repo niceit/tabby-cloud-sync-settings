@@ -34,7 +34,7 @@ const CloudSyncLang = {
             error_invalid_setting_2: 'Your sync config is invalid. Please re-configure it!',
             error_save_setting: 'Something wrong! unable to save settings.',
             need_to_save_config: 'Please save your config first',
-            sync_success: 'Your saved settings was synced to the cloud.',
+            sync_success: 'Your saved settings was synced.',
             sync_error: 'Unable to sync your setting. Please check the configuration!',
             sync_server_failed: 'Sync file to the cloud failed. Please check your cloud service!',
             sync_enabled: 'Sync feature enabled.',

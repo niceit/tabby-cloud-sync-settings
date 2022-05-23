@@ -122,13 +122,13 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
                         this.config.requestRestart()
                     } else {
                         this.setFormMessage.emit({
-                            message: typeof result !== 'boolean' ? result['message'] : Lang.trans('sync.sync_server_failed'),
+                            message: typeof result !== 'boolean' && result['message'] ? result['message'] : Lang.trans('sync.sync_server_failed'),
                             type: 'error',
                         })
                         this.isSettingSaved = false
                         this.isCheckLoginSuccess = false
                         this.isPreloadingSavedConfig = false
-                        await SettingsHelper.removeConfirmFile(this.platform, this.toast)
+                        await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
                     }
                     this.isSyncingProgress = false
                 })

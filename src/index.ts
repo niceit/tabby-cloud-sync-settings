@@ -15,7 +15,7 @@ import SettingsHelper from './utils/settings-helper'
 import { ToastrService } from "ngx-toastr";
 import { CloudSyncAboutComponent } from "./components/sub-components/about/about.component";
 import {CloudSyncGistSettingsComponent} from "./components/sub-components/gist/gist-settings.component";
-
+let autoSynInProgress = false;
 @NgModule({
     imports: [
         CommonModule,
@@ -40,6 +40,7 @@ import {CloudSyncGistSettingsComponent} from "./components/sub-components/gist/g
     ],
 })
 
+
 export default class CloudSyncSettingsModule {
     constructor (private app: AppService,
                  private platform: PlatformService,
@@ -50,6 +51,12 @@ export default class CloudSyncSettingsModule {
                 setTimeout(() => {
                     this.subscribeToConfigChangeEvent()
                 }, 2000)
+
+                // Auto Sync between local and remote every 30s
+                setInterval(() => {
+                    console.warn("Tabby Auto Sync Started");
+                    this.syncCloudSettings();
+                }, 30000)
             })
         })
     }
@@ -61,9 +68,14 @@ export default class CloudSyncSettingsModule {
     }
 
     async syncCloudSettings() {
-        const savedConfigs = SettingsHelper.readConfigFile(this.platform)
-        if (savedConfigs) {
-            await SettingsHelper.syncWithCloud(this.configService, this.platform, this.toast).then(() => {})
+        if (!autoSynInProgress) {
+            autoSynInProgress = true;
+            const savedConfigs = SettingsHelper.readConfigFile(this.platform)
+            if (savedConfigs) {
+                await SettingsHelper.syncWithCloud(this.configService, this.platform, this.toast).then(() => {
+                    autoSynInProgress = false;
+                })
+            }
         }
     }
 }

@@ -1,15 +1,14 @@
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 import { Component, EventEmitter, OnInit, Output } from '@angular/core'
 import CloudSyncSettingsData from '../../../data/setting-items'
-import Lang from '../../../data/lang'
 import SettingsHelper from '../../../utils/settings-helper'
-import {ConfigService, PlatformService} from "terminus-core"
-import {ToastrService} from "ngx-toastr"
-import CloudSyncLang from "../../../data/lang"
+import { ConfigService, PlatformService } from 'terminus-core'
+import { ToastrService } from 'ngx-toastr'
+import CloudSyncLang from '../../../data/lang'
 import Logger from '../../../utils/Logger'
-import Github from "../../../utils/cloud-components/gists/github";
-import SettingItems from "../../../data/setting-items";
-import Gitee from "../../../utils/cloud-components/gists/gitee";
-import Gitlab from "../../../utils/cloud-components/gists/gitlab";
+import Github from '../../../utils/cloud-components/gists/github'
+import Gitee from '../../../utils/cloud-components/gists/gitee'
+import Gitlab from '../../../utils/cloud-components/gists/gitlab'
 
 interface formData {
     type: string,
@@ -46,7 +45,7 @@ export class CloudSyncGistSettingsComponent implements OnInit {
     ]
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.GIST] as formData
 
-    constructor(private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
+    constructor (private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
 
     }
 
@@ -61,8 +60,8 @@ export class CloudSyncGistSettingsComponent implements OnInit {
         this.isPreloadingSavedConfig = false
     }
 
-    toggleViewPassword() {
-        this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
+    toggleViewPassword (): void {
+        this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password'
     }
 
     async testConnection (): Promise<void> {
@@ -70,9 +69,9 @@ export class CloudSyncGistSettingsComponent implements OnInit {
         this.resetFormMessages.emit()
         let isFormValidated = true
         for (const idx in this.form) {
-            if (this.form[idx].trim() === '' && ['name', 'id'].indexOf(idx) < 0) {
+            if (this.form[idx].trim() === '' && !['name', 'id'].includes(idx)) {
                 this.setFormMessage.emit({
-                    message: Lang.trans('form.error.required_all'),
+                    message: CloudSyncLang.trans('form.error.required_all'),
                     type: 'error',
                 })
                 isFormValidated = false
@@ -87,17 +86,17 @@ export class CloudSyncGistSettingsComponent implements OnInit {
                 switch (this.form.type) {
                     case 'github': {
                         $component = new Github(this.form.id, this.form.accessToken)
-                        break;
+                        break
                     }
 
                     case 'gitee': {
                         $component = new Gitee(this.form.id, this.form.accessToken)
-                        break;
+                        break
                     }
 
                     case 'gitlab': {
                         $component = new Gitlab(this.form.id, this.form.accessToken)
-                        break;
+                        break
                     }
                 }
 
@@ -112,7 +111,7 @@ export class CloudSyncGistSettingsComponent implements OnInit {
                             })
                         } else {
                             this.setFormMessage.emit({
-                                message: Lang.trans('settings.amazon.connected'),
+                                message: CloudSyncLang.trans('settings.amazon.connected'),
                                 type: 'success',
                             })
                             this.isCheckLoginSuccess = true
@@ -126,14 +125,14 @@ export class CloudSyncGistSettingsComponent implements OnInit {
                     })
                 } else {
                     this.setFormMessage.emit({
-                        message: Lang.trans('gist.invalid_provider'),
+                        message: CloudSyncLang.trans('gist.invalid_provider'),
                         type: 'success',
                     })
                 }
             } catch (e) {
                 this.isFormProcessing = false
                 this.setFormMessage.emit({
-                    message: Lang.trans('sync.error_connection'),
+                    message: CloudSyncLang.trans('sync.error_connection'),
                     type: 'error',
                 })
                 logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + e.toString(), 'error')
@@ -148,24 +147,26 @@ export class CloudSyncGistSettingsComponent implements OnInit {
             this.isFormProcessing = false
             if (!result) {
                 this.setFormMessage.emit({
-                    message: Lang.trans('settings.amazon.save_settings_failed'),
+                    message: CloudSyncLang.trans('settings.amazon.save_settings_failed'),
                     type: 'error',
                 })
             } else {
                 this.setFormMessage.emit({
-                    message: Lang.trans('settings.amazon.save_settings_success'),
+                    message: CloudSyncLang.trans('settings.amazon.save_settings_success'),
                     type: 'success',
                 })
                 this.isSettingSaved = true
                 this.isSyncingProgress = true
-                await SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
-                    const resultCheck = typeof result === 'boolean' ? result : result['result']
+                await SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (subResult: any) => {
+                    const resultCheck = typeof subResult === 'boolean' ? subResult : subResult['result']
                     if (resultCheck) {
                         this.config.requestRestart()
                     } else {
                         this.resetFormMessages.emit()
                         this.setFormMessage.emit({
-                            message: typeof result !== 'boolean' ? result['message'] : Lang.trans('sync.sync_server_failed'),
+                            message: typeof subResult !== 'boolean' && subResult['message']
+                                ? subResult['message']
+                                : CloudSyncLang.trans('sync.sync_server_failed'),
                             type: 'error',
                         })
                         this.isSettingSaved = false
@@ -196,12 +197,12 @@ export class CloudSyncGistSettingsComponent implements OnInit {
         // TODO Tran Remove git data
     }
 
-    viewGistUrl() {
+    viewGistUrl (): void {
         if (this.form.id) {
-            let platformViewUrl = SettingItems.gistUrls.viewItems.github
+            let platformViewUrl = CloudSyncSettingsData.gistUrls.viewItems.github
             switch (this.form.type) {
                 case 'gitlab': {
-                    platformViewUrl = SettingItems.gistUrls.viewItems.gitlab
+                    platformViewUrl = CloudSyncSettingsData.gistUrls.viewItems.gitlab
                     break
                 }
             }
@@ -211,15 +212,15 @@ export class CloudSyncGistSettingsComponent implements OnInit {
         }
     }
 
-    goToHelpLink(type) {
+    goToHelpLink (type: string): void {
         switch (type) {
             case 'github': {
-                this.platform.openExternal(SettingItems.gistUrls.viewItems.github)
+                this.platform.openExternal(CloudSyncSettingsData.gistUrls.viewItems.github)
                 break
             }
 
             case 'gitee': {
-                this.platform.openExternal(SettingItems.gistUrls.viewItems.gitee)
+                this.platform.openExternal(CloudSyncSettingsData.gistUrls.viewItems.gitee)
                 break
             }
         }

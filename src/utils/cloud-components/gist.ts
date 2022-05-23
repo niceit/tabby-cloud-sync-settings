@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 /**
  * Root class for the Gist
  */
@@ -6,18 +7,18 @@ class Gist {
     protected id: string
     protected accessToken: string
 
-    constructor(url: string, id: string, accessToken: string) {
+    constructor (url: string, id: string, accessToken: string) {
         this.baseRequestUrl = url
         this.id = id
         this.accessToken = accessToken
     }
 
-    getSyncTextDateTime() {
+    getSyncTextDateTime (): string {
         const dt = new Date()
-        return "Tabby sync config " + dt.toLocaleString()
+        return 'Tabby sync config ' + dt.toLocaleString()
     }
 
-    getDummyContent() {
+    getDummyContent (): string {
         return 'tabby config will sync here.'
     }
 }

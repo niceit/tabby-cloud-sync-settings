@@ -1,5 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 import AmazonData from '../data/s3-data'
-import CloudSyncSettingsData from "../data/setting-items";
+import CloudSyncSettingsData from '../data/setting-items'
 
 class CloudSyncSettingsHelper {
     getS3regionsList = (provider: string) => {
