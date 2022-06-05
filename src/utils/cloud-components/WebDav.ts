@@ -112,6 +112,7 @@ class WebDav {
                 })
             } catch (e) {
                 logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
+                toast.error(CloudSyncLang.trans('sync.sync_error'))
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 if (isSyncingInProgress) {
                     logger.log(CloudSyncLang.trans('sync.sync_success'))
