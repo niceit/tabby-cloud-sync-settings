@@ -147,7 +147,7 @@ class FTP {
                                 toast.error(CloudSyncLang.trans('sync.sync_error'))
                                 return false
                             } else {
-                                toast.info(CloudSyncLang.trans('sync.sync_success'))
+                                logger.log(CloudSyncLang.trans('sync.sync_success'))
                             }
                             return true
                         })

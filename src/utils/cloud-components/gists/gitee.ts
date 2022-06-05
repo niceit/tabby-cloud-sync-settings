@@ -146,7 +146,7 @@ class Gitee extends Gist {
                         Authorization: `Bearer ${component.accessToken}`,
                     },
                 }).then(() => {
-                    toast.info(CloudSyncLang.trans('sync.sync_success'))
+                    logger.log(CloudSyncLang.trans('sync.sync_success'))
                     return true
                 }).catch(e => {
                     logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
