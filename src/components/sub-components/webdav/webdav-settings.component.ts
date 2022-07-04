@@ -7,6 +7,7 @@ import {ConfigService, PlatformService} from "terminus-core"
 import {ToastrService} from "ngx-toastr"
 import CloudSyncLang from "../../../data/lang"
 import Logger from '../../../utils/Logger'
+import WebDav from "../../../utils/cloud-components/WebDav";
 
 interface formData {
     host: string,
@@ -122,7 +123,44 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
                         this.config.requestRestart()
                     } else {
                         this.setFormMessage.emit({
-                            message: typeof result !== 'boolean' && result['message'] ? result['message'] : Lang.trans('sync.sync_server_failed'),
+                            message: (typeof result !== 'boolean' && result['message'] ? result['message'] : Lang.trans('sync.sync_server_failed')),
+                            type: 'error',
+                        })
+                        this.isSettingSaved = false
+                        this.isCheckLoginSuccess = false
+                        this.isPreloadingSavedConfig = false
+                        await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
+                    }
+                    this.isSyncingProgress = false
+                })
+            }
+        })
+    }
+
+    async uploadLocalSettings (): Promise<void> {
+        this.resetFormMessages.emit()
+        this.isFormProcessing = true
+        SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.WEBDAV, this.form).then(result => {
+            this.isFormProcessing = false
+            if (!result) {
+                this.setFormMessage.emit({
+                    message: Lang.trans('settings.amazon.save_settings_failed') + ' 1',
+                    type: 'error',
+                })
+            } else {
+                this.isSettingSaved = true
+                this.setFormMessage.emit({
+                    message: Lang.trans('settings.amazon.save_settings_success'),
+                    type: 'success',
+                })
+                this.isSettingSaved = true
+                WebDav.syncLocalSettingsToCloud(this.platform, this.toast).then(async (result) => {
+                    const resultCheck = typeof result === 'boolean' ? result : result['result']
+                    if (resultCheck) {
+                        this.config.requestRestart()
+                    } else {
+                        this.setFormMessage.emit({
+                            message: (typeof result !== 'boolean' && result['message'] ? result['message'] : Lang.trans('sync.sync_server_failed')) + ' 2',
                             type: 'error',
                         })
                         this.isSettingSaved = false

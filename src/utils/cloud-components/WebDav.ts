@@ -110,6 +110,7 @@ class WebDav {
                 await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true, true), { overwrite: true }).then(() => {
                     logger.log(CloudSyncLang.trans('sync.sync_success'))
                 })
+                return true
             } catch (e) {
                 logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
                 toast.error(CloudSyncLang.trans('sync.sync_error'))
@@ -120,6 +121,8 @@ class WebDav {
             }
             isSyncingInProgress = false
         }
+
+        return false
     }
 
     private static createClient (params) {

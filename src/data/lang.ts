@@ -97,6 +97,7 @@ const CloudSyncLang = {
             test_connection: 'Test Connection',
             processing: 'Processing...',
             save_settings: 'Save This Setting',
+            upload_settings: 'Upload Local Setting (Forced)',
             cloud_syncing_progress: 'Syncing with the cloud...',
             remove_saved_setting: 'Remove this setting',
         },

@@ -78,6 +78,10 @@
                 i.fas.fa-fw.fa-save.mr-2
                 span([textContent]='translate.trans("buttons.save_settings")')
 
+            button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='uploadLocalSettings()')
+                i.fas.fa-fw.fa-cloud-upload.mr-2
+                span([textContent]='translate.trans("buttons.upload_settings")')
+
             button.btn.btn-danger.flex-shrink-0.ml-3.mb-2((click)='cancelSaveSettings()')
                 i.fas.fa-fw.fa-times-circle.mr-2
                 span([textContent]='translate.trans("buttons.cancel")')
