@@ -48,6 +48,15 @@ Love the plugin? Buy me a coffee.
 # Changelog
 Keep tracking of version release change logs
 
+## [v1.5.0] - 2022-07-17
+
+- Official support for **S3 Compatibility Minio, and others...**
+- Minor fixes and bugs.
+- 
+## [v1.4.3] - ...
+
+- Minor fixes and bugs.
+
 ## [v1.4.0] - 2022-05-22
 
 - Auto sync support (Detect sync settings from other machine from cloud.)
