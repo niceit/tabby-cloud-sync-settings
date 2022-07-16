@@ -75,6 +75,13 @@ h3([textContent]='translate.trans("settings.title")')
             [provider]='serviceProviderValues.BLACKBLAZE'
         )
 
+    .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.S3_COMPATIBLE')
+        amazon-settings(
+            (resetFormMessages)='resetFormMessages()',
+            (setFormMessage)='setFormMessage($event)',
+            [provider]='serviceProviderValues.S3_COMPATIBLE'
+        )
+
     .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.WEBDAV')
         webdav-settings(
             (resetFormMessages)='resetFormMessages()',

@@ -10,6 +10,7 @@ import CloudSyncLang from '../../../data/lang'
 import Logger from '../../../utils/Logger'
 
 interface formData {
+    endpointUrl: string,
     appId: string,
     appSecret: string,
     bucket: string,
@@ -41,7 +42,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     ngOnInit (): void {
         const logger = new Logger(this.platform)
         this.s3Regions = cloudSyncSettingsHelper.getS3regionsList(this.provider)
-        if (this.provider !== this.presetData.values.BLACKBLAZE) {
+        if (![this.presetData.values.BLACKBLAZE, this.presetData.values.S3_COMPATIBLE].includes(this.provider)) {
             this.form.region = this.s3Regions[0].value
         } else {
             this.form.region = ''
@@ -64,6 +65,8 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
         let isFormValidated = true
         for (const idx in this.form) {
             if (this.form[idx].trim() === '') {
+                if (this.provider === this.presetData.values.S3_COMPATIBLE && idx === 'region') {continue}
+
                 this.setFormMessage.emit({
                     message: CloudSyncLang.trans('form.error.required_all'),
                     type: 'error',
