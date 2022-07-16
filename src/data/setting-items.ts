@@ -1,4 +1,5 @@
-import DevEnvConstants from "../services/dev-constants";
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+import DevEnvConstants from '../services/dev-constants'
 
 const providerConstantItems = {
     BUILT_IN: 'builtin-tabby',
@@ -6,20 +7,23 @@ const providerConstantItems = {
     WASABI: 'wasabi',
     DIGITAL_OCEAN: 'digital-ocean',
     BLACKBLAZE: 'blackblaze',
+    S3_COMPATIBLE: 's3-compatible',
     WEBDAV: 'webdav',
     FTP: 'ftp',
-    GIST: 'gists'
+    GIST: 'gists',
 }
 
 const amazonS3CompatibilityInstances = [
     providerConstantItems.S3, providerConstantItems.WASABI,
-    providerConstantItems.DIGITAL_OCEAN, providerConstantItems.BLACKBLAZE
+    providerConstantItems.DIGITAL_OCEAN, providerConstantItems.BLACKBLAZE,
+    providerConstantItems.S3_COMPATIBLE,
 ]
 
 const amazonCompatibilityEndpoints = {
     WASABI: 's3.wasabisys.com',
     DIGITAL_OCEAN: '{REGION}.digitaloceanspaces.com',
     BLACKBLAZE: 's3.{REGION}.backblazeb2.com',
+    S3_COMPATIBLE: 'sample.s3.endpoint.com',
 }
 
 const DevEnv = DevEnvConstants
@@ -36,6 +40,7 @@ const CloudSyncSettingsData = {
         { name: 'Wasabi', value: providerConstantItems.WASABI },
         { name: 'DigitalOcean Space', value: providerConstantItems.DIGITAL_OCEAN },
         { name: 'Blackblaze', value: providerConstantItems.BLACKBLAZE },
+        { name: 'S3 Compatible (Minio, etc...)', value: providerConstantItems.S3_COMPATIBLE },
         { name: 'WebDav', value: providerConstantItems.WEBDAV },
         { name: 'Gists', value: providerConstantItems.GIST },
         { name: 'FTP / FTPS', value: providerConstantItems.FTP },
@@ -78,6 +83,14 @@ const CloudSyncSettingsData = {
             bucket: '',
             region: '',
         },
+        [providerConstantItems.S3_COMPATIBLE]: {
+            endpointUrl: '',
+            appId: '',
+            appSecret: '',
+            location: '/',
+            bucket: '',
+            region: '',
+        },
         [providerConstantItems.WEBDAV]: {
             host: '',
             username: '',
@@ -91,7 +104,7 @@ const CloudSyncSettingsData = {
             username: '',
             password: '',
             location: '/',
-            port: 21
+            port: 21,
         },
         [providerConstantItems.GIST]: {
             type: 'github',
@@ -101,9 +114,9 @@ const CloudSyncSettingsData = {
         },
     },
     external_urls: {
-        BlackBlazeHelp: 'https://tabby-cloud.tranit.co/how-to-get-blackblaze-regtion-code/'
+        BlackBlazeHelp: 'https://tabby-cloud.tranit.co/how-to-get-blackblaze-regtion-code/',
     },
-    isCloudStorageS3Compatibility(provider: string) {
+    isCloudStorageS3Compatibility (provider: string) {
         return amazonS3CompatibilityInstances.includes(provider)
     },
     gistUrls: {
@@ -116,6 +129,6 @@ const CloudSyncSettingsData = {
         gitee: 'https://gitee.com/api/v5/gists',
         gitlab: 'https://gitlab.com/api/v4/snippets',
 
-    }
+    },
 }
 export default CloudSyncSettingsData

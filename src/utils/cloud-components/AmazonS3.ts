@@ -89,6 +89,7 @@ class AmazonS3Class {
     async sync (config: ConfigService, platform: PlatformService, toast: ToastrService, params: AmazonParams, firstInit = false) {
         const logger = new Logger(platform)
         const result = { result: false, message: '' }
+
         const client = this.createClient(params, platform)
         let remoteFile = ''
         let remoteSyncConfigUpdatedAt = null
@@ -260,6 +261,15 @@ class AmazonS3Class {
                 logger.log('Fetch Blackblaze instance', 'info')
                 delete s3Params.region
                 s3Params['endpoint'] = new Endpoint(CloudSyncSettingsData.amazonEndpoints.BLACKBLAZE.replace('{REGION}', this.region))
+                break
+            }
+
+            case CloudSyncSettingsData.values.S3_COMPATIBLE: {
+                logger.log('Fetch S3 Compatible instance', 'info')
+                s3Params['signatureVersion'] = 'v4'
+                s3Params['sslEnabled'] = params.endpointUrl.includes('https')
+                s3Params['s3ForcePathStyle'] = true
+                s3Params['endpoint'] = new Endpoint(params.endpointUrl)
                 break
             }
 

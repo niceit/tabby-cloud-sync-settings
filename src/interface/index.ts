@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 export interface AmazonParams {
+    endpointUrl: string,
     appId: string,
     appSecret: string,
     bucket: string,

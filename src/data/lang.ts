@@ -57,7 +57,9 @@ const CloudSyncLang = {
             blackblaze_key_placeholder: 'Your Key ID',
             blackblaze_app_key_placeholder: 'Your Application Key Id',
             bucket_placeholder: 'Bucket',
+            region_placeholder: 'Default region (optional)',
             blackblaze_bucket_placeholder: 'Enter your BlackBlaze B2 region',
+            endpoint_placeholder: 'Endpoint URL',
             location_placeholder: 'Location /',
         },
         ftp: {
