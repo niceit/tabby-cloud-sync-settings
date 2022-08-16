@@ -1,5 +1,7 @@
 # Tabby Sync Cloud Settings
 
+----
+
 ### Support for Tabby SSH https://github.com/Eugeny/tabby
 
 <p align="center">
@@ -17,6 +19,8 @@ This plugin is **FREE** of use under public license MIT.
 
 ## Current supported Cloud Services
 
+----
+
 ![](./screenshots/cloud-services/cloud-services-s3.png)
 ![](./screenshots/cloud-services/cloud-services-webdav.png)
 ![](./screenshots/cloud-services/cloud-services-ftp.png)
@@ -27,6 +31,8 @@ This plugin is **FREE** of use under public license MIT.
 ![](./screenshots/cloud-services/cloud-services-gitlab.png)
 
 ## Checkout some screenshots
+
+----
 
 ![](./screenshots/2021-08-07_11-12-03.png)
 
@@ -41,25 +47,42 @@ Plugin support vary amount of cloud services. More clouds will be supported soon
 Any feedback will be appreciated for next version releases.
 Hope you will like this plugin for your productivity work.
 
-Love the plugin? Buy me a coffee.
+### Love the plugin? Buy me a coffee.
+
+----
 
 [![Donate to TranIT](https://tranit.co/donate-tranit.png)](https://donorbox.org/tabby-cloud-sync-settings-donation)
 
-# Changelog
+## Project supported by <a href="https://jb.gg/OpenSourceSupport" target="_blank">Jetbrains</a>. Special thanks!
+
+----
+
+<a href="https://jb.gg/OpenSourceSupport" target="_blank"><img width="250" style="width: 250px;" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo."></a>
+
+# Change logs 
+
+----
+
 Keep tracking of version release change logs
+
+## [v1.5.1] - 2022-08-16
+
+- Inline Feedback, change logs, donate button, and more.
+- Improve UI for better user experience.
+- Minor fixes and bugs.
 
 ## [v1.5.0] - 2022-07-17
 
 - Official support for **S3 Compatibility Minio, and others...**
 - Minor fixes and bugs.
-- 
+
 ## [v1.4.3] - ...
 
 - Minor fixes and bugs.
 
 ## [v1.4.0] - 2022-05-22
 
-- Auto sync support (Detect sync settings from other machine from cloud.)
+- Auto sync support (Detect sync settings from other machine from cloud).
 - Critical bugs fix.
 - Minor fixes and bugs.
 

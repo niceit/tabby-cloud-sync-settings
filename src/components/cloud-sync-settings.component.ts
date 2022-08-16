@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-import { Component, OnInit } from '@angular/core'
-import { ConfigService, PlatformService } from 'terminus-core'
+import {Component, HostBinding, OnInit} from '@angular/core'
+import { ConfigService, PlatformService, BaseComponent } from 'terminus-core'
 import { ToastrService } from 'ngx-toastr'
 import CloudSyncSettingsData from '../data/setting-items'
 import Lang from '../data/lang'
@@ -12,7 +12,7 @@ import SettingsHelper from '../utils/settings-helper'
     styles: [require('./cloud-sync-settings.component.scss')],
 })
 
-export class CloudSyncSettingsComponent implements OnInit {
+export class CloudSyncSettingsComponent extends BaseComponent implements OnInit {
     translate = Lang
     serviceProviderValues = CloudSyncSettingsData.values
     serviceProviders = CloudSyncSettingsData.serviceProvidersList
@@ -27,11 +27,13 @@ export class CloudSyncSettingsComponent implements OnInit {
 
     form: any = CloudSyncSettingsData.formData
 
+    @HostBinding('class.content-box') true
     constructor (
         public config: ConfigService,
         private toast: ToastrService,
         private platform: PlatformService
     ) {
+      super()
     }
 
     ngOnInit (): void {
