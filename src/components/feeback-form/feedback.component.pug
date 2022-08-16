@@ -1,0 +1,98 @@
+.row.pb-1.has-border-top.mt-3.pt-3
+    .col-md-12
+        h3 Share Your Thought
+    .col-md-12
+        p.mb-0 Share your thoughts on how well the plugin is doing.
+        p.mt-0.pt-0 We appreciate your feedback and will use it to improve the application.
+    .col-md-12(*ngIf='form_messages.errors.length || form_messages.success.length')
+        .alert.alert-success(*ngIf='form_messages.success.length')
+            p.pb-0.mb-0(*ngFor='let message of form_messages.success') {{message}}
+
+        .alert.alert-danger(*ngIf='form_messages.errors.length')
+            p.pb-0.mb-0(*ngFor='let message of form_messages.errors') {{message}}
+    .col-md-12
+        .form-group
+            .col-md-12
+                .input-group.mb-2
+                    .input-group-prepend
+                        .input-group-text
+                            i.fas.fa-fw.fa-book
+                    input.form-control(
+                        type='text',
+                        [placeholder]="'Subject (*)'",
+                        [(ngModel)]='form.subject',
+                    )
+            .col-md-12
+                .input-group.mb-2
+                    .input-group-prepend
+                        .input-group-text
+                            i.fas.fa-fw.fa-user
+                    input.form-control(
+                        type='text',
+                        [placeholder]="'Your Name (*)'",
+                        [(ngModel)]='form.name',
+                    )
+            .col-md-12
+                .input-group.mb-2
+                    .input-group-prepend
+                        .input-group-text
+                            i.fas.fa-fw.fa-envelope
+                    input.form-control(
+                        type='text',
+                        [placeholder]="'Your Email (*)'",
+                        [(ngModel)]='form.email',
+                    )
+            .col-md-12
+                .input-group.mb-2
+                    .input-group-prepend
+                        .input-group-text
+                            i.fas.fa-fw.fa-message
+                    textarea.form-control.message-body(
+                        [placeholder]="'Message (*)'",
+                        [(ngModel)]='form.message',
+                    )
+            .col-md-12
+                .input-group.mb-2
+                    .input-group-prepend
+                        .input-group-text
+                            i.fas.fa-fw.fa-question-circle.mr-2
+                            span Answer the question: {{calculationGenerateObj.left}} + {{calculationGenerateObj.right}} =
+                    input.form-control(
+                        type='text',
+                        [placeholder]="''",
+                        [(ngModel)]='calculationGenerateObj.answer',
+                    )
+            .col-md-12.pt-3.text-right
+                button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='!isFormProcessing ? submitFeedback() : null')
+                    i.fas.fa-fw.fa-plug.mr-2
+                    span(*ngIf="isFormProcessing") Submitting...
+                    span(*ngIf="!isFormProcessing") Submit
+
+.row.pb-1.has-border-top.mt-3.pt-3
+    .col-md-12
+        h3 Subscribe to our Newsletter
+    .col-md-12
+        p.mb-0 Subscribe to our newsletter to get the latest news and updates.
+    .col-md-12(*ngIf='form_subscribe_messages.errors.length || form_subscribe_messages.success.length')
+        .alert.alert-success(*ngIf='form_subscribe_messages.success.length')
+            p.pb-0.mb-0(*ngFor='let message of form_subscribe_messages.success') {{message}}
+
+        .alert.alert-danger(*ngIf='form_subscribe_messages.errors.length')
+            p.pb-0.mb-0(*ngFor='let message of form_subscribe_messages.errors') {{message}}
+    .col-md-12
+        .form-group
+            .col-md-12.pt-2
+                .input-group.mb-2
+                    .input-group-prepend
+                        .input-group-text
+                            i.fas.fa-fw.fa-envelope
+                    input.form-control(
+                        type='text',
+                        [placeholder]="'Your email'",
+                        [(ngModel)]='newLetterForm.email',
+                    )
+            .col-md-12.pt-3.text-right
+                button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='!isFormProcessing ? subscribeNewsletter() : null')
+                    i.fas.fa-fw.fa-square-envelope
+                    span(*ngIf="isFormSubscribeProcessing") Submitting...
+                    span(*ngIf="!isFormSubscribeProcessing") Subscribe

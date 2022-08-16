@@ -116,7 +116,7 @@ const CloudSyncSettingsData = {
     external_urls: {
         BlackBlazeHelp: 'https://tabby-cloud.tranit.co/how-to-get-blackblaze-regtion-code/',
     },
-    isCloudStorageS3Compatibility (provider: string) {
+    isCloudStorageS3Compatibility (provider: string): boolean {
         return amazonS3CompatibilityInstances.includes(provider)
     },
     gistUrls: {
@@ -130,5 +130,7 @@ const CloudSyncSettingsData = {
         gitlab: 'https://gitlab.com/api/v4/snippets',
 
     },
+    donationUrl: 'https://donorbox.org/tabby-cloud-sync-settings-donation',
+    pluginUrl: 'https://tabby-cloud.tranit.co',
 }
 export default CloudSyncSettingsData
