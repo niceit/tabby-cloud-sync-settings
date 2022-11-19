@@ -37,6 +37,23 @@ ul.nav-tabs(ngbNav, #nav='ngbNav')
                             (ngModelChange)='toggleEnableSync()',
                         )
 
+                    .tabby-sync-loading(*ngIf='showBottomLoaderIcon')
+                        img(src='https://loading.io/assets/img/c/loader/golden.svg', width='30')
+
+
+                    .form-line.sync-interval(style='margin-top: -25px;')
+                        .header
+                            .title
+                                i.fas.fa-refresh.mr-2
+                                span Interval syncing time (in seconds)
+                            .subtitle How often should Tabby sync your settings?
+                        input.form-control(
+                            type='number',
+                            [(ngModel)]='intervalSync',
+                            [disabled]='storedSettingsData === null',
+                            (ngModelChange)='onIntervalSyncChanged()',
+                        )
+
             .row
                 .col-md-12(*ngIf='form_messages.errors.length || form_messages.success.length')
                     .alert.alert-success(*ngIf='form_messages.success.length')

@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-import {Component, HostBinding, OnInit} from '@angular/core'
+import { Component, HostBinding, OnInit } from '@angular/core'
 import { ConfigService, PlatformService, BaseComponent } from 'terminus-core'
 import { ToastrService } from 'ngx-toastr'
 import CloudSyncSettingsData from '../data/setting-items'
@@ -23,7 +23,9 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         success: [],
     }
     syncEnabled = false
+    intervalSync = CloudSyncSettingsData.defaultSyncInterval
     storedSettingsData = null
+    showBottomLoaderIcon = false
 
     form: any = CloudSyncSettingsData.formData
 
@@ -33,7 +35,7 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         private toast: ToastrService,
         private platform: PlatformService
     ) {
-      super()
+        super()
     }
 
     ngOnInit (): void {
@@ -41,6 +43,7 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         if (this.storedSettingsData) {
             this.selectedProvider = this.storedSettingsData.adapter
             this.syncEnabled = this.storedSettingsData.enabled
+            this.intervalSync = this.storedSettingsData?.interval_insync || CloudSyncSettingsData.defaultSyncInterval
         } else {
             this.selectedProvider = this.serviceProviderValues.S3
         }
@@ -51,7 +54,22 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     }
 
     toggleEnableSync (): void {
-        SettingsHelper.toggleEnabledPlugin(this.syncEnabled, this.platform, this.toast).then(() => {})
+        this.showBottomLoaderIcon = true
+        SettingsHelper.toggleEnabledPlugin(this.syncEnabled, this.platform, this.toast).then((result) => {
+            this.showBottomLoaderIcon = false
+            if (result) {
+                this.config.requestRestart()
+            }
+        })
+    }
+
+    onIntervalSyncChanged (): void {
+        SettingsHelper.saveIntervalSync(this.intervalSync, this.platform, this.toast).then((result) => {
+            this.showBottomLoaderIcon = false
+            if (result) {
+                this.config.requestRestart()
+            }
+        })
     }
 
     resetFormMessages (): void {

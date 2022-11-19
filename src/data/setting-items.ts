@@ -28,6 +28,7 @@ const amazonCompatibilityEndpoints = {
 
 const DevEnv = DevEnvConstants
 const CloudSyncSettingsData = {
+    defaultSyncInterval: 10, // 10 seconds
     tabbySettingsFilename: '/config.yaml',
     storedSettingsFilename: '/sync-settings' + (DevEnv.ENABLE_DEBUG ? '-dev': '') + '.json',
     cloudSettingsFilename: '/tabby-settings' + (DevEnv.ENABLE_DEBUG ? '-dev': '') + '.json',

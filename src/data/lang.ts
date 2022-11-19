@@ -42,6 +42,7 @@ const CloudSyncLang = {
             confirm_remove_setting: 'Are you sure want to remove saved config?',
             remove_setting_success: 'Your settings had been removed.',
             remove_setting_error: 'Can not remove your setting. Try again later!',
+            setting_changes_saved: 'Your setting changes had been saved.',
         },
         log: {
             invalid_cloud_settings: 'Invalid cloud settings syncing',

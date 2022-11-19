@@ -32,11 +32,13 @@ export class SettingsHelperClass {
         const settingsArr = {
             adapter: adapter,
             enabled: true,
+            interval_insync: CloudSyncSettingsData.defaultSyncInterval,
             configs: params,
         }
         if (fs.existsSync(filePath)) {
             const savedConfigs = this.readConfigFile(platform)
             settingsArr.enabled = savedConfigs !== null ? savedConfigs['enabled'] : true
+            settingsArr.interval_insync = savedConfigs !== null ? savedConfigs['interval_insync'] : CloudSyncSettingsData.defaultSyncInterval
         }
         const fileContent = CloudSyncLang.trans('common.config_inject_header') + CryptoJS.AES.encrypt(JSON.stringify(settingsArr), this.generatedCryptoHash).toString()
 
@@ -130,7 +132,8 @@ export class SettingsHelperClass {
                 const bytes = CryptoJS.AES.decrypt(fsReadFile(filePath, 'utf8').replace(CloudSyncLang.trans('common.config_inject_header'), ''), this.generatedCryptoHash)
                 const content = bytes.toString(CryptoJS.enc.Utf8)
                 data = isRaw ? content : JSON.parse(content)
-            } catch (e) {}
+            } catch (e) {
+            }
         }
 
         return data
@@ -145,7 +148,8 @@ export class SettingsHelperClass {
                 data = isRaw
                     ? !isEncrypt ? content : CloudSyncLang.trans('common.config_inject_header') + CryptoJS.AES.encrypt(content, this.generatedCryptoHash).toString()
                     : JSON.parse(content)
-            } catch (e) {}
+            } catch (e) {
+            }
         }
 
         return data
@@ -157,7 +161,7 @@ export class SettingsHelperClass {
             try {
                 const content = fsReadFile(filePath, 'utf8')
                 try {
-                    const backupFilePath =  path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename + '.backup'
+                    const backupFilePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename + '.backup'
                     const promise = new Promise((resolve, reject) => {
                         return fs.writeFile(backupFilePath, content,
                             (err) => {
@@ -175,7 +179,44 @@ export class SettingsHelperClass {
                 } catch (e) {
                     return false
                 }
-            } catch (e) {}
+            } catch (e) {
+            }
+        }
+    }
+
+    async saveIntervalSync (value: number, platform: PlatformService, toast: ToastrService): Promise<any> {
+        const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
+        if (!fs.existsSync(filePath)) {
+            toast.error(CloudSyncLang.trans('sync.need_to_save_config'))
+            return false
+        }
+        const savedConfigs = this.readConfigFile(platform)
+        if (savedConfigs) {
+            savedConfigs.interval_insync = value
+            const fileContent = CloudSyncLang.trans('common.config_inject_header') + CryptoJS.AES.encrypt(JSON.stringify(savedConfigs), this.generatedCryptoHash).toString()
+
+            const promise = new Promise((resolve, reject) => {
+                return fs.writeFile(filePath, fileContent,
+                    (err) => {
+                        if (err) {
+                            reject(false)
+                        }
+
+                        resolve(true)
+                    })
+            })
+
+            return promise.then(status => {
+                if (status) {
+                    toast.info(CloudSyncLang.trans('sync.setting_changes_saved'))
+                } else {
+                    toast.info(CloudSyncLang.trans('sync.error_save_setting'))
+                }
+                return status
+            })
+        } else {
+            toast.info(CloudSyncLang.trans('sync.error_save_setting'))
+            return false
         }
     }
 
@@ -186,28 +227,34 @@ export class SettingsHelperClass {
             return false
         }
         const savedConfigs = this.readConfigFile(platform)
-        savedConfigs.enabled = value
-        const fileContent = JSON.stringify(savedConfigs)
 
-        const promise = new Promise((resolve, reject) => {
-            return fs.writeFile(filePath, fileContent,
-                (err) => {
-                    if (err) {
-                        reject(false)
-                    }
+        if (savedConfigs) {
+            savedConfigs.enabled = value
+            const fileContent = CloudSyncLang.trans('common.config_inject_header') + CryptoJS.AES.encrypt(JSON.stringify(savedConfigs), this.generatedCryptoHash).toString()
 
-                    resolve(true)
-                })
-        })
+            const promise = new Promise((resolve, reject) => {
+                return fs.writeFile(filePath, fileContent,
+                    (err) => {
+                        if (err) {
+                            reject(false)
+                        }
 
-        return promise.then(status => {
-            if (status) {
-                toast.info(CloudSyncLang.trans(value ? 'sync.sync_enabled' : 'sync.sync_disabled'))
-            } else {
-                toast.info(CloudSyncLang.trans('sync.error_save_setting'))
-            }
-            return status
-        })
+                        resolve(true)
+                    })
+            })
+
+            return promise.then(status => {
+                if (status) {
+                    toast.info(CloudSyncLang.trans(value ? 'sync.sync_enabled' : 'sync.sync_disabled'))
+                } else {
+                    toast.info(CloudSyncLang.trans('sync.error_save_setting'))
+                }
+                return status
+            })
+        } else {
+            toast.info(CloudSyncLang.trans('sync.error_save_setting'))
+            return false
+        }
     }
 
     async removeConfirmFile (platform: PlatformService, toast: ToastrService, needConfirm = true): Promise<boolean> {
@@ -256,4 +303,5 @@ export class SettingsHelperClass {
         return configRawData.includes(CloudSyncLang.trans('common.verifyConfigString'))
     }
 }
+
 export default new SettingsHelperClass()
