@@ -1,6 +1,6 @@
 {
   "name": "terminus-cloud-settings-sync",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "date": "16th Agust 2022",
   "description": "Cloud Services sync the Tabby config and connections across platform devices.",
   "keywords": [

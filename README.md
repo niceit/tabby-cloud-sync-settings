@@ -5,9 +5,9 @@
 ### Support for Tabby SSH https://github.com/Eugeny/tabby
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/terminus-cloud-settings-sync"><img alt="npm" src="https://img.shields.io/npm/v/terminus-cloud-settings-sync?label=npmjs"></a> 
-  <a href="https://tabby-cloud.tranit.co/"><img src="https://img.shields.io/static/v1?label=Support URL&message=Visit TranIt.co&color=#333"/></a> &nbsp;  
-  <img alt="GitHub" src="https://img.shields.io/github/license/niceit/tabby-cloud-sync-settings"> 
+  <a href="https://www.npmjs.com/package/terminus-cloud-settings-sync"><img alt="npm" src="https://img.shields.io/npm/v/terminus-cloud-settings-sync?label=npmjs"></a>
+  <a href="https://tabby-cloud.tranit.co/"><img src="https://img.shields.io/static/v1?label=Support URL&message=Visit TranIt.co&color=#333"/></a> &nbsp;
+  <img alt="GitHub" src="https://img.shields.io/github/license/niceit/tabby-cloud-sync-settings">
   <img alt="Scrutinizer code quality (GitHub/Bitbucket)" src="https://img.shields.io/scrutinizer/quality/g/niceit/tabby-cloud-sync-settings">
 </p>
 
@@ -59,11 +59,14 @@ Hope you will like this plugin for your productivity work.
 
 <a href="https://jb.gg/OpenSourceSupport" target="_blank"><img width="250" style="width: 250px;" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo."></a>
 
-# Change logs 
+# Change logs
 
 ----
 
 Keep tracking of version release change logs
+
+// TODO Tran Add change logs for v1.5.2
+## [v1.5.2] - 2022-11-19
 
 ## [v1.5.1] - 2022-08-16
 
