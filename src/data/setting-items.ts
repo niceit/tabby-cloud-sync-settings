@@ -116,6 +116,7 @@ const CloudSyncSettingsData = {
     },
     external_urls: {
         BlackBlazeHelp: 'https://tabby-cloud.tranit.co/how-to-get-blackblaze-regtion-code/',
+        checkForUpdateUrl: 'https://ws.phprockets.com/tabby-sync/check-for-updates',
     },
     isCloudStorageS3Compatibility (provider: string): boolean {
         return amazonS3CompatibilityInstances.includes(provider)

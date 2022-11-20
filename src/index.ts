@@ -20,7 +20,8 @@ import { CloudSyncFeedbackComponent } from './components/feeback-form/feeback.co
 import { MasterPasswordComponent } from './components/master-password/master-password.component'
 import { ChangeLogsComponent } from './components/change-logs/change-logs.component'
 import { SupportUsComponent } from './components/support-us/support-us.component'
-import CloudSyncSettingsData from './data/setting-items';
+import CloudSyncSettingsData from './data/setting-items'
+import { CheckForUpdatesComponent } from './components/sub-components/check-for-updates/check-for-updates.component'
 
 let autoSynInProgress = false
 let autoSynIntervalInstance = null
@@ -50,6 +51,7 @@ let initAutoSynIntervalFrequency = CloudSyncSettingsData.defaultSyncInterval * 1
         MasterPasswordComponent,
         ChangeLogsComponent,
         SupportUsComponent,
+        CheckForUpdatesComponent,
         ToggleComponent,
     ],
 })

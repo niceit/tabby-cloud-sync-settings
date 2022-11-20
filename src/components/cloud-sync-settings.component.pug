@@ -7,6 +7,10 @@ h3([textContent]='translate.trans("settings.title")')
         i.fab.fa-fw.fa-apple.mr-1
         i.fab.fa-fw.fa-linux
 
+.row.mt-3.mb-3(*ngIf='isUpdateAvailable')
+    .col-md-12
+        .alert.alert-warning A new version is available. Please update to the latest version to continue using the plugin.
+
 ul.nav-tabs(ngbNav, #nav='ngbNav')
     li(ngbNavItem)
         a(ngbNavLink) General
@@ -143,5 +147,10 @@ ul.nav-tabs(ngbNav, #nav='ngbNav')
         a(ngbNavLink) Support Us
         ng-template(ngbNavContent)
             support-us-cloud-sync
+
+    li(ngbNavItem)
+        a(ngbNavLink) Check for update
+        ng-template(ngbNavContent)
+            check-for-updates-cloud-sync
 
 div([ngbNavOutlet]='nav')

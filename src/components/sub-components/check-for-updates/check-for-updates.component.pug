@@ -1,0 +1,45 @@
+.row.pb-1.has-border-top.mt-3.pt-3
+    .col-md-12
+        h3 Check for Updates
+    .col-md-12.mb-2
+        .alert.alert-info
+            p.mb-0 You are using version {{version}}
+            p.mb-0 Hit the button below to check for updates.
+
+    .col-md-12.pt-3.text-right
+        button.btn.btn-warning.flex-shrink-0.ml-3.mb-2(
+            (click)='checkForPluginVersion()',
+            [disabled]='isProcessingRequest',
+        )
+            i.fas.fa-plug.mr-2
+            span(*ngIf="!isProcessingRequest") Check for Updates
+            span(*ngIf="isProcessingRequest") Processing...
+
+    .col-md-12.mt-2(*ngIf='isUpdateAvailable')
+        .alert.alert-warning
+            p.mb-0 Latest version is {{newVersionData.version}}
+            h3 What's new?
+            .mt-2(*ngFor="let news of newVersionData.what_news")
+                h4 {{news.title}}
+                p.mb-0(*ngFor="let item of news.content" ) {{item}}
+
+        button.btn.btn-primary.flex-shrink-0.ml-3.mb-2(*ngIf="!errorCheckForUpdates || !isSuccessPluginUpgrade" , (click)='upgradePlugin()')
+            i.fas.fa-cloud-download.mr-2
+            span(*ngIf="!isUpdatingPlugin") Update To {{newVersionData.version}}
+            span(*ngIf="isUpdatingPlugin") Processing...
+
+        .col-md-12.mt-2(*ngIf='errorUpgradePlugin')
+            .alert.alert-danger
+                p.mb-0 {{errorUpgradePluginMessage}}
+
+    .col-md-12.mt-2(*ngIf='noUpdateAvailable')
+        .alert.alert-success
+            p.mb-0 You are using the latest version
+
+    .col-md-12.mt-2(*ngIf='errorCheckForUpdates')
+        .alert.alert-warning
+            p.mb-0 There is an error while checking for updates. Please try again later!
+
+    .col-md-12.mt-2(*ngIf='isSuccessPluginUpgrade')
+        .alert.alert-success
+            p.mb-0 Plugin has been updated successfully!
