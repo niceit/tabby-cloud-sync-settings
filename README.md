@@ -65,8 +65,12 @@ Hope you will like this plugin for your productivity work.
 
 Keep tracking of version release change logs
 
-// TODO Tran Add change logs for v1.5.2
 ## [v1.5.2] - 2022-11-19
+
+- Add custom config for setting interval syncing time.
+- Added Check for update tab.
+- Support check for update and inline update for the plugin.
+- Minor bug fixes.
 
 ## [v1.5.1] - 2022-08-16
 
