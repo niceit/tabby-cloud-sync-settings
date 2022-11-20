@@ -4,3 +4,10 @@
 .enable-sync {
   margin-top: -25px;
 }
+
+.tabby-sync-loading {
+    position: fixed;
+    z-index: 999;
+    right: 10px;
+    bottom: 40px;
+}

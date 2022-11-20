@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 import { NgModule } from '@angular/core'
 import { SettingsTabProvider } from 'terminus-settings'
 import { SyncConfigSettingsTabProvider } from './settings'
@@ -19,7 +20,13 @@ import { CloudSyncFeedbackComponent } from './components/feeback-form/feeback.co
 import { MasterPasswordComponent } from './components/master-password/master-password.component'
 import { ChangeLogsComponent } from './components/change-logs/change-logs.component'
 import { SupportUsComponent } from './components/support-us/support-us.component'
+import CloudSyncSettingsData from './data/setting-items'
+import { CheckForUpdatesComponent } from './components/sub-components/check-for-updates/check-for-updates.component'
+
 let autoSynInProgress = false
+let autoSynIntervalInstance = null
+let initAutoSynIntervalFrequency = CloudSyncSettingsData.defaultSyncInterval * 1000
+
 @NgModule({
     imports: [
         CommonModule,
@@ -44,6 +51,7 @@ let autoSynInProgress = false
         MasterPasswordComponent,
         ChangeLogsComponent,
         SupportUsComponent,
+        CheckForUpdatesComponent,
         ToggleComponent,
     ],
 })
@@ -60,13 +68,16 @@ export default class CloudSyncSettingsModule {
                     this.subscribeToConfigChangeEvent()
                 }, 2000)
 
-                // Auto Sync between local and remote every 30s
-                setInterval(() => {
-                    console.warn('Tabby Auto Sync Started')
-                    this.syncCloudSettings()
-                }, 30000)
+                this.subscribeToAutoSyncEvent()
             })
         })
+    }
+
+    subscribeToAutoSyncEvent (): void {
+        // Auto Sync between local and remote every 30s
+        autoSynIntervalInstance = setTimeout(() => {
+            this.syncCloudSettings().then()
+        }, initAutoSynIntervalFrequency)
     }
 
     subscribeToConfigChangeEvent (): void {
@@ -79,11 +90,16 @@ export default class CloudSyncSettingsModule {
         if (!autoSynInProgress) {
             autoSynInProgress = true
             const savedConfigs = SettingsHelper.readConfigFile(this.platform)
-            if (savedConfigs) {
+            if (savedConfigs?.enabled) {
+                console.warn('Tabby Auto Sync Started ' + new Date().toLocaleString())
+                initAutoSynIntervalFrequency = (savedConfigs?.interval_insync || CloudSyncSettingsData.defaultSyncInterval) * 1000
                 await SettingsHelper.syncWithCloud(this.configService, this.platform, this.toast).then(() => {
                     autoSynInProgress = false
+                    this.subscribeToAutoSyncEvent()
                 })
             }
+        } else {
+            clearTimeout(autoSynIntervalInstance)
         }
     }
 }

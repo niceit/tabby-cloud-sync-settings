@@ -1,10 +1,13 @@
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-import {Component, HostBinding, OnInit} from '@angular/core'
+import { compare as semverCompare } from 'semver'
+import { Component, HostBinding, OnInit } from '@angular/core'
 import { ConfigService, PlatformService, BaseComponent } from 'terminus-core'
 import { ToastrService } from 'ngx-toastr'
 import CloudSyncSettingsData from '../data/setting-items'
 import Lang from '../data/lang'
 import SettingsHelper from '../utils/settings-helper'
+import axios from 'axios'
+import { version } from '../../package.json'
 
 /** @hidden */
 @Component({
@@ -14,6 +17,8 @@ import SettingsHelper from '../utils/settings-helper'
 
 export class CloudSyncSettingsComponent extends BaseComponent implements OnInit {
     translate = Lang
+    isUpdateAvailable = false
+
     serviceProviderValues = CloudSyncSettingsData.values
     serviceProviders = CloudSyncSettingsData.serviceProvidersList
     selectedProvider: any = ''
@@ -23,7 +28,9 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         success: [],
     }
     syncEnabled = false
+    intervalSync = CloudSyncSettingsData.defaultSyncInterval
     storedSettingsData = null
+    showBottomLoaderIcon = false
 
     form: any = CloudSyncSettingsData.formData
 
@@ -33,17 +40,30 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         private toast: ToastrService,
         private platform: PlatformService
     ) {
-      super()
+        super()
     }
 
     ngOnInit (): void {
+        this.checkForNewVersion().then()
         this.storedSettingsData = SettingsHelper.readConfigFile(this.platform)
         if (this.storedSettingsData) {
             this.selectedProvider = this.storedSettingsData.adapter
             this.syncEnabled = this.storedSettingsData.enabled
+            this.intervalSync = this.storedSettingsData?.interval_insync || CloudSyncSettingsData.defaultSyncInterval
         } else {
             this.selectedProvider = this.serviceProviderValues.S3
         }
+    }
+
+    async checkForNewVersion (): Promise<void> {
+        await axios.get(CloudSyncSettingsData.external_urls.checkForUpdateUrl, {
+            timeout: 30000,
+        }).then((response) => {
+            const data = response.data
+            if (semverCompare(version, data.version) === -1) {
+                this.isUpdateAvailable = true
+            }
+        })
     }
 
     onSelectProviderChange (): void {
@@ -51,7 +71,22 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     }
 
     toggleEnableSync (): void {
-        SettingsHelper.toggleEnabledPlugin(this.syncEnabled, this.platform, this.toast).then(() => {})
+        this.showBottomLoaderIcon = true
+        SettingsHelper.toggleEnabledPlugin(this.syncEnabled, this.platform, this.toast).then((result) => {
+            this.showBottomLoaderIcon = false
+            if (result) {
+                this.config.requestRestart()
+            }
+        })
+    }
+
+    onIntervalSyncChanged (): void {
+        SettingsHelper.saveIntervalSync(this.intervalSync, this.platform, this.toast).then((result) => {
+            this.showBottomLoaderIcon = false
+            if (result) {
+                this.config.requestRestart()
+            }
+        })
     }
 
     resetFormMessages (): void {

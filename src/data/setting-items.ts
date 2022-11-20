@@ -28,6 +28,7 @@ const amazonCompatibilityEndpoints = {
 
 const DevEnv = DevEnvConstants
 const CloudSyncSettingsData = {
+    defaultSyncInterval: 10, // 10 seconds
     tabbySettingsFilename: '/config.yaml',
     storedSettingsFilename: '/sync-settings' + (DevEnv.ENABLE_DEBUG ? '-dev': '') + '.json',
     cloudSettingsFilename: '/tabby-settings' + (DevEnv.ENABLE_DEBUG ? '-dev': '') + '.json',
@@ -115,6 +116,7 @@ const CloudSyncSettingsData = {
     },
     external_urls: {
         BlackBlazeHelp: 'https://tabby-cloud.tranit.co/how-to-get-blackblaze-regtion-code/',
+        checkForUpdateUrl: 'https://ws.phprockets.com/tabby-sync/check-for-updates',
     },
     isCloudStorageS3Compatibility (provider: string): boolean {
         return amazonS3CompatibilityInstances.includes(provider)
