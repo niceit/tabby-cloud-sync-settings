@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 import DevEnvConstants from '../services/dev-constants'
+import DevMockData from '../utils/dev-mock-data'
 
 const providerConstantItems = {
     BUILT_IN: 'builtin-tabby',
@@ -93,11 +94,11 @@ const CloudSyncSettingsData = {
             region: '',
         },
         [providerConstantItems.WEBDAV]: {
-            host: '',
-            username: '',
-            password: '',
-            location: '',
-            port: '443',
+            host: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().host : '',
+            username: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().username : '',
+            password: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().password : '',
+            location: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().location : '',
+            port: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().port : '443',
         },
         [providerConstantItems.FTP]: {
             protocol: 'ftp',

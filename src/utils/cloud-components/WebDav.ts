@@ -19,9 +19,11 @@ class WebDav {
         const client = WebDav.createClient(params)
         const remoteFile = params.location + CloudSyncSettingsData.cloudSettingsFilename
         let remoteSyncConfigUpdatedAt = null
+        let isAbleToLoadRemoteContent = false
 
         try {
-            client.stat(remoteFile).then(async (fileStats: any) => {
+            await client.stat(remoteFile).then(async (fileStats: any) => {
+                isAbleToLoadRemoteContent = true
                 if (fileStats?.lastmod) {
                     remoteSyncConfigUpdatedAt = moment(fileStats.lastmod)
                 }
@@ -93,6 +95,21 @@ class WebDav {
             }
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (!isAbleToLoadRemoteContent) {
+            console.log('RUN #10')
+            if ((await platform.showMessageBox({
+                type: 'warning',
+                message: 'Seem to be server has no file or the setting file is corrupted. Do you want to push local file to the cloud?',
+                buttons: ['Cancel', 'Yes'],
+                defaultId: 0,
+            })).response === 1) {
+                await client.putFileContents(remoteFile, SettingsHelper.readTabbyConfigFile(platform, true, true), { overwrite: true })
+                result['result'] = true
+            } else {
+                // Do Nothing
+            }
+        }
         return result
     }
 

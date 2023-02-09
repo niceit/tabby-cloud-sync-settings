@@ -8,6 +8,7 @@ import Lang from '../data/lang'
 import SettingsHelper from '../utils/settings-helper'
 import axios from 'axios'
 import { version } from '../../package.json'
+import devConstants from '../services/dev-constants'
 
 /** @hidden */
 @Component({
@@ -18,6 +19,7 @@ import { version } from '../../package.json'
 export class CloudSyncSettingsComponent extends BaseComponent implements OnInit {
     translate = Lang
     isUpdateAvailable = false
+    isDebug = devConstants.ENABLE_DEBUG
 
     serviceProviderValues = CloudSyncSettingsData.values
     serviceProviders = CloudSyncSettingsData.serviceProvidersList
