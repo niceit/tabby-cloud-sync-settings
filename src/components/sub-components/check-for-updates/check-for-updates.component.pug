@@ -76,5 +76,5 @@
                             [disabled]='isUpdatingPlugin',
                         )
                             i.fas.fa-undo.mr-2
-                            span(*ngIf="!isUpdatingPlugin") Rollback
-                            span(*ngIf="isUpdatingPlugin") Processing...
+                            span(*ngIf="!isUpdatingPlugin || targetRollbackVersion != version") Rollback
+                            span(*ngIf="isUpdatingPlugin && targetRollbackVersion == version") Processing...

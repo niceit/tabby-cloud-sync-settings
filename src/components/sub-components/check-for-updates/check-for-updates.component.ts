@@ -23,6 +23,7 @@ export class CheckForUpdatesComponent implements OnInit {
     errorUpgradePlugin = false
     errorUpgradePluginMessage = ''
     isUpdatingPlugin = false
+    targetRollbackVersion = ''
 
     isUpdateAvailable = false
     newVersionData = null
@@ -86,6 +87,7 @@ export class CheckForUpdatesComponent implements OnInit {
     }
 
     async confirmRollbackToVersion (rollbackVersion: string): Promise<void> {
+        this.targetRollbackVersion = rollbackVersion
         if ((await this.platform.showMessageBox({
             type: 'warning',
             message: 'Are you sure you want to rollback to version ' + rollbackVersion + '?',
