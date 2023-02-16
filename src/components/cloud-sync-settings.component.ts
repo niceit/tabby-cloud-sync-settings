@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 import { compare as semverCompare } from 'semver'
 import { Component, HostBinding, OnInit } from '@angular/core'
 import { ConfigService, PlatformService, BaseComponent } from 'terminus-core'
@@ -23,7 +22,7 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
 
     serviceProviderValues = CloudSyncSettingsData.values
     serviceProviders = CloudSyncSettingsData.serviceProvidersList
-    selectedProvider: any = ''
+    selectedProvider = ''
 
     form_messages = {
         errors: [],
@@ -34,7 +33,7 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     storedSettingsData = null
     showBottomLoaderIcon = false
 
-    form: any = CloudSyncSettingsData.formData
+    form = CloudSyncSettingsData.formData
 
     @HostBinding('class.content-box') true
     constructor (

@@ -6,6 +6,7 @@ import axios from 'axios'
 import { compare as semverCompare } from 'semver'
 import { TabbySyncUpgradeService } from '../../../services/tabby-sync-upgrade'
 import CloudSyncSettingsData from '../../../data/setting-items'
+import Logger from '../../../utils/Logger'
 
 @Component({
     selector: 'check-for-updates-cloud-sync',
@@ -13,7 +14,9 @@ import CloudSyncSettingsData from '../../../data/setting-items'
     styles: [require('./check-for-updates.component.scss')],
 })
 export class CheckForUpdatesComponent implements OnInit {
+    logger = null
     version = version
+    availableRollbackBuilds = CloudSyncSettingsData.availablePluginVersions
     errorCheckForUpdates = false
 
     isSuccessPluginUpgrade = false
@@ -30,6 +33,7 @@ export class CheckForUpdatesComponent implements OnInit {
     constructor (private platform: PlatformService,
         private config: ConfigService,
         public pluginManager: TabbySyncUpgradeService) {
+        this.logger = new Logger(this.platform)
     }
 
     ngOnInit (): void {
@@ -64,17 +68,34 @@ export class CheckForUpdatesComponent implements OnInit {
         })
     }
 
-    async upgradePlugin (): Promise<void> {
+    async upgradePlugin (targetVersion = null): Promise<void> {
         this.isUpdatingPlugin = true
+        this.logger.log('Updating plugin to version ' + (targetVersion ? targetVersion : this.newVersionData.version))
         try {
-            await this.pluginManager.installPlugin(this.newVersionData.version)
+            await this.pluginManager.installPlugin(targetVersion ? targetVersion : this.newVersionData.version)
             this.isUpdatingPlugin = false
             this.config.requestRestart()
             this.isSuccessPluginUpgrade = true
+            this.logger.log('Plugin updated successfully to version ' + (targetVersion ? targetVersion : this.newVersionData.version))
         } catch (err) {
             this.errorUpgradePlugin = true
             this.errorUpgradePluginMessage = err.message
             this.isUpdatingPlugin = false
+            this.logger.log('Error while updating plugin to version ' + (targetVersion ? targetVersion : this.newVersionData.version) + ': ' + err.message, 'error')
+        }
+    }
+
+    async confirmRollbackToVersion (rollbackVersion: string): Promise<void> {
+        if ((await this.platform.showMessageBox({
+            type: 'warning',
+            message: 'Are you sure you want to rollback to version ' + rollbackVersion + '?',
+            buttons: ['Ok', 'Cancel'],
+            defaultId: 0,
+        })).response === 0) {
+            this.logger.log('Perform Rolling back to version ' + rollbackVersion)
+            await this.upgradePlugin(rollbackVersion)
+        } else {
+            // do nothing
         }
     }
 }

@@ -6,9 +6,11 @@ import { Component, OnInit } from '@angular/core'
     styles: [require('./master-password.component.scss')],
 })
 export class MasterPasswordComponent implements OnInit {
-    form: any = {
+    form = {
         password: '',
         reTypePassword: '',
     }
-    ngOnInit (): void {}
+    ngOnInit (): void {
+        // do nothing
+    }
 }

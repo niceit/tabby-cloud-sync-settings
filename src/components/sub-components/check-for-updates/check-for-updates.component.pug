@@ -3,12 +3,16 @@
         h3 Check for Updates
     .col-md-12.mb-2
         .alert.alert-info
-            p.mb-0 You are using version {{version}}
-            p.mb-0 Hit the button below to check for updates.
+            p.mb-0
+                i.fas.fa-info-circle.mr-2
+                span You are using version {{version}}
+            p.mb-0
+                i.fas.fa-info-circle.mr-2
+                span Hit the button below to check for updates.
 
     .col-md-12.pt-3.text-right
         button.btn.btn-warning.flex-shrink-0.ml-3.mb-2(
-            (click)='checkForPluginVersion()',
+            (click)='checkForPluginVersion().then()',
             [disabled]='isProcessingRequest',
         )
             i.fas.fa-plug.mr-2
@@ -43,3 +47,34 @@
     .col-md-12.mt-2(*ngIf='isSuccessPluginUpgrade')
         .alert.alert-success
             p.mb-0 Plugin has been updated successfully!
+
+.row.pb-1.has-border-top.mt-3.pt-3
+    .col-md-12
+        h3 Rollback to Previous Version
+
+    .col-md-12.mb-2
+        .alert.alert-warning
+            p.mb-2
+                i.fas.fa-exclamation-triangle.mr-2
+                span We are strongly recommend you to backup your settings before rollback to previous version. Use the export settings feature to backup your settings.
+            p.mb-0
+                i.fas.fa-exclamation-triangle.mr-2
+                span By rolling back to previous version, that may cause some issues with your settings.
+
+    .col-md-12
+        table.table.table-striped.table-bordered.table-hover.table-sm
+            thead
+                tr
+                    th Version
+                    th Action
+            tbody
+                tr(*ngFor="let version of availableRollbackBuilds")
+                    td {{version}}
+                    td
+                        button.btn.btn-primary.btn-sm.flex-shrink-0.ml-3.mb-2(
+                            (click)='confirmRollbackToVersion(version).then()',
+                            [disabled]='isUpdatingPlugin',
+                        )
+                            i.fas.fa-undo.mr-2
+                            span(*ngIf="!isUpdatingPlugin") Rollback
+                            span(*ngIf="isUpdatingPlugin") Processing...

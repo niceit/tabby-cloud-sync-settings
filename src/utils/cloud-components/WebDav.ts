@@ -97,7 +97,6 @@ class WebDav {
 
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!isAbleToLoadRemoteContent) {
-            console.log('RUN #10')
             if ((await platform.showMessageBox({
                 type: 'warning',
                 message: 'Seem to be server has no file or the setting file is corrupted. Do you want to push local file to the cloud?',

@@ -29,7 +29,7 @@ const amazonCompatibilityEndpoints = {
 
 const DevEnv = DevEnvConstants
 const CloudSyncSettingsData = {
-    defaultSyncInterval: 10, // 10 seconds
+    defaultSyncInterval: 20, // 20 seconds
     tabbySettingsFilename: '/config.yaml',
     storedSettingsFilename: '/sync-settings' + (DevEnv.ENABLE_DEBUG ? '-dev': '') + '.json',
     cloudSettingsFilename: '/tabby-settings' + (DevEnv.ENABLE_DEBUG ? '-dev': '') + '.json',
@@ -51,6 +51,27 @@ const CloudSyncSettingsData = {
         LOGIN: 'Login',
         RESET_PASSWORD: 'ResetPassword',
     },
+    availablePluginVersions: [
+        '1.5.2',
+        '1.5.1',
+        '1.5.0',
+        '1.4.3',
+        '1.4.2',
+        '1.4.1',
+        '1.4.0',
+        '1.3.0',
+        '1.2.21',
+        '1.2.2',
+        '1.2.1',
+        '1.2.0',
+        '1.1.3',
+        '1.1.2',
+        '1.1.1',
+        '1.1.0',
+        '1.0.6',
+        '1.0.5',
+        '1.0.4',
+    ],
     formData: {
         [providerConstantItems.BUILT_IN]: {
             email: '',
@@ -116,6 +137,7 @@ const CloudSyncSettingsData = {
         },
     },
     external_urls: {
+        ApiUrl: `https://${DevEnv.ENABLE_DEBUG ? 'dev.' : ''}ws.phprockets.com`,
         BlackBlazeHelp: 'https://tabby-cloud.tranit.co/how-to-get-blackblaze-regtion-code/',
         checkForUpdateUrl: 'https://ws.phprockets.com/tabby-sync/check-for-updates',
     },
