@@ -16,6 +16,7 @@ import devConstants from '../services/dev-constants'
 })
 
 export class CloudSyncSettingsComponent extends BaseComponent implements OnInit {
+    lastVersion = ''
     translate = Lang
     isUpdateAvailable = false
     isDebug = devConstants.ENABLE_DEBUG
@@ -63,6 +64,7 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
             const data = response.data
             if (semverCompare(version, data.version) === -1) {
                 this.isUpdateAvailable = true
+                this.lastVersion = data.version
             }
         })
     }

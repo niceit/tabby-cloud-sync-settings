@@ -1,4 +1,4 @@
-div.alert.alert-warning(*ngIf='isDebug')
+.alert.alert-warning(*ngIf='isDebug')
     p.mb-0
         i.fas.fa-exclamation-triangle.mr-1
         |  This is a debug build. Please use the production build for production use.
@@ -12,9 +12,10 @@ h3([textContent]='translate.trans("settings.title")')
         i.fab.fa-fw.fa-apple.mr-1
         i.fab.fa-fw.fa-linux
 
-.row.mt-3.mb-3(*ngIf='isUpdateAvailable')
-    .col-md-12
-        .alert.alert-warning A new version is available. Please update to the latest version to continue using the plugin.
+.alert.alert-warning(*ngIf='isUpdateAvailable')
+    p.mb-0
+        i.fas.fa-exclamation-triangle.mr-1
+        | A New version is available to update: {{lastVersion}}
 
 ul.nav-tabs(ngbNav, #nav='ngbNav')
     li(ngbNavItem)

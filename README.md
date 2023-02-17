@@ -66,9 +66,13 @@ Hope you will like this plugin for your productivity work.
 
 Keep tracking of version release change logs
 
-## [v1.6.0] - <...>
+## [v1.6.0] - 2023-02-17
 
-// TODO Tran - Add details
+- Fix WebDav init sync issue.
+- Improve self checking for update.
+- Add support for rollback to previous version.
+- Sponsor list added.
+- Minor bug fixes.
 
 ## [v1.5.2] - 2022-11-19
 
