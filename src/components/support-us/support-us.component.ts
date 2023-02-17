@@ -12,7 +12,7 @@ export class SupportUsComponent implements OnInit {
     isSponsorListVisible = false
     isLoadingSponsorList = false
     loadSponsorListError = false
-    sponsorList: any = []
+    sponsorList = []
 
     constructor (private platform: PlatformService) {
         // do nothing
