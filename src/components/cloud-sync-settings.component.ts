@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 import { compare as semverCompare } from 'semver'
 import { Component, HostBinding, OnInit } from '@angular/core'
 import { ConfigService, PlatformService, BaseComponent } from 'terminus-core'
@@ -8,6 +7,7 @@ import Lang from '../data/lang'
 import SettingsHelper from '../utils/settings-helper'
 import axios from 'axios'
 import { version } from '../../package.json'
+import devConstants from '../services/dev-constants'
 
 /** @hidden */
 @Component({
@@ -16,12 +16,14 @@ import { version } from '../../package.json'
 })
 
 export class CloudSyncSettingsComponent extends BaseComponent implements OnInit {
+    lastVersion = ''
     translate = Lang
     isUpdateAvailable = false
+    isDebug = devConstants.ENABLE_DEBUG
 
     serviceProviderValues = CloudSyncSettingsData.values
     serviceProviders = CloudSyncSettingsData.serviceProvidersList
-    selectedProvider: any = ''
+    selectedProvider = ''
 
     form_messages = {
         errors: [],
@@ -32,7 +34,7 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     storedSettingsData = null
     showBottomLoaderIcon = false
 
-    form: any = CloudSyncSettingsData.formData
+    form = CloudSyncSettingsData.formData
 
     @HostBinding('class.content-box') true
     constructor (
@@ -62,6 +64,7 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
             const data = response.data
             if (semverCompare(version, data.version) === -1) {
                 this.isUpdateAvailable = true
+                this.lastVersion = data.version
             }
         })
     }

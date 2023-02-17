@@ -1,13 +1,13 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core'
+import { Component, EventEmitter, OnInit, Output } from '@angular/core'
 import CloudSyncSettingsData from '../../../data/setting-items'
 import { AuthType, createClient } from 'webdav'
 import Lang from '../../../data/lang'
 import SettingsHelper from '../../../utils/settings-helper'
-import {ConfigService, PlatformService} from "terminus-core"
-import {ToastrService} from "ngx-toastr"
-import CloudSyncLang from "../../../data/lang"
+import { ConfigService, PlatformService } from 'terminus-core'
+import { ToastrService } from 'ngx-toastr'
+import CloudSyncLang from '../../../data/lang'
 import Logger from '../../../utils/Logger'
-import WebDav from "../../../utils/cloud-components/WebDav";
+import WebDav from '../../../utils/cloud-components/WebDav'
 
 interface formData {
     host: string,
@@ -36,7 +36,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
 
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.WEBDAV] as formData
 
-    constructor(private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
+    constructor (private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
 
     }
 
@@ -44,9 +44,9 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
         const configs = SettingsHelper.readConfigFile(this.platform)
         if (configs) {
             if (configs.adapter === this.presetData.values.WEBDAV) {
-                     this.form = configs.configs as formData
-                     this.isSettingSaved = true
-                }
+                this.form = configs.configs as formData
+                this.isSettingSaved = true
+            }
         }
         this.isPreloadingSavedConfig = false
     }
@@ -67,7 +67,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
         }
 
         if (isFormValidated) {
-            const client = createClient(this.form.host + (this.form.port ? (':'+ this.form.port) : ''), {
+            const client = createClient(this.form.host + (this.form.port ? ':'+ this.form.port : ''), {
                 authType: AuthType.Password,
                 username: this.form.username,
                 password: this.form.password,
@@ -75,7 +75,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
             this.isFormProcessing = true
             if (this.form.location !== '/') {
                 this.form.location = this.form.location.endsWith('/')
-                    ? this.form.location.substr(0,this.form.location.length - 1)
+                    ? this.form.location.substr(0, this.form.location.length - 1)
                     : this.form.location
             }
 
@@ -123,7 +123,7 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
                         this.config.requestRestart()
                     } else {
                         this.setFormMessage.emit({
-                            message: (typeof result !== 'boolean' && result['message'] ? result['message'] : Lang.trans('sync.sync_server_failed')),
+                            message: typeof result !== 'boolean' && result['message'] ? result['message'] : Lang.trans('sync.sync_server_failed'),
                             type: 'error',
                         })
                         this.isSettingSaved = false

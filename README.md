@@ -9,6 +9,8 @@
   <a href="https://tabby-cloud.tranit.co/"><img src="https://img.shields.io/static/v1?label=Support URL&message=Visit TranIt.co&color=#333"/></a> &nbsp;
   <img alt="GitHub" src="https://img.shields.io/github/license/niceit/tabby-cloud-sync-settings">
   <img alt="Scrutinizer code quality (GitHub/Bitbucket)" src="https://img.shields.io/scrutinizer/quality/g/niceit/tabby-cloud-sync-settings">
+  <a href="https://www.codefactor.io/repository/github/niceit/tabby-cloud-sync-settings"><img src="https://www.codefactor.io/repository/github/niceit/tabby-cloud-sync-settings/badge" alt="CodeFactor" /></a>
+  <img alt="npm" src="https://img.shields.io/npm/dt/terminus-cloud-settings-sync">
 </p>
 
 With this plugin you could sync your settings (Including saved SSH Sessions) automatically across devices.
@@ -64,6 +66,14 @@ Hope you will like this plugin for your productivity work.
 ----
 
 Keep tracking of version release change logs
+
+## [v1.6.0] - 2023-02-17
+
+- Fix WebDav init sync issue.
+- Improve self checking for update.
+- Add support for rollback to previous version.
+- Sponsor list added.
+- Minor bug fixes.
 
 ## [v1.5.2] - 2022-11-19
 

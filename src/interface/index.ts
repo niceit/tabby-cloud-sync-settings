@@ -22,3 +22,11 @@ export interface GistParams {
     id: string,
     accessToken: string
 }
+
+export interface WebDavParams {
+    host: string,
+    username: string,
+    password: string,
+    location: string,
+    port: string,
+}

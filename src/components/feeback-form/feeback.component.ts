@@ -19,18 +19,18 @@ export class CloudSyncFeedbackComponent implements OnInit {
         errors: [],
         success: [],
     }
-    form: any = {
+    form = {
         subject: '',
         name: '',
         email: '',
         message: '',
 
     }
-    newLetterForm: any = {
+    newLetterForm = {
         email: '',
     }
 
-    calculationGenerateObj: any = {
+    calculationGenerateObj = {
         left: 0,
         right: 0,
         answer: '',

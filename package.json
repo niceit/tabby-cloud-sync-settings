@@ -1,7 +1,7 @@
 {
   "name": "terminus-cloud-settings-sync",
-  "version": "1.5.2",
-  "date": "19th November 2022",
+  "version": "1.6.0",
+  "date": "17th Febuary 2023",
   "description": "Cloud Services sync the Tabby config and connections across platform devices.",
   "keywords": [
     "terminus-plugin"
@@ -9,11 +9,12 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "build": "webpack --progress --color --mode=production",
+    "build": "webpack --progress --color --mode=production && npm run postbuild",
     "watch": "webpack --progress --color --watch",
     "prepublishOnly": "npm run build --mode=production",
     "lint": "eslint --ext ts */src */lib",
-    "test": "jest"
+    "test": "jest",
+    "postbuild": "cp src/data/mockdata.json dist/src/data/mockdata.json"
   },
   "files": [
     "dist"
