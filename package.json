@@ -1,7 +1,7 @@
 {
   "name": "terminus-cloud-settings-sync",
-  "version": "1.6.0",
-  "date": "17th Febuary 2023",
+  "version": "1.6.5",
+  "date": "17th Febuary 2023 // TODO TRANIT",
   "description": "Cloud Services sync the Tabby config and connections across platform devices.",
   "keywords": [
     "terminus-plugin"
@@ -77,7 +77,8 @@
     "url": "git+https://github.com/niceit/tabby-cloud-sync-settings.git"
   },
   "dependencies": {
-    "crypto-js": "^4.0.0"
+    "crypto-js": "^4.0.0",
+    "dropbox": "^10.34.0"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"

@@ -67,6 +67,10 @@ Hope you will like this plugin for your productivity work.
 
 Keep tracking of version release change logs
 
+## [v1.6.5] - // TODO TRANIT
+
+...
+
 ## [v1.6.0] - 2023-02-17
 
 - Fix WebDav init sync issue.
