@@ -1,0 +1,6 @@
+.row
+    .col-md-12.mb-2
+        button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='!isConnectingDropbox ? connect() : null')
+            i.fa.fa-brands.fa-dropbox.mr-2
+            span(*ngIf="isConnectingDropbox") Connecting...
+            span(*ngIf="!isConnectingDropbox") Connect

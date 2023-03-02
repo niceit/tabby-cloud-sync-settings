@@ -22,6 +22,7 @@ import { ChangeLogsComponent } from './components/change-logs/change-logs.compon
 import { SupportUsComponent } from './components/support-us/support-us.component'
 import CloudSyncSettingsData from './data/setting-items'
 import { CheckForUpdatesComponent } from './components/sub-components/check-for-updates/check-for-updates.component'
+import {CloudSyncDropboxSettingsComponent} from "./components/sub-components/dropbox/dropbox-settings.component";
 
 let autoSynInProgress = false
 let autoSynIntervalInstance = null
@@ -53,6 +54,7 @@ let initAutoSynIntervalFrequency = CloudSyncSettingsData.defaultSyncInterval * 1
         SupportUsComponent,
         CheckForUpdatesComponent,
         ToggleComponent,
+        CloudSyncDropboxSettingsComponent,
     ],
 })
 
@@ -74,7 +76,7 @@ export default class CloudSyncSettingsModule {
     }
 
     subscribeToAutoSyncEvent (): void {
-        // Auto Sync between local and remote every 30s
+        // Auto Sync between local and remote every interval config set
         autoSynIntervalInstance = setTimeout(() => {
             this.syncCloudSettings().then()
         }, initAutoSynIntervalFrequency)
@@ -82,7 +84,9 @@ export default class CloudSyncSettingsModule {
 
     subscribeToConfigChangeEvent (): void {
         this.configService.changed$.subscribe(async () => {
-            await SettingsHelper.syncLocalSettingsToCloud(this.platform, this.toast).then(() => { /* TODO document why this arrow function is empty */ })
+            await SettingsHelper.syncLocalSettingsToCloud(this.platform, this.toast).then(() => {
+                // Do nothing
+            })
         })
     }
 

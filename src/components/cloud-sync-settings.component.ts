@@ -8,6 +8,8 @@ import SettingsHelper from '../utils/settings-helper'
 import axios from 'axios'
 import { version } from '../../package.json'
 import devConstants from '../services/dev-constants'
+import { ConnectionGroup } from '../interface'
+import { Dropbox } from 'dropbox'
 
 /** @hidden */
 @Component({
@@ -25,6 +27,22 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     serviceProviders = CloudSyncSettingsData.serviceProvidersList
     selectedProvider = ''
 
+    groups: ConnectionGroup[] = [
+        {
+            name: 'Exclusive Sponsor Cloud Services',
+            collapsed: true,
+            type: 'exclusive',
+        },
+        {
+            name: 'Free Cloud Services',
+            collapsed: false,
+            type: 'free',
+        },
+    ]
+    sponsorEmailConnected = true
+    sponsorEmail = 'ss@ss.com'
+    isSubmittingSponsorEmail = false
+
     form_messages = {
         errors: [],
         success: [],
@@ -35,6 +53,12 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     showBottomLoaderIcon = false
 
     form = CloudSyncSettingsData.formData
+
+    isConnectingDropbox = false
+    isConnectingGoogleDrive = false
+    isConnectingOneDrive = false
+
+    dropboxToken = 'sl.BZyoPyjtKuTuAez3XogfZQuY9T0VQa3KkLwsvZVUJqIZMT3mkxEjloc4_gy1529BqQMGMIMLG1gwpUBvZnSihyT3KNSENftubhRYMJ_7CzTUggwruagngp8Zk40bo4VXWX6Ry6XPF4U'
 
     @HostBinding('class.content-box') true
     constructor (
@@ -110,5 +134,23 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
                 break
             }
         }
+    }
+
+    toggleGroupCollapse (group: ConnectionGroup): void {
+        this.groups.forEach((g, index) => {
+            if (g.name === group.name) {
+                this.groups[index].collapsed = !this.groups[index].collapsed
+            } else {
+                this.groups[index].collapsed = true
+            }
+        })
+    }
+
+    connectSponsorEmail (): void {
+        // TODO TRANIT - implement this
+    }
+
+    connectDropbox (): void {
+
     }
 }

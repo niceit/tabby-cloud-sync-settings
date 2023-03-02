@@ -22,19 +22,12 @@ ul.nav-tabs(ngbNav, #nav='ngbNav')
         a(ngbNavLink) General
         ng-template(ngbNavContent)
             .row.pb-1.has-border-top.mt-3
-                .col-md-12
-                    .form-line
-                        .header
-                            .title
-                                i.fas.fa-fw.fa-cog.mr-2
-                                span([textContent]='translate.trans("settings.service_label")')
+                .col-md-12(*ngIf='form_messages.errors.length || form_messages.success.length')
+                    .alert.alert-success(*ngIf='form_messages.success.length')
+                        p.pb-0.mb-0(*ngFor='let message of form_messages.success') {{message}}
 
-                        select.form-control(
-                            [(ngModel)]='selectedProvider',
-                            (ngModelChange)='onSelectProviderChange()',
-
-                        )
-                            option(*ngFor='let item of serviceProviders', [ngValue]='item.value') {{item.name}}
+                    .alert.alert-danger(*ngIf='form_messages.errors.length')
+                        p.pb-0.mb-0(*ngFor='let message of form_messages.errors') {{message}}
 
                     .form-line.enable-sync
                         .header
@@ -64,74 +57,136 @@ ul.nav-tabs(ngbNav, #nav='ngbNav')
                             (ngModelChange)='onIntervalSyncChanged()',
                         )
 
-            .row
-                .col-md-12(*ngIf='form_messages.errors.length || form_messages.success.length')
-                    .alert.alert-success(*ngIf='form_messages.success.length')
-                        p.pb-0.mb-0(*ngFor='let message of form_messages.success') {{message}}
-
-                    .alert.alert-danger(*ngIf='form_messages.errors.length')
-                        p.pb-0.mb-0(*ngFor='let message of form_messages.errors') {{message}}
-
-                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.BUILT_IN')
-                    builtin-settings(
-                        (resetFormMessages)='resetFormMessages()',
-                        (setFormMessage)='setFormMessage($event)'
+            .list-group.mt-3.mb-3
+                ng-container(*ngFor='let group of groups')
+                    .list-group-item.list-group-item-action.d-flex.align-items-center.tabby-sync-connection-type(
+                        (click)='toggleGroupCollapse(group)',
+                        [ngClass]='{ "expanded": !group.collapsed }'
                     )
+                        .fa.fa-fw.fa-chevron-right(*ngIf='group.collapsed')
+                        .fa.fa-fw.fa-chevron-down(*ngIf='!group.collapsed')
+                        span.ml-3.mr-auto {{group.name}}
+                        img(*ngIf="group.type === 'exclusive'" , src='https://cdn-icons-png.flaticon.com/512/3791/3791606.png', alt='Sponsor', width='20', height='20').ml-3
 
-                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.S3')
-                    amazon-settings(
-                        (resetFormMessages)='resetFormMessages()',
-                        (setFormMessage)='setFormMessage($event)',
-                        [provider]='serviceProviderValues.S3'
-                    )
+                    ng-container(*ngIf='!group.collapsed')
+                        ng-container(*ngIf="group.type === 'free'")
+                            .row.p-3
+                                .col-md-12
+                                    .form-line
+                                        .header
+                                            .title
+                                                i.fas.fa-fw.fa-cog.mr-2
+                                                span([textContent]='translate.trans("settings.service_label")')
 
-                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.WASABI')
-                    amazon-settings(
-                        (resetFormMessages)='resetFormMessages()',
-                        (setFormMessage)='setFormMessage($event)',
-                        [provider]='serviceProviderValues.WASABI'
-                    )
+                                        select.form-control(
+                                            [(ngModel)]='selectedProvider',
+                                            (ngModelChange)='onSelectProviderChange()',
 
-                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.DIGITAL_OCEAN')
-                    amazon-settings(
-                        (resetFormMessages)='resetFormMessages()',
-                        (setFormMessage)='setFormMessage($event)',
-                        [provider]='serviceProviderValues.DIGITAL_OCEAN'
-                    )
+                                        )
+                                            option(*ngFor='let item of serviceProviders', [ngValue]='item.value') {{item.name}}
 
-                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.BLACKBLAZE')
-                    amazon-settings(
-                        (resetFormMessages)='resetFormMessages()',
-                        (setFormMessage)='setFormMessage($event)',
-                        [provider]='serviceProviderValues.BLACKBLAZE'
-                    )
+                                .col-md-12.pt-3(*ngIf='selectedProvider === serviceProviderValues.BUILT_IN')
+                                    builtin-settings(
+                                        (resetFormMessages)='resetFormMessages()',
+                                        (setFormMessage)='setFormMessage($event)'
+                                    )
 
-                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.S3_COMPATIBLE')
-                    amazon-settings(
-                        (resetFormMessages)='resetFormMessages()',
-                        (setFormMessage)='setFormMessage($event)',
-                        [provider]='serviceProviderValues.S3_COMPATIBLE'
-                    )
+                                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.S3')
+                                    amazon-settings(
+                                        (resetFormMessages)='resetFormMessages()',
+                                        (setFormMessage)='setFormMessage($event)',
+                                        [provider]='serviceProviderValues.S3'
+                                    )
 
-                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.WEBDAV')
-                    webdav-settings(
-                        (resetFormMessages)='resetFormMessages()',
-                        (setFormMessage)='setFormMessage($event)'
-                    )
+                                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.WASABI')
+                                    amazon-settings(
+                                        (resetFormMessages)='resetFormMessages()',
+                                        (setFormMessage)='setFormMessage($event)',
+                                        [provider]='serviceProviderValues.WASABI'
+                                    )
 
-                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.FTP')
-                    ftp-settings(
-                        (resetFormMessages)='resetFormMessages()',
-                        (setFormMessage)='setFormMessage($event)'
-                    )
+                                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.DIGITAL_OCEAN')
+                                    amazon-settings(
+                                        (resetFormMessages)='resetFormMessages()',
+                                        (setFormMessage)='setFormMessage($event)',
+                                        [provider]='serviceProviderValues.DIGITAL_OCEAN'
+                                    )
 
-                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.GIST')
-                    gist-settings(
-                        (resetFormMessages)='resetFormMessages()',
-                        (setFormMessage)='setFormMessage($event)'
-                    )
+                                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.BLACKBLAZE')
+                                    amazon-settings(
+                                        (resetFormMessages)='resetFormMessages()',
+                                        (setFormMessage)='setFormMessage($event)',
+                                        [provider]='serviceProviderValues.BLACKBLAZE'
+                                    )
 
-                cloud-sync-about
+                                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.S3_COMPATIBLE')
+                                    amazon-settings(
+                                        (resetFormMessages)='resetFormMessages()',
+                                        (setFormMessage)='setFormMessage($event)',
+                                        [provider]='serviceProviderValues.S3_COMPATIBLE'
+                                    )
+
+                                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.WEBDAV')
+                                    webdav-settings(
+                                        (resetFormMessages)='resetFormMessages()',
+                                        (setFormMessage)='setFormMessage($event)'
+                                    )
+
+                                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.FTP')
+                                    ftp-settings(
+                                        (resetFormMessages)='resetFormMessages()',
+                                        (setFormMessage)='setFormMessage($event)'
+                                    )
+
+                                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.GIST')
+                                    gist-settings(
+                                        (resetFormMessages)='resetFormMessages()',
+                                        (setFormMessage)='setFormMessage($event)'
+                                    )
+
+                        ng-container(*ngIf="group.type === 'exclusive'")
+                            .row.p-3(*ngIf='!sponsorEmailConnected')
+                                .col-md-12
+                                    .alert.alert-info
+                                        p.mb-0
+                                            i.fa.fa-info-circle.mr-2
+                                            span Exclusive sync services were made possible by our awesome supporters.
+                                        p.mb-0
+                                            i.fa.fa-info-circle.mr-2
+                                            span Bind your sponsor email to the form below to unlock exclusive sync services.
+
+                                .row.p-3
+                                    .col-md-9
+                                        .input-group.mb-2
+                                            .input-group-prepend
+                                                .input-group-text
+                                                    i.fa.fa-envelope
+                                            input.form-control(
+                                                type='text',
+                                                [placeholder]="'Your Email'",
+                                                [(ngModel)]='sponsorEmail'
+                                            )
+
+                                    .col-md-3.text-right
+                                        button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='!isSubmittingSponsorEmail ? connectSponsorEmail() : null')
+                                            i.fas.fa-fw.fa-plug.mr-2
+                                            span(*ngIf="isSubmittingSponsorEmail") Submitting...
+                                            span(*ngIf="!isSubmittingSponsorEmail") Check
+
+                            .row.p-3(*ngIf='sponsorEmailConnected')
+                                dropbox-settings
+
+                                .col-md-12
+                                    .alert.alert-success
+                                        p.mb-0
+                                            i.fa.fa-check-circle.mr-2
+                                            span You can now use exclusive sync services.
+                                        p.mb-0
+                                            i.fa.fa-info-circle.mr-2
+                                            span Connected email: {{sponsorEmail}}
+
+
+            cloud-sync-about
 
     // TODO TRAN | Tobe implemented encryption with vault
     //li(ngbNavItem)

@@ -30,3 +30,9 @@ export interface WebDavParams {
     location: string,
     port: string,
 }
+
+export interface ConnectionGroup {
+    name: string,
+    collapsed: boolean,
+    type: string
+}
