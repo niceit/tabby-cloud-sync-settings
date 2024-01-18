@@ -1,7 +1,3 @@
-## This repo will be stopped supporting and it will be ended of life after June 2023 due to conflicting development with Built-in feature of Tabby Sync Config and it's core team.
-
-Please use built-in sync config of Tabby. Thank you for using it so far.
-
 # Tabby Sync Cloud Settings
 
 ----
