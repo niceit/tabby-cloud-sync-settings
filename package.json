@@ -77,7 +77,7 @@
     "url": "git+https://github.com/niceit/tabby-cloud-sync-settings.git"
   },
   "dependencies": {
-    "crypto-js": "^4.0.0"
+    "crypto-js": "^4.2.0"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
