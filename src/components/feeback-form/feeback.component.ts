@@ -7,8 +7,8 @@ import axios from 'axios'
     styles: [require('./feedback.component.scss')],
 })
 export class CloudSyncFeedbackComponent implements OnInit {
-    requestUrl = 'https://ws.phprockets.com/submit-feedback'
-    requestSubscribeUrl = 'https://ws.phprockets.com/subsribe-newsletter'
+    requestUrl = 'https://tabby-api.tranit.co/submit-feedback'
+    requestSubscribeUrl = 'https:/tabby-api.tranit.co/subsribe-newsletter'
     isFormProcessing = false
     isFormSubscribeProcessing = false
     form_messages = {

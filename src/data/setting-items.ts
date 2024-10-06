@@ -137,9 +137,9 @@ const CloudSyncSettingsData = {
         },
     },
     external_urls: {
-        ApiUrl: `https://${DevEnv.ENABLE_DEBUG ? 'dev.' : ''}ws.phprockets.com`,
+        ApiUrl: `https://${DevEnv.ENABLE_DEBUG ? 'dev.' : ''}tabby-api.tranit.co`,
         BlackBlazeHelp: 'https://tabby-cloud.tranit.co/how-to-get-blackblaze-regtion-code/',
-        checkForUpdateUrl: `https://${DevEnv.ENABLE_DEBUG ? 'dev.' : ''}ws.phprockets.com/tabby-sync/check-for-updates`,
+        checkForUpdateUrl: `https://${DevEnv.ENABLE_DEBUG ? 'dev.' : ''}tabby-api.tranit.co/tabby-sync/check-for-updates`,
     },
     isCloudStorageS3Compatibility (provider: string): boolean {
         return amazonS3CompatibilityInstances.includes(provider)

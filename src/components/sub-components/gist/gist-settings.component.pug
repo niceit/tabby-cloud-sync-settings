@@ -10,9 +10,8 @@
     .row
         .col-md-6.col-sm-12
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-globe
+                .input-group-text
+                    i.fas.fa-fw.fa-globe
                 select.form-control(
                     [(ngModel)]='form.type',
                     [disabled]='isSettingSaved || isCheckLoginSuccess',
@@ -21,9 +20,8 @@
                     option(*ngFor='let item of gistTypeChoices', [ngValue]='item.value') {{item.name}}
 
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-tag
+                .input-group-text
+                    i.fas.fa-tag
                 input.form-control(
                     type='text',
                     [placeholder]='translate.trans("gist.name")',
@@ -33,9 +31,8 @@
 
         .col-md-6.col-sm-12
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-user
+                .input-group-text
+                    i.fas.fa-fw.fa-user
                 input.form-control(
                     type='text',
                     [placeholder]='translate.trans("gist.id")',
@@ -44,9 +41,8 @@
                 )
 
             .input-group.mb-2.relative
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-lock
+                .input-group-text
+                    i.fas.fa-fw.fa-lock
                 input.form-control(
                     [type]='passwordFieldType',
                     [placeholder]='translate.trans("gist.token")',
