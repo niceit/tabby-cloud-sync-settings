@@ -12,6 +12,7 @@ const providerConstantItems = {
     WEBDAV: 'webdav',
     FTP: 'ftp',
     GIST: 'gists',
+    DROPBOX: 'dropbox',
 }
 
 const amazonS3CompatibilityInstances = [
@@ -46,12 +47,14 @@ const CloudSyncSettingsData = {
         { name: 'WebDav', value: providerConstantItems.WEBDAV },
         { name: 'Gists', value: providerConstantItems.GIST },
         { name: 'FTP / FTPS', value: providerConstantItems.FTP },
+        { name: 'Dropbox', value: providerConstantItems.DROPBOX },
     ],
     BuiltinLoginMode: {
         LOGIN: 'Login',
         RESET_PASSWORD: 'ResetPassword',
     },
     availablePluginVersions: [
+        '1.6.0',
         '1.5.2',
         '1.5.1',
         '1.5.0',
@@ -115,11 +118,16 @@ const CloudSyncSettingsData = {
             region: '',
         },
         [providerConstantItems.WEBDAV]: {
-            host: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().host : '',
-            username: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().username : '',
-            password: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().password : '',
-            location: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().location : '',
-            port: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().port : '443',
+            // host: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().host : '',
+            // username: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().username : '',
+            // password: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().password : '',
+            // location: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().location : '',
+            // port: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().port : '443',
+            host: '',
+            username: '',
+            password: '',
+            location: '',
+            port: '443',
         },
         [providerConstantItems.FTP]: {
             protocol: 'ftp',
@@ -134,6 +142,9 @@ const CloudSyncSettingsData = {
             name: '',
             accessToken: '',
             id: '',
+        },
+        [providerConstantItems.DROPBOX]: {
+            accessToken: '',
         },
     },
     external_urls: {

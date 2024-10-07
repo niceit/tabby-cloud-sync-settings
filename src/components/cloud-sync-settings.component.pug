@@ -131,6 +131,12 @@ ul.nav-tabs(ngbNav, #nav='ngbNav')
                         (setFormMessage)='setFormMessage($event)'
                     )
 
+                .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.DROPBOX')
+                    dropbox-settings(
+                        (resetFormMessages)='resetFormMessages()',
+                        (setFormMessage)='setFormMessage($event)'
+                    )
+
                 cloud-sync-about
 
     // TODO TRAN | Tobe implemented encryption with vault

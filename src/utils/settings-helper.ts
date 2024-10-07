@@ -8,6 +8,7 @@ import CloudSyncLang from '../data/lang'
 import AmazonS3 from './cloud-components/AmazonS3'
 import FTP from './cloud-components/FTP'
 import Gists from './cloud-components/gists/gists'
+import DropboxSync from './cloud-components/Dropbox'
 
 const fs = require('fs')
 const path = require('path')
@@ -23,6 +24,7 @@ export class SettingsHelperClass {
         [CloudSyncSettingsData.values.S3_COMPATIBLE]: AmazonS3,
         [CloudSyncSettingsData.values.FTP]: FTP,
         [CloudSyncSettingsData.values.GIST]: Gists,
+        [CloudSyncSettingsData.values.DROPBOX]: DropboxSync,
     }
     private generatedCryptoHash = 'tp!&nc3^to8y7^3#4%2%&szufx!'
 

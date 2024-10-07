@@ -8,6 +8,7 @@ import SettingsHelper from '../utils/settings-helper'
 import axios from 'axios'
 import { version } from '../../package.json'
 import devConstants from '../services/dev-constants'
+import { ConnectionGroup } from '../interface'
 
 /** @hidden */
 @Component({
@@ -25,6 +26,19 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     serviceProviders = CloudSyncSettingsData.serviceProvidersList
     selectedProvider = ''
 
+    groups: ConnectionGroup[] = [
+        {
+            name: 'Exclusive Sponsor Cloud Services',
+            collapsed: true,
+            type: 'exclusive',
+        },
+        {
+            name: 'Free Cloud Services',
+            collapsed: false,
+            type: 'free',
+        },
+    ]
+
     form_messages = {
         errors: [],
         success: [],
@@ -33,7 +47,6 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     intervalSync = CloudSyncSettingsData.defaultSyncInterval
     storedSettingsData = null
     showBottomLoaderIcon = false
-
     form = CloudSyncSettingsData.formData
 
     @HostBinding('class.content-box') true
