@@ -1,5 +1,4 @@
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-import { AuthType, createClient } from 'webdav'
 import CloudSyncSettingsData from '../../data/setting-items'
 import SettingsHelper from '../settings-helper'
 import { ConfigService, PlatformService } from 'terminus-core'
@@ -11,27 +10,56 @@ import path from 'path'
 import fs from 'fs'
 import moment from 'moment'
 import {Dropbox} from "dropbox";
+import {EventEmitter} from "@angular/core";
 
 let isSyncingInProgress = false
 class DropboxSync {
-    async sync (config: ConfigService, platform: PlatformService, toast: ToastrService, params, firstInit = false) {
+
+    private _isFirstInit = false
+    private _emitter: EventEmitter<any>
+    private emitterActions = {
+        syncComplete: 'dropbox-sync-complete',
+        _syncFileToCloud: 'dropbox-sync-file-to-cloud',
+    }
+
+    internalEmitterHandler () {
+        this._emitter?.subscribe(async (event: { action: string, result: boolean, message?: string }) => {
+            switch (event.action) {
+                case this.emitterActions._syncFileToCloud: {
+                    this._emitter?.emit({
+                        action: this.emitterActions.syncComplete,
+                        result: true,
+                    })
+                    break
+                }
+            }
+        })
+    }
+
+    async sync (config: ConfigService, platform: PlatformService, toast: ToastrService, params: any, firstInit = false, emitter: EventEmitter<any> = null) {
         const logger = new Logger(platform)
+        this._emitter = emitter
+        this.internalEmitterHandler()
+
+        this._isFirstInit = firstInit
         const result = { result: false, message: '' }
         const remoteFile = params.location + CloudSyncSettingsData.cloudSettingsFilename
         let remoteSyncConfigUpdatedAt = null
-        let isAbleToLoadRemoteContent = false
         const dbx = new Dropbox({ accessToken: params.accessToken })
 
         try {
             dbx.filesDownload({ path:  remoteFile }).then((response: any) => {
-                logger.log('Dropbox file downloaded result: ' + response.toString());
+                logger.log('Dropbox file downloaded result: ' + JSON.stringify(response))
+
                 const reader = new FileReader()
-                const blob: Blob = response.fileBlob
+                const blob: Blob = response.result.fileBlob
                 reader.addEventListener('loadend', async (e) => {
                     logger.log(('Dropbox file reader: ' + e.toString()))
-                    const content =  JSON.parse(reader.result as string)
+                    const content =  reader.result as string
+
                     logger.log('Dropbox file download success')
-                    console.log('Dropbox file content: ' + content)
+                    logger.log('Dropbox file content: ' + content)
+
                     remoteSyncConfigUpdatedAt = moment(response.server_modified)
                     yaml.load(content)
                     if (firstInit) {
@@ -41,16 +69,23 @@ class DropboxSync {
                             buttons: [CloudSyncLang.trans('buttons.sync_from_cloud'), CloudSyncLang.trans('buttons.sync_from_local')],
                             defaultId: 0,
                         })).response === 1) {
-                            await this.syncLocalSettingsToCloud(platform, toast)
-                            result['result'] = true
+                            logger.log('First init. Sync direction: Cloud to local.')
+                            this.syncLocalSettingsToCloud(platform, toast)
                         } else {
+                            logger.log('First init. Sync direction: Local To Cloud.')
                             if (SettingsHelper.verifyServerConfigIsValid(content)) {
                                 await SettingsHelper.backupTabbyConfigFile(platform)
                                 config.writeRaw(SettingsHelper.doDescryption(content))
-                                result['result'] = true
+                                this._emitter?.emit({
+                                    action: this.emitterActions.syncComplete,
+                                    result: true,
+                                })
                             } else {
-                                result['result'] = false
-                                result['message'] = CloudSyncLang.trans('common.errors.invalidServerConfig')
+                                emitter?.emit({
+                                    action: this.emitterActions.syncComplete,
+                                    result: true,
+                                    message: CloudSyncLang.trans('common.errors.invalidServerConfig'),
+                                })
                             }
                         }
                     } else {
@@ -63,6 +98,7 @@ class DropboxSync {
                                 logger.log(err)
                             } else {
                                 localFileUpdatedAt = moment(stats.mtime)
+
                                 logger.log('Auto Sync Dropbox')
                                 logger.log('Server Updated At ' + (remoteSyncConfigUpdatedAt ? remoteSyncConfigUpdatedAt.format('YYYY-MM-DD HH:mm:ss') : null))
                                 logger.log('Local Updated At ' + localFileUpdatedAt.format('YYYY-MM-DD HH:mm:ss'))
@@ -82,45 +118,77 @@ class DropboxSync {
                 reader.readAsText(blob)
             }).catch(async (error: any) => {
                 logger.log('File download failed: ' + error.toString())
-                result['result'] = await this.syncLocalSettingsToCloud(platform, toast)
+                if (this._isFirstInit) {
+                    if ((await platform.showMessageBox({
+                        type: 'warning',
+                        message: 'Unable to download file or file is not exist on cloud. Do you want to sync from local?',
+                        buttons: ['Cancel', CloudSyncLang.trans('buttons.sync_from_local')],
+                        defaultId: 0,
+                    })).response === 1) {
+                        this.syncLocalSettingsToCloud(platform, toast)
+                        result['result'] = true
+                    }
+                }
             })
         } catch (e) {
             logger.log(CloudSyncLang.trans('log.read_cloud_settings') + ' | Exception: ' + e.toString())
             try {
-                result['result'] = await this.syncLocalSettingsToCloud(platform, toast)
+                if (this._isFirstInit) {
+                    if ((await platform.showMessageBox({
+                        type: 'warning',
+                        message: 'Unable to download file or file is not exist on cloud. Do you want to sync from local?',
+                        buttons: ['Cancel', CloudSyncLang.trans('buttons.sync_from_local')],
+                        defaultId: 0,
+                    })).response === 1) {
+                        this.syncLocalSettingsToCloud(platform, toast)
+                        result['result'] = true
+                    }
+                }
             } catch (exception) {
                 logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + exception.toString(), 'error')
             }
         }
 
+        logger.log('Dropbox sync completed result: ' + JSON.stringify(result))
         return result
     }
 
-    async syncLocalSettingsToCloud (platform: PlatformService, toast: ToastrService) {
+    syncLocalSettingsToCloud (platform: PlatformService, toast: ToastrService) {
         const logger = new Logger(platform)
         if (!isSyncingInProgress) {
             isSyncingInProgress = true
 
             const savedConfigs = SettingsHelper.readConfigFile(platform)
-            logger.log('savedConfigs: ' + JSON.stringify(savedConfigs))
             const params = savedConfigs.configs
             const remoteFile = params.location + CloudSyncSettingsData.cloudSettingsFilename
 
             try {
                 const dbx = new Dropbox({ accessToken: params.accessToken })
-
-                dbx.filesUpload({ path: remoteFile, contents: SettingsHelper.readTabbyConfigFile(platform, true, true) })
+                dbx.filesUpload({ path: remoteFile, contents: SettingsHelper.readTabbyConfigFile(platform, true, true), mode: 'overwrite' as any })
                     .then((response: any) => {
                         logger.log('Dropbox file upload success');
                         logger.log(response.toString());
+
+                        if (this._isFirstInit) {
+                            this._emitter?.emit({
+                                action: this.emitterActions.syncComplete,
+                                result: true,
+                            })
+                        }
                     })
                     .catch((uploadErr) => {
                         logger.log('Dropbox file upload failed', 'error')
                         logger.log(uploadErr.toString(), 'error')
                         toast.error(uploadErr.message)
-                    });
 
-                return true
+                        if (this._isFirstInit) {
+                            this._emitter?.emit({
+                                action: this.emitterActions.syncComplete,
+                                result: false,
+                                message: uploadErr.message,
+                            })
+                        }
+                    });
             } catch (e) {
                 logger.log(CloudSyncLang.trans('log.error_upload_settings') + ' | Exception: ' + e.toString(), 'error')
                 toast.error(CloudSyncLang.trans('sync.sync_error'))
@@ -128,19 +196,17 @@ class DropboxSync {
                 if (isSyncingInProgress) {
                     logger.log(CloudSyncLang.trans('sync.sync_success'))
                 }
+
+                if (this._isFirstInit) {
+                    this._emitter?.emit({
+                        action: this.emitterActions.syncComplete,
+                        result: false,
+                        message: CloudSyncLang.trans('sync.sync_error'),
+                    })
+                }
             }
             isSyncingInProgress = false
         }
-
-        return false
-    }
-
-    private static createClient (params) {
-        return createClient(params.host + (params.port ? ':' + params.port : ''), {
-            authType: AuthType.Password,
-            username: params.username,
-            password: params.password,
-        })
     }
 }
 export default new DropboxSync()

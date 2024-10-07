@@ -9,12 +9,15 @@ import AmazonS3 from './cloud-components/AmazonS3'
 import FTP from './cloud-components/FTP'
 import Gists from './cloud-components/gists/gists'
 import DropboxSync from './cloud-components/Dropbox'
+import {EventEmitter} from "@angular/core";
+import Logger from "./Logger";
 
 const fs = require('fs')
 const path = require('path')
 const CryptoJS = require('crypto-js')
 
 export class SettingsHelperClass {
+    private isSettingSyncing = false
     private adapterHandler = {
         [CloudSyncSettingsData.values.WEBDAV]: WebDav,
         [CloudSyncSettingsData.values.S3]: AmazonS3,
@@ -27,6 +30,14 @@ export class SettingsHelperClass {
         [CloudSyncSettingsData.values.DROPBOX]: DropboxSync,
     }
     private generatedCryptoHash = 'tp!&nc3^to8y7^3#4%2%&szufx!'
+
+    public setIsSettingSyncing (value: boolean) {
+        this.isSettingSyncing = value
+    }
+
+    public getIsSettingSyncing () {
+        return this.isSettingSyncing
+    }
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     async saveSettingsToFile (platform: PlatformService, adapter: string, params: any): Promise<any> {
@@ -87,9 +98,15 @@ export class SettingsHelperClass {
         }
     }
 
-    async syncWithCloud (config: ConfigService, platform: PlatformService, toast: ToastrService, firstInit = false): Promise<any> {
+    async syncWithCloud (config: ConfigService, platform: PlatformService, toast: ToastrService, firstInit = false, emitter: EventEmitter<any> = null): Promise<any> {
         const savedConfigs = this.readConfigFile(platform)
         let result = false
+        const logger = new Logger(platform)
+
+        if (!savedConfigs.enabled) {
+            logger.log('Sync disabled. Skipping...')
+            return false
+        }
 
         if (savedConfigs.enabled) {
             if (CloudSyncSettingsData.isCloudStorageS3Compatibility(savedConfigs.adapter)) {
@@ -97,7 +114,7 @@ export class SettingsHelperClass {
             }
 
             try {
-                await this.adapterHandler[savedConfigs.adapter].sync(config, platform, toast, savedConfigs.configs, firstInit).then(status => {
+                await this.adapterHandler[savedConfigs.adapter].sync(config, platform, toast, savedConfigs.configs, firstInit, emitter).then(status => {
                     result = status
                 })
             } catch (e) {
@@ -111,7 +128,7 @@ export class SettingsHelperClass {
     async syncWithCloudSettings (platform: PlatformService, toast: ToastrService): Promise<void> {
         const savedConfigs = this.readConfigFile(platform)
         if (savedConfigs) {
-            await this.adapterHandler[savedConfigs.adapter].syncLocalSettingsToCloud(platform, toast).then()
+            await this.adapterHandler[savedConfigs.adapter].syncLocalSettingsToCloud(platform, toast)
         } else {
             toast.error(CloudSyncLang.trans('sync.error_invalid_setting_2'))
         }
@@ -120,7 +137,7 @@ export class SettingsHelperClass {
     async syncLocalSettingsToCloud (platform: PlatformService, toast: ToastrService): Promise<void> {
         const savedConfigs = this.readConfigFile(platform)
         if (savedConfigs) {
-            await this.adapterHandler[savedConfigs.adapter].syncLocalSettingsToCloud(platform, toast).then()
+            await this.adapterHandler[savedConfigs.adapter].syncLocalSettingsToCloud(platform, toast)
         } else {
             toast.error(CloudSyncLang.trans('sync.error_invalid_setting_2'))
         }

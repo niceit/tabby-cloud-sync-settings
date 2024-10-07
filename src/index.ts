@@ -23,6 +23,7 @@ import { SupportUsComponent } from './components/support-us/support-us.component
 import CloudSyncSettingsData from './data/setting-items'
 import { CheckForUpdatesComponent } from './components/sub-components/check-for-updates/check-for-updates.component'
 import {CloudSyncDropboxSettingsComponent} from "./components/sub-components/dropbox/dropbox-settings.component";
+import Logger from "./utils/Logger";
 
 let autoSynInProgress = false
 let autoSynIntervalInstance = null
@@ -58,7 +59,6 @@ let initAutoSynIntervalFrequency = CloudSyncSettingsData.defaultSyncInterval * 1
     ],
 })
 
-
 export default class CloudSyncSettingsModule {
     constructor (private app: AppService,
         private platform: PlatformService,
@@ -83,7 +83,13 @@ export default class CloudSyncSettingsModule {
     }
 
     subscribeToConfigChangeEvent (): void {
+        if (autoSynInProgress) {
+            return
+        }
+
         this.configService.changed$.subscribe(async () => {
+            const logger = new Logger(this.platform)
+            logger.log('Config changed. Syncing local settings to cloud...')
             await SettingsHelper.syncLocalSettingsToCloud(this.platform, this.toast).then(() => {
                 // Do nothing
             })
@@ -98,8 +104,10 @@ export default class CloudSyncSettingsModule {
                 console.warn('Tabby Auto Sync Started ' + new Date().toLocaleString())
                 initAutoSynIntervalFrequency = (savedConfigs?.interval_insync || CloudSyncSettingsData.defaultSyncInterval) * 1000
                 await SettingsHelper.syncWithCloud(this.configService, this.platform, this.toast).then(() => {
-                    autoSynInProgress = false
-                    this.subscribeToAutoSyncEvent()
+                    setTimeout(() => {
+                        autoSynInProgress = false
+                        this.subscribeToAutoSyncEvent()
+                    }, 1000)
                 })
             }
         } else {

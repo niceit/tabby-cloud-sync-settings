@@ -29,12 +29,10 @@ export default class Logger {
             console.log(time.toString() + ' ', content)
         }
 
-        if (DevConstants.ENABLE_DEBUG) {
-            this.logger.log({
-                level: level,
-                time: time.toLocaleString(),
-                message: content,
-            })
-        }
+        this.logger.log({
+            level: level,
+            time: time.toLocaleString(),
+            message: content,
+        })
     }
 }

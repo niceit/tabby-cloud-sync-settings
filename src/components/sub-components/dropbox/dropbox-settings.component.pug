@@ -3,12 +3,13 @@
         .title(*ngIf='!isConnecting', [textContent]="'Connect to Dropbox'")
         .title(*ngIf='isConnecting', [textContent]="'Authorizing Dropbox...'")
 
-.row(*ngIf='!connectedData.isConnected && !isSaveSettingErrored')
+.row(*ngIf='!connectedData.isConnected')
     .col-md-12.mb-2(*ngIf='!isConnecting')
         button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='connect()')
             i.fa.fa-brands.fa-dropbox.mr-2
             span Connect
 
+.row(*ngIf='!connectedData.isConnected && !isSaveSettingErrored')
     .col-md-12.mb-2(*ngIf='isConnecting')
         button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='cancelConnect()')
             span.spinner-border.spinner-border-sm.mr-2
@@ -26,7 +27,7 @@
         button.btn.btn-primary.flex-shrink-0.ml-3.mb-2.mr-2((click)='!isFormProcessing ? handleAuthCallback() : null')
             i.fa.fa-brands.fa-dropbox.mr-2(*ngIf='!isFormProcessing')
             span(*ngIf='!isFormProcessing', [textContent]='"Obtain Access Token"')
-            span.spinner-border.spinner-border-sm(*ngIf='isFormProcessing')
+            span.spinner-border.spinner-border-sm.mr-2(*ngIf='isFormProcessing')
             span(*ngIf='isFormProcessing', [textContent]='"Obtaining Access Token..."')
 
         button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='pasteFromClipboard()')
@@ -41,7 +42,12 @@
                 i.fas.fa-info-circle.mr-2
                 span Connected: {{connectedData.email}}
 
-    .col-md-12.mb-2
+    .col-md-12.mb-2(*ngIf='isSettingSaved')
+        button.btn.btn-danger.flex-shrink-0.ml-3((click)='disconnectSettings()')
+            i.fa.fa-fw.fa-sign-out-alt.mr-2
+            span Disconnect Account
+
+    .col-md-12.mb-2(*ngIf='!isSettingSaved')
         button.btn.btn-warning.flex-shrink-0.ml-3.mr-2((click)='saveSettings()')
             i.fa.fa-fw.fa-save.mr-2
             span Save Settings

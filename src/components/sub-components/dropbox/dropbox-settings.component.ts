@@ -19,6 +19,8 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
     @Output() resetFormMessages = new EventEmitter()
     @Output() setFormMessage = new EventEmitter()
 
+    private dropboxServiceEmitter = new EventEmitter()
+
     private dbx: Dropbox
 
     translate = CloudSyncLang
@@ -36,54 +38,43 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
     isFormProcessing = false
     isSettingSaved = false
     isSaveSettingErrored = false
-
     callbackUrl = ''
-    dropboxToken: string = '00_sl.B-QKHM3EHwCuTqZ65LnpvWoyt1NpqZWfb03jIBNdR-qBbK155Zw0Qf8l4H2jf4BvzT5jLH8fTpVXHD_toBgKH9JgLvrMFZgiQegDHBGcLA-ETUMrBkPpPEOG3JuReBS5Xd2Tuq9OoYuO'
 
     constructor (private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
         this.dbx = new Dropbox({clientId: '68h0g2tx5tao1l6', clientSecret: 'bdjvlag5age3e2c'})
     }
 
     ngOnInit (): void {
-        // if (this.dropboxToken !== undefined) {
-        //     const dbx = new Dropbox({ accessToken: this.dropboxToken })
-        //     const remoteFile = CloudSyncSettingsData.cloudSettingsFilename
-        //
-        //     dbx.filesUpload({ path: '/test.txt', contents: 'Sample content' })
-        //         .then((response: any) => {
-        //             console.log('Dropbox file upload success');
-        //             console.log(response);
-        //         })
-        //         .catch((uploadErr) => {
-        //             console.log('Dropbox file upload failed')
-        //             console.log(uploadErr);
-        //             this.toast.error(uploadErr.message)
-        //         });
-        //
-        //     dbx.filesListFolder({ path: '' })
-        //         .then((response: any) => {
-        //             console.log('Dropbox file list success');
-        //             console.log(response);
-        //         })
-        //         .catch((err: any) => {
-        //             console.log('Dropbox file list failed')
-        //             console.log(err);
-        //         });
-        //     dbx.filesDownload({ path:  remoteFile }).then(function (response: any) {
-        //         const reader = new FileReader()
-        //         const blob: Blob = response.fileBlob
-        //         reader.addEventListener('loadend', function (e) {
-        //             console.log(e)
-        //             const content =  JSON.parse(reader.result as string)
-        //             console.log('Dropbox file download success')
-        //             console.log(content)
-        //         })
-        //         reader.readAsText(blob)
-        //     })
-        //         .catch(function (error: any) {
-        //             console.log('File download failed', error)
-        //         })
-        // }
+        const configs = SettingsHelper.readConfigFile(this.platform)
+        if (configs) {
+            if (configs.adapter === this.presetData.values.DROPBOX) {
+                this.connectedData = configs.configs
+                this.isSettingSaved = true
+            }
+        }
+
+        this.dropboxServiceEmitter.subscribe(async (event: { action: string, result: boolean, message?: string }) => {
+            switch (event.action) {
+                case 'dropbox-sync-complete': {
+                    if (event.result) {
+                        this.isSettingSaved = true
+                        this.config.requestRestart()
+                    } else {
+                        this.resetFormMessages.emit()
+                        this.disconnect()
+                        this.setFormMessage.emit({
+                            message: event.message,
+                            type: 'error',
+                        })
+
+                        this.isSettingSaved = false
+                        this.isSaveSettingErrored = true
+                        await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
+                    }
+                    break
+                }
+            }
+        })
     }
 
     async connect (): Promise<void> {
@@ -155,33 +146,31 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
                     type: 'success',
                 })
                 this.isSettingSaved = true
-                SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
-                    const resultCheck = typeof result === 'boolean' ? result : result['result']
-                    if (resultCheck) {
-                        this.config.requestRestart()
-                    } else {
-                        this.setFormMessage.emit({
-                            message: typeof result !== 'boolean' && result['message'] ? result['message'] : Lang.trans('sync.sync_server_failed'),
-                            type: 'error',
-                        })
-
-                        this.isSettingSaved = false
-                        this.isSaveSettingErrored = true
-                        // await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
-                    }
-                    this.isFormProcessing = false
-                })
+                SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true, this.dropboxServiceEmitter)
             }
         })
     }
 
-    async disconnect (): Promise<void> {
+    disconnect (): void {
         this.connectedData.isConnected = false
         this.connectedData.accessToken = ''
         this.connectedData.refreshToken = ''
         this.connectedData.email = ''
 
         this.isConnecting = false
+    }
+
+    async disconnectSettings(): Promise<void> {
+        if ((await this.platform.showMessageBox({
+            type: 'warning',
+            message: 'Are you sure you want to disconnect?',
+            buttons: ['Cancel', 'Disconnect'],
+            defaultId: 0,
+        })).response === 1) {
+            await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
+            this.disconnect()
+            this.config.requestRestart()
+        }
     }
 
     cancelConnect (): void {
