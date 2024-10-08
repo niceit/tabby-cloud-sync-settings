@@ -44,7 +44,7 @@ const CloudSyncSettingsData = {
         { name: 'Amazon S3', value: providerConstantItems.S3 },
         { name: 'Wasabi', value: providerConstantItems.WASABI },
         { name: 'DigitalOcean Space', value: providerConstantItems.DIGITAL_OCEAN },
-        { name: 'Blackblaze', value: providerConstantItems.BLACKBLAZE },
+        { name: 'Backblaze', value: providerConstantItems.BLACKBLAZE },
         { name: 'S3 Compatible (Minio, etc...)', value: providerConstantItems.S3_COMPATIBLE },
         { name: 'WebDav', value: providerConstantItems.WEBDAV },
         { name: 'Gists', value: providerConstantItems.GIST },
