@@ -29,6 +29,8 @@ const amazonCompatibilityEndpoints = {
 }
 
 const DevEnv = DevEnvConstants
+const API_URL = `${DevEnv.ENABLE_DEBUG ? 'http' : 'https' }://tabby-api.tranit.${DevEnv.ENABLE_DEBUG ? 'local': 'co'}`
+
 const CloudSyncSettingsData = {
     defaultSyncInterval: 20, // 20 seconds
     tabbySettingsFilename: '/config.yaml',
@@ -118,11 +120,6 @@ const CloudSyncSettingsData = {
             region: '',
         },
         [providerConstantItems.WEBDAV]: {
-            // host: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().host : '',
-            // username: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().username : '',
-            // password: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().password : '',
-            // location: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().location : '',
-            // port: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().port : '443',
             host: '',
             username: '',
             password: '',
@@ -144,13 +141,14 @@ const CloudSyncSettingsData = {
             id: '',
         },
         [providerConstantItems.DROPBOX]: {
-            accessToken: '',
+            apiKey: '',
+            apiSecret: '',
         },
     },
     external_urls: {
-        ApiUrl: `https://${DevEnv.ENABLE_DEBUG ? 'dev.' : ''}tabby-api.tranit.co`,
-        BlackBlazeHelp: 'https://tabby-cloud.tranit.co/how-to-get-blackblaze-regtion-code/',
-        checkForUpdateUrl: `https://${DevEnv.ENABLE_DEBUG ? 'dev.' : ''}tabby-api.tranit.co/tabby-sync/check-for-updates`,
+        ApiUrl: API_URL,
+        BlackBlazeHelp: API_URL + '/how-to-get-blackblaze-regtion-code/',
+        checkForUpdateUrl: API_URL + '/tabby-sync/check-for-updates'
     },
     isCloudStorageS3Compatibility (provider: string): boolean {
         return amazonS3CompatibilityInstances.includes(provider)

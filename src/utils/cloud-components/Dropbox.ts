@@ -124,29 +124,35 @@ class DropboxSync {
                 await SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
 
                 logger.log('Try to refresh token')
-                // Try to refresh token
-                try {
-                    // @ts-ignore
-                    dbx.auth.setClientId('68h0g2tx5tao1l6')
-                    // @ts-ignore
-                    dbx.auth.setClientSecret('bdjvlag5age3e2c')
-                    // @ts-ignore
-                    dbx.auth.setRefreshToken(params.refreshToken)
-                    // @ts-ignore
-                    await dbx.auth.refreshAccessToken()
+                if (CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiKey && CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiSecret)
+                {
+                    // Try to refresh token
+                    try {
+                        // @ts-ignore
+                        dbx.auth.setClientId(CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiKey)
+                        // @ts-ignore
+                        dbx.auth.setClientSecret(CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiSecret)
+                        // @ts-ignore
+                        dbx.auth.setRefreshToken(params.refreshToken)
+                        // @ts-ignore
+                        await dbx.auth.refreshAccessToken()
 
-                    // @ts-ignore
-                    params.accessToken = dbx.auth.getAccessToken()
-                    // @ts-ignore
-                    params.refreshToken = dbx.auth.getRefreshToken()
+                        // @ts-ignore
+                        params.accessToken = dbx.auth.getAccessToken()
+                        // @ts-ignore
+                        params.refreshToken = dbx.auth.getRefreshToken()
 
-                    await SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
+                        await SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
 
-                    logger.log('Refresh token success')
-                } catch (e) {
-                    logger.log('Refresh token failed: ' + e.toString())
-                    toast.error(e.toString())
-                    return
+                        logger.log('Refresh token success')
+                    } catch (e) {
+                        logger.log('Refresh token failed: ' + e.toString())
+                        toast.error(e.toString())
+                        return
+                    }
+                }
+                else {
+                    logger.log('Dropbox API Key and Secret is not set. Skipping refresh token.')
                 }
 
                 if (this._isFirstInit) {

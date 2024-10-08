@@ -41,14 +41,16 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
     isSaveSettingErrored = false
     callbackUrl = ''
 
-    constructor (private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
-        this.dbx = new Dropbox({clientId: '68h0g2tx5tao1l6', clientSecret: 'bdjvlag5age3e2c'})
+    constructor(private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
+        if (!CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiKey || !CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiSecret) {
+            this.toast.error('Unable to fetch Dropbox settings. Please contact support.')
+        } else {
+            this.dbx = new Dropbox({clientId: CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiKey, clientSecret: CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiSecret})
+        }
     }
 
     ngOnInit (): void {
         const configs = SettingsHelper.readConfigFile(this.platform)
-
-        console.log('Cloud Configs', configs)
         if (configs) {
             if (configs.adapter === this.presetData.values.DROPBOX) {
                 this.connectedData = configs.configs
@@ -82,6 +84,10 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
 
     async connect (): Promise<void> {
         this.resetFormMessages.emit()
+        if (!this.dbx) {
+            this.toast.error('Unable to fetch Dropbox settings. Please contact support.')
+            return
+        }
         const dbx = this.dbx;
         this.isConnecting = true
         // @ts-ignore

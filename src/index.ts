@@ -64,7 +64,9 @@ export default class CloudSyncSettingsModule {
         private platform: PlatformService,
         private toast: ToastrService,
         private configService: ConfigService) {
+        SettingsHelper.loadPluginSettings(this.platform)
         setTimeout(async () => {
+
             await this.syncCloudSettings().then(() => {
                 setTimeout(() => {
                     this.subscribeToConfigChangeEvent()

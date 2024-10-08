@@ -11,13 +11,13 @@ import Gists from './cloud-components/gists/gists'
 import DropboxSync from './cloud-components/Dropbox'
 import {EventEmitter} from "@angular/core";
 import Logger from "./Logger";
+import axios from "axios";
 
 const fs = require('fs')
 const path = require('path')
 const CryptoJS = require('crypto-js')
 
 export class SettingsHelperClass {
-    private isSettingSyncing = false
     private adapterHandler = {
         [CloudSyncSettingsData.values.WEBDAV]: WebDav,
         [CloudSyncSettingsData.values.S3]: AmazonS3,
@@ -30,14 +30,6 @@ export class SettingsHelperClass {
         [CloudSyncSettingsData.values.DROPBOX]: DropboxSync,
     }
     private generatedCryptoHash = 'tp!&nc3^to8y7^3#4%2%&szufx!'
-
-    public setIsSettingSyncing (value: boolean) {
-        this.isSettingSyncing = value
-    }
-
-    public getIsSettingSyncing () {
-        return this.isSettingSyncing
-    }
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     async saveSettingsToFile (platform: PlatformService, adapter: string, params: any): Promise<any> {
@@ -325,6 +317,24 @@ export class SettingsHelperClass {
     clearLastErrorMessage (platform: PlatformService, adapter: string, params: any): void {
         params.lastErrorMessage = ''
         this.saveSettingsToFile(platform, adapter, params)
+    }
+
+    loadPluginSettings (platform: PlatformService): void {
+        const logger = new Logger(platform)
+        const requestUrl = CloudSyncSettingsData.external_urls.ApiUrl + '/tabby-sync/plugin-settings'
+        axios.post(requestUrl, {},{
+            timeout: 30000,
+        }).then((response) => {
+            logger.log('Response: ' + JSON.stringify(response))
+            const data = response.data
+            if (data.status === 'success') {
+                logger.log('Settings loaded successfully')
+                CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiKey = data.dropbox.apiKey
+                CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiSecret = data.dropbox.apiSecret
+            } else {
+                logger.log('Error while loading settings: ' + data.message)
+            }
+        })
     }
 }
 
