@@ -83,12 +83,13 @@ export default class CloudSyncSettingsModule {
     }
 
     subscribeToConfigChangeEvent (): void {
-        if (autoSynInProgress) {
-            return
-        }
-
+        const logger = new Logger(this.platform)
         this.configService.changed$.subscribe(async () => {
-            const logger = new Logger(this.platform)
+            if (autoSynInProgress) {
+                logger.log('Config changed. But auto sync is in progress. Skipping...')
+                return
+            }
+
             logger.log('Config changed. Syncing local settings to cloud...')
             await SettingsHelper.syncLocalSettingsToCloud(this.platform, this.toast).then(() => {
                 // Do nothing
@@ -107,7 +108,7 @@ export default class CloudSyncSettingsModule {
                     setTimeout(() => {
                         autoSynInProgress = false
                         this.subscribeToAutoSyncEvent()
-                    }, 1000)
+                    }, 1500)
                 })
             }
         } else {
