@@ -42,6 +42,12 @@
                 i.fas.fa-info-circle.mr-2
                 span Connected: {{connectedData.email}}
 
+    .col-md-12.mb-2(*ngIf='connectedData.lastErrorMessage')
+        .alert.alert-warning
+            p.mb-2
+                i.fas.fa-info-circle.mr-2
+                span Sync Errored: {{connectedData.lastErrorMessage}}
+
     .col-md-12.mb-2(*ngIf='isSettingSaved')
         button.btn.btn-danger.flex-shrink-0.ml-3((click)='disconnectSettings()')
             i.fa.fa-fw.fa-sign-out-alt.mr-2

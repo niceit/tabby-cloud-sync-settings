@@ -32,6 +32,7 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
         location: '',
         refreshToken: '',
         email: '',
+        lastErrorMessage: ''
     }
 
     isConnecting = false
@@ -46,6 +47,8 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
 
     ngOnInit (): void {
         const configs = SettingsHelper.readConfigFile(this.platform)
+
+        console.log('Cloud Configs', configs)
         if (configs) {
             if (configs.adapter === this.presetData.values.DROPBOX) {
                 this.connectedData = configs.configs

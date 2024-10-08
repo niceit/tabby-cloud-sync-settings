@@ -118,6 +118,10 @@ class DropboxSync {
                 reader.readAsText(blob)
             }).catch(async (error: any) => {
                 logger.log('File download failed: ' + error.toString())
+
+                params.lastErrorMessage = error.toString()
+                SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
+
                 if (this._isFirstInit) {
                     if ((await platform.showMessageBox({
                         type: 'warning',
@@ -132,6 +136,10 @@ class DropboxSync {
             })
         } catch (e) {
             logger.log(CloudSyncLang.trans('log.read_cloud_settings') + ' | Exception: ' + e.toString())
+
+            params.lastErrorMessage = e.toString()
+            SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
+
             try {
                 if (this._isFirstInit) {
                     if ((await platform.showMessageBox({
@@ -196,6 +204,9 @@ class DropboxSync {
                 if (isSyncingInProgress) {
                     logger.log(CloudSyncLang.trans('sync.sync_success'))
                 }
+
+                params.lastErrorMessage = e.toString()
+                SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
 
                 if (this._isFirstInit) {
                     this._emitter?.emit({
