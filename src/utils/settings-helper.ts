@@ -321,6 +321,11 @@ export class SettingsHelperClass {
     verifyServerConfigIsValid (configRawData: string): boolean {
         return configRawData.includes(CloudSyncLang.trans('common.verifyConfigString'))
     }
+
+    clearLastErrorMessage (platform: PlatformService, adapter: string, params: any): void {
+        params.lastErrorMessage = ''
+        this.saveSettingsToFile(platform, adapter, params)
+    }
 }
 
 export default new SettingsHelperClass()

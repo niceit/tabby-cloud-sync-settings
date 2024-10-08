@@ -49,6 +49,7 @@ class DropboxSync {
 
         try {
             dbx.filesDownload({ path:  remoteFile }).then((response: any) => {
+                SettingsHelper.clearLastErrorMessage(platform, CloudSyncSettingsData.values.DROPBOX, params)
                 logger.log('Dropbox file downloaded result: ' + JSON.stringify(response))
 
                 const reader = new FileReader()
@@ -120,7 +121,33 @@ class DropboxSync {
                 logger.log('File download failed: ' + error.toString())
 
                 params.lastErrorMessage = error.toString()
-                SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
+                await SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
+
+                logger.log('Try to refresh token')
+                // Try to refresh token
+                try {
+                    // @ts-ignore
+                    dbx.auth.setClientId('68h0g2tx5tao1l6')
+                    // @ts-ignore
+                    dbx.auth.setClientSecret('bdjvlag5age3e2c')
+                    // @ts-ignore
+                    dbx.auth.setRefreshToken(params.refreshToken)
+                    // @ts-ignore
+                    await dbx.auth.refreshAccessToken()
+
+                    // @ts-ignore
+                    params.accessToken = dbx.auth.getAccessToken()
+                    // @ts-ignore
+                    params.refreshToken = dbx.auth.getRefreshToken()
+
+                    await SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
+
+                    logger.log('Refresh token success')
+                } catch (e) {
+                    logger.log('Refresh token failed: ' + e.toString())
+                    toast.error(e.toString())
+                    return
+                }
 
                 if (this._isFirstInit) {
                     if ((await platform.showMessageBox({
