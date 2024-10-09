@@ -8,8 +8,8 @@
 .tabby-sync-loading {
     position: fixed;
     z-index: 999;
-    right: 10px;
-    bottom: 40px;
+    right: 50px;
+    bottom: 50px;
 }
 .tabby-sync-connection-type.expanded,
 .tabby-sync-connection-type.expanded:hover {
@@ -20,4 +20,33 @@
 }
 .mb-2 {
     margin-bottom: 5px;
+}
+/* HTML: <div class="loader"></div> */
+.tabby-sync-loading .loader {
+    width: 50px;
+    aspect-ratio: 1;
+    display: grid;
+}
+.tabby-sync-loading .loader::before,
+.tabby-sync-loading .loader::after {
+    content:"";
+    grid-area: 1/1;
+    --c:no-repeat radial-gradient(farthest-side,#25b09b 92%,#0000);
+    background:
+        var(--c) 50%  0,
+        var(--c) 50%  100%,
+        var(--c) 100% 50%,
+        var(--c) 0    50%;
+    background-size: 12px 12px;
+    animation: l12 1s infinite;
+}
+.tabby-sync-loading .loader::before {
+    margin: 4px;
+    filter: hue-rotate(45deg);
+    background-size: 8px 8px;
+    animation-timing-function: linear
+}
+
+@keyframes l12 {
+    100%{transform: rotate(.5turn)}
 }

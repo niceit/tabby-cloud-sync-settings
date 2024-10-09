@@ -47,7 +47,7 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     syncEnabled = false
     intervalSync = CloudSyncSettingsData.defaultSyncInterval
     storedSettingsData = null
-    showBottomLoaderIcon = true
+    showBottomLoaderIcon = false
     form = CloudSyncSettingsData.formData
 
     @HostBinding('class.content-box') true
@@ -124,5 +124,9 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
                 break
             }
         }
+    }
+
+    setShowLoader ($event: boolean) {
+        this.showBottomLoaderIcon = $event
     }
 }
