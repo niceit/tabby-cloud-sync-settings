@@ -165,4 +165,9 @@ ul.nav-tabs(ngbNav, #nav='ngbNav')
         ng-template(ngbNavContent)
             check-for-updates-cloud-sync
 
+    li(ngbNavItem)
+        a(ngbNavLink) Logs
+        ng-template(ngbNavContent)
+            plugin-logs
+
 div([ngbNavOutlet]='nav')

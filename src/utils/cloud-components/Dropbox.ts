@@ -59,8 +59,6 @@ class DropboxSync {
                     const content =  reader.result as string
 
                     logger.log('Dropbox file download success')
-                    logger.log('Dropbox file content: ' + content)
-
                     remoteSyncConfigUpdatedAt = moment(response.server_modified)
                     yaml.load(content)
                     if (firstInit) {

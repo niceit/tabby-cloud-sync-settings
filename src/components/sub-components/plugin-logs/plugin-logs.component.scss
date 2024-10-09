@@ -1,0 +1,19 @@
+.log-table {
+    width: 100%;
+    height: 400px;
+    overflow: scroll;
+}
+td.log-info {
+    background-color: #0059a559 !important;
+    color: #fff !important;
+}
+
+td.log-error {
+    background-color: #ff0000 !important;
+    color: #fff !important;
+}
+.log-message {
+    white-space: pre-wrap;
+    max-width: 400px;
+    word-wrap: break-word;
+}

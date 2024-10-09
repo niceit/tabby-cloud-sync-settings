@@ -24,6 +24,7 @@ import CloudSyncSettingsData from './data/setting-items'
 import { CheckForUpdatesComponent } from './components/sub-components/check-for-updates/check-for-updates.component'
 import {CloudSyncDropboxSettingsComponent} from "./components/sub-components/dropbox/dropbox-settings.component";
 import Logger from "./utils/Logger";
+import {PluginLogsComponent} from "./components/sub-components/plugin-logs/plugin-logs.component";
 
 let autoSynInProgress = false
 let autoSynIntervalInstance = null
@@ -54,6 +55,7 @@ let initAutoSynIntervalFrequency = CloudSyncSettingsData.defaultSyncInterval * 1
         ChangeLogsComponent,
         SupportUsComponent,
         CheckForUpdatesComponent,
+        PluginLogsComponent,
         ToggleComponent,
         CloudSyncDropboxSettingsComponent,
     ],

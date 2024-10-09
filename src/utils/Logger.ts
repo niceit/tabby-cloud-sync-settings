@@ -2,6 +2,7 @@
 import winston, {QueryOptions} from 'winston'
 import { PlatformService } from 'terminus-core'
 import moment from "moment";
+import fs from "fs";
 
 const path = require('path')
 export default class Logger {
@@ -25,25 +26,34 @@ export default class Logger {
         return path.dirname(this.platform.getConfigPath()) + '/tabby-sync/' + moment().format('DD-MM-YYYY') + '.log'
     }
 
-    getLogContents (date: string = moment().format('DD-MM-YYYY')): any {
-        console.log('Getting log contents for ' + date)
+    getLogContents (callback: any, date: string = moment().format('DD-MM-YYYY'), limit = 1000): any {
+        const loggerFile =  path.dirname(this.platform.getConfigPath()) + '/tabby-sync/' + date + '.log'
+
+        // check if the file exists
+        if (!fs.existsSync(loggerFile)) {
+            return callback(new Error('Log file is not exist.'), [])
+        }
+
+        const logger = winston.createLogger({
+            transports: [
+                new winston.transports.Console(),
+                new winston.transports.File({ filename: loggerFile }),
+            ],
+            format: winston.format.json(),
+        })
+
         const options = {
             // @ts-ignore
-            from: new Date() - (24 * 60 * 60 * 1000),
-            until: new Date(),
-            limit: 10,
+            from: moment(date, 'DD-MM-YYYY').toDate(),
+            until: moment(date, 'DD-MM-YYYY').toDate(),
+            limit: limit,
             start: 0,
             order: 'desc',
-            fields: ['message']
+            fields: ['message', 'level', 'time']
         } as any;
-        return this.logger.query(options , (err, result) => {
-            if (err) {
-                /* TODO: handle me */
-                throw err;
-            }
 
-            console.log('Log Contents', result)
-            return result
+        return logger.query(options , (err, result) => {
+            callback(err, result)
         })
     }
 

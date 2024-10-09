@@ -69,11 +69,6 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         } else {
             this.selectedProvider = this.serviceProviderValues.S3
         }
-
-        // Get today log contents
-        const logger = new Logger(this.platform)
-        const todayLogContents = logger.getLogContents()
-        console.log('Today Log Contents', todayLogContents)
     }
 
     async checkForNewVersion (): Promise<void> {
