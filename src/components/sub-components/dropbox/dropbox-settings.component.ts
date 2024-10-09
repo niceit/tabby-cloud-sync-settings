@@ -42,8 +42,10 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
     callbackUrl = ''
 
     constructor(private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
+        const logger = new Logger(this.platform)
         if (!CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiKey || !CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiSecret) {
             this.toast.error('Unable to fetch Dropbox settings. Please contact support.')
+            logger.log('Unable to fetch Dropbox settings. Please contact support.')
         } else {
             this.dbx = new Dropbox({clientId: CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiKey, clientSecret: CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiSecret})
         }

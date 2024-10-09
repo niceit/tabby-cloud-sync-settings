@@ -9,6 +9,7 @@ import axios from 'axios'
 import { version } from '../../package.json'
 import devConstants from '../services/dev-constants'
 import { ConnectionGroup } from '../interface'
+import Logger from "../utils/Logger";
 
 /** @hidden */
 @Component({
@@ -46,7 +47,7 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     syncEnabled = false
     intervalSync = CloudSyncSettingsData.defaultSyncInterval
     storedSettingsData = null
-    showBottomLoaderIcon = false
+    showBottomLoaderIcon = true
     form = CloudSyncSettingsData.formData
 
     @HostBinding('class.content-box') true
@@ -68,6 +69,11 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         } else {
             this.selectedProvider = this.serviceProviderValues.S3
         }
+
+        // Get today log contents
+        const logger = new Logger(this.platform)
+        const todayLogContents = logger.getLogContents()
+        console.log('Today Log Contents', todayLogContents)
     }
 
     async checkForNewVersion (): Promise<void> {
