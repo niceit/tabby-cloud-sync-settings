@@ -2,7 +2,7 @@
     .col-md-12
         h3 Support & Donation
     .col-md-12.mb-2
-        .alert.alert-info
+        .alert.alert-warning
             p.mb-2
                 i.fa.fa-fw.fa-info-circle.mr-2
                 span Support the development of this application by donating to the project, you can donate via the donation link below. Any of the donations will be used to cover the costs of development of this plugin.
@@ -11,27 +11,27 @@
                 span We're appreciative of any support you can give. Many thanks in advance!
 
     .col-md-12.pt-3.text-right
-        button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='openDonationPage()')
+        button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='openDonationPage()')
             i.fas.fa-fw.fa-donate.mr-2
             span Make Donation
 
     .col-md-12.mt-2.has-border-top.pt-3
         h3
-            img(src='https://cdn-icons-png.flaticon.com/512/3791/3791606.png', alt='Sponsor', width='32', height='32').mr-3
+            img(src='https://cdn-icons-png.flaticon.com/512/3791/3791606.png', alt='Sponsor', width='32', height='32').mr-2
             span A lot of cool features are coming soon!
         .alert.alert-warning.mt-2
             p.mb-1
                 i.fa.fa-fw.fa-info-circle.mr-2
                 span You will become our sponsor by donating to the project.
+            //p.mb-1
+            //    i.fa.fa-fw.fa-info-circle.mr-2
+            //    span You could access to the premium features of this plugin.
             p.mb-1
                 i.fa.fa-fw.fa-info-circle.mr-2
-                span You could access to the premium features of this plugin.
-            p.mb-1
-                i.fa.fa-fw.fa-info-circle.mr-2
-                span Your name will appear for the sponsor list.
+                span Your name will appear for the sponsors list.
 
     .col-md-12.pt-3.text-right
-        button.btn.btn-success.flex-shrink-0.ml-3.mb-2((click)='toggleSponsorList().then()')
+        button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='toggleSponsorList().then()')
             i.fas.fa-fw.fa-user.mr-2
             span(*ngIf="!isSponsorListVisible") View Sponsors
             span(*ngIf="isSponsorListVisible") Hide Sponsors

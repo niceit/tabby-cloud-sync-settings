@@ -268,6 +268,43 @@ export class SettingsHelperClass {
         }
     }
 
+    async toggleEnabledShowLoader (value: boolean, platform: PlatformService, toast: ToastrService): Promise<any> {
+        const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
+        if (!fs.existsSync(filePath)) {
+            toast.error(CloudSyncLang.trans('sync.need_to_save_config'))
+            return false
+        }
+        const savedConfigs = this.readConfigFile(platform)
+
+        if (savedConfigs) {
+            savedConfigs.showLoader = value
+            const fileContent = CloudSyncLang.trans('common.config_inject_header') + CryptoJS.AES.encrypt(JSON.stringify(savedConfigs), this.generatedCryptoHash).toString()
+
+            const promise = new Promise((resolve, reject) => {
+                return fs.writeFile(filePath, fileContent,
+                    (err) => {
+                        if (err) {
+                            reject(false)
+                        }
+
+                        resolve(true)
+                    })
+            })
+
+            return promise.then(status => {
+                if (status) {
+                    toast.info(value ? 'Syncing icon enabled.' : 'Syncing icon disabled.')
+                } else {
+                    toast.info(CloudSyncLang.trans('sync.error_save_setting'))
+                }
+                return status
+            })
+        } else {
+            toast.info(CloudSyncLang.trans('sync.error_save_setting'))
+            return false
+        }
+    }
+
     async removeConfirmFile (platform: PlatformService, toast: ToastrService, needConfirm = true): Promise<boolean> {
         let result = false
         try {

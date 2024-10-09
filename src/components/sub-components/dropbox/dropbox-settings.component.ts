@@ -18,11 +18,9 @@ import Lang from "../../../data/lang";
 export class CloudSyncDropboxSettingsComponent implements OnInit {
     @Output() resetFormMessages = new EventEmitter()
     @Output() setFormMessage = new EventEmitter()
-    @Output() setShowLoader = new EventEmitter()
 
 
     private dropboxServiceEmitter = new EventEmitter()
-
     private dbx: Dropbox
 
     translate = CloudSyncLang
@@ -83,8 +81,6 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
                     break
                 }
             }
-
-            this.setShowLoader.emit(false)
         })
     }
 
@@ -96,7 +92,6 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
         }
         const dbx = this.dbx;
         this.isConnecting = true
-        this.setShowLoader.emit(true)
         // @ts-ignore
         dbx.auth.getAuthenticationUrl('http://localhost', null, 'code', 'offline', null, 'none', false)
             .then((authUrl) => {
@@ -132,7 +127,6 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
                         this.connectedData.refreshToken = token.result.refresh_token
                         this.connectedData.email = response.result.email
                         this.isFormProcessing = false
-                        this.setShowLoader.emit(false)
                     })
                     .catch((error) => {
                         logger.log(error, 'error');
@@ -175,7 +169,6 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
         this.connectedData.email = ''
 
         this.isConnecting = false
-        this.setShowLoader.emit(false)
     }
 
     async disconnectSettings(): Promise<void> {
@@ -194,7 +187,6 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
     cancelConnect (): void {
         this.resetFormMessages.emit()
         this.isConnecting = false
-        this.setShowLoader.emit(false)
     }
 
     async pasteFromClipboard () {

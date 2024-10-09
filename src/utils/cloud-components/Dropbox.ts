@@ -206,7 +206,7 @@ class DropboxSync {
                 dbx.filesUpload({ path: remoteFile, contents: SettingsHelper.readTabbyConfigFile(platform, true, true), mode: 'overwrite' as any })
                     .then((response: any) => {
                         logger.log('Dropbox file upload success');
-                        logger.log(response.toString());
+                        logger.log(JSON.stringify(response));
 
                         if (this._isFirstInit) {
                             this._emitter?.emit({

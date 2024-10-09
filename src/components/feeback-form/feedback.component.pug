@@ -58,7 +58,7 @@
                         [(ngModel)]='calculationGenerateObj.answer',
                     )
             .col-md-12.pt-3.text-right
-                button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='!isFormProcessing ? submitFeedback() : null')
+                button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='!isFormProcessing ? submitFeedback() : null')
                     i.fas.fa-fw.fa-plug.mr-2
                     span(*ngIf="isFormProcessing") Submitting...
                     span(*ngIf="!isFormProcessing") Submit

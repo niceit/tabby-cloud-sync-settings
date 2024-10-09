@@ -49,6 +49,17 @@ h3([textContent]='translate.trans("settings.title")')
                                     (ngModelChange)='toggleEnableSync()',
                                 )
 
+                            .form-line.enable-sync
+                                .header
+                                    .title
+                                        i.fas.fa-fw.fa-check-circle.mr-2
+                                        span Show sync loader
+                                toggle(
+                                    [(ngModel)]='isShowSyncLoader',
+                                    [disabled]='storedSettingsData === null',
+                                    (ngModelChange)='toggleEnableShowLoader()',
+                                )
+
 
                             .form-line.sync-interval(style='margin-top: -25px;')
                                 .header
@@ -134,7 +145,6 @@ h3([textContent]='translate.trans("settings.title")')
                             dropbox-settings(
                                 (resetFormMessages)='resetFormMessages()',
                                 (setFormMessage)='setFormMessage($event)',
-                                (setShowLoader)='setShowLoader($event)'
                             )
 
                         cloud-sync-about
@@ -169,8 +179,5 @@ h3([textContent]='translate.trans("settings.title")')
                 a(ngbNavLink) Logs
                 ng-template(ngbNavContent)
                     plugin-logs
-
-        .tabby-sync-loading(*ngIf='showBottomLoaderIcon')
-            .loader
 
 div([ngbNavOutlet]='nav')
