@@ -37,12 +37,14 @@ export class SettingsHelperClass {
         const settingsArr = {
             adapter: adapter,
             enabled: true,
+            showLoader: true,
             interval_insync: CloudSyncSettingsData.defaultSyncInterval,
             configs: params,
         }
         if (fs.existsSync(filePath)) {
             const savedConfigs = this.readConfigFile(platform)
             settingsArr.enabled = savedConfigs !== null ? savedConfigs['enabled'] : true
+            settingsArr.showLoader = savedConfigs !== null ? savedConfigs['showLoader'] : true
             settingsArr.interval_insync = savedConfigs !== null ? savedConfigs['interval_insync'] : CloudSyncSettingsData.defaultSyncInterval
         }
         const fileContent = CloudSyncLang.trans('common.config_inject_header') + CryptoJS.AES.encrypt(JSON.stringify(settingsArr), this.generatedCryptoHash).toString()
