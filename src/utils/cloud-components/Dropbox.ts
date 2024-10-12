@@ -68,10 +68,10 @@ class DropboxSync {
                             buttons: [CloudSyncLang.trans('buttons.sync_from_cloud'), CloudSyncLang.trans('buttons.sync_from_local')],
                             defaultId: 0,
                         })).response === 1) {
-                            logger.log('First init. Sync direction: Cloud to local.')
-                            this.syncLocalSettingsToCloud(platform, toast)
+                            logger.log('First init. Sync direction: Local to Cloud.')
+                            await this.syncLocalSettingsToCloud(platform, toast)
                         } else {
-                            logger.log('First init. Sync direction: Local To Cloud.')
+                            logger.log('First init. Sync direction: Cloud To Local.')
                             if (SettingsHelper.verifyServerConfigIsValid(content)) {
                                 await SettingsHelper.backupTabbyConfigFile(platform)
                                 config.writeRaw(SettingsHelper.doDescryption(content))
@@ -79,6 +79,11 @@ class DropboxSync {
                                     action: this.emitterActions.syncComplete,
                                     result: true,
                                 })
+
+                                if (params.lastErrorMessage) {
+                                    params.lastErrorMessage = null
+                                    await SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
+                                }
                             } else {
                                 emitter?.emit({
                                     action: this.emitterActions.syncComplete,
@@ -160,7 +165,7 @@ class DropboxSync {
                         buttons: ['Cancel', CloudSyncLang.trans('buttons.sync_from_local')],
                         defaultId: 0,
                     })).response === 1) {
-                        this.syncLocalSettingsToCloud(platform, toast)
+                        await this.syncLocalSettingsToCloud(platform, toast)
                         result['result'] = true
                     }
                 }
@@ -169,7 +174,7 @@ class DropboxSync {
             logger.log(CloudSyncLang.trans('log.read_cloud_settings') + ' | Exception: ' + e.toString())
 
             params.lastErrorMessage = e.toString()
-            SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
+            await SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
 
             try {
                 if (this._isFirstInit) {
@@ -192,7 +197,7 @@ class DropboxSync {
         return result
     }
 
-    syncLocalSettingsToCloud (platform: PlatformService, toast: ToastrService) {
+    async syncLocalSettingsToCloud (platform: PlatformService, toast: ToastrService) {
         const logger = new Logger(platform)
         if (!isSyncingInProgress) {
             isSyncingInProgress = true
@@ -204,7 +209,7 @@ class DropboxSync {
             try {
                 const dbx = new Dropbox({ accessToken: params.accessToken })
                 dbx.filesUpload({ path: remoteFile, contents: SettingsHelper.readTabbyConfigFile(platform, true, true), mode: 'overwrite' as any })
-                    .then((response: any) => {
+                    .then(async (response: any) => {
                         logger.log('Dropbox file upload success');
                         logger.log(JSON.stringify(response));
 
@@ -213,6 +218,12 @@ class DropboxSync {
                                 action: this.emitterActions.syncComplete,
                                 result: true,
                             })
+                        }
+
+                        // Clear last error message
+                        if (params.lastErrorMessage) {
+                            params.lastErrorMessage = null
+                            await SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
                         }
                     })
                     .catch((uploadErr) => {
@@ -237,7 +248,7 @@ class DropboxSync {
                 }
 
                 params.lastErrorMessage = e.toString()
-                SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
+                await SettingsHelper.saveSettingsToFile(platform, CloudSyncSettingsData.values.DROPBOX, params)
 
                 if (this._isFirstInit) {
                     this._emitter?.emit({
