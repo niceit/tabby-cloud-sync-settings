@@ -8,6 +8,10 @@ import CloudSyncLang from '../data/lang'
 import AmazonS3 from './cloud-components/AmazonS3'
 import FTP from './cloud-components/FTP'
 import Gists from './cloud-components/gists/gists'
+import DropboxSync from './cloud-components/Dropbox'
+import {EventEmitter} from "@angular/core";
+import Logger from "./Logger";
+import axios from "axios";
 
 const fs = require('fs')
 const path = require('path')
@@ -23,6 +27,7 @@ export class SettingsHelperClass {
         [CloudSyncSettingsData.values.S3_COMPATIBLE]: AmazonS3,
         [CloudSyncSettingsData.values.FTP]: FTP,
         [CloudSyncSettingsData.values.GIST]: Gists,
+        [CloudSyncSettingsData.values.DROPBOX]: DropboxSync,
     }
     private generatedCryptoHash = 'tp!&nc3^to8y7^3#4%2%&szufx!'
 
@@ -32,12 +37,14 @@ export class SettingsHelperClass {
         const settingsArr = {
             adapter: adapter,
             enabled: true,
+            showLoader: true,
             interval_insync: CloudSyncSettingsData.defaultSyncInterval,
             configs: params,
         }
         if (fs.existsSync(filePath)) {
             const savedConfigs = this.readConfigFile(platform)
             settingsArr.enabled = savedConfigs !== null ? savedConfigs['enabled'] : true
+            settingsArr.showLoader = savedConfigs !== null ? savedConfigs['showLoader'] : true
             settingsArr.interval_insync = savedConfigs !== null ? savedConfigs['interval_insync'] : CloudSyncSettingsData.defaultSyncInterval
         }
         const fileContent = CloudSyncLang.trans('common.config_inject_header') + CryptoJS.AES.encrypt(JSON.stringify(settingsArr), this.generatedCryptoHash).toString()
@@ -85,9 +92,15 @@ export class SettingsHelperClass {
         }
     }
 
-    async syncWithCloud (config: ConfigService, platform: PlatformService, toast: ToastrService, firstInit = false): Promise<any> {
+    async syncWithCloud (config: ConfigService, platform: PlatformService, toast: ToastrService, firstInit = false, emitter: EventEmitter<any> = null): Promise<any> {
         const savedConfigs = this.readConfigFile(platform)
         let result = false
+        const logger = new Logger(platform)
+
+        if (!savedConfigs.enabled) {
+            logger.log('Sync disabled. Skipping...')
+            return false
+        }
 
         if (savedConfigs.enabled) {
             if (CloudSyncSettingsData.isCloudStorageS3Compatibility(savedConfigs.adapter)) {
@@ -95,7 +108,7 @@ export class SettingsHelperClass {
             }
 
             try {
-                await this.adapterHandler[savedConfigs.adapter].sync(config, platform, toast, savedConfigs.configs, firstInit).then(status => {
+                await this.adapterHandler[savedConfigs.adapter].sync(config, platform, toast, savedConfigs.configs, firstInit, emitter).then(status => {
                     result = status
                 })
             } catch (e) {
@@ -109,7 +122,7 @@ export class SettingsHelperClass {
     async syncWithCloudSettings (platform: PlatformService, toast: ToastrService): Promise<void> {
         const savedConfigs = this.readConfigFile(platform)
         if (savedConfigs) {
-            await this.adapterHandler[savedConfigs.adapter].syncLocalSettingsToCloud(platform, toast).then()
+            await this.adapterHandler[savedConfigs.adapter].syncLocalSettingsToCloud(platform, toast)
         } else {
             toast.error(CloudSyncLang.trans('sync.error_invalid_setting_2'))
         }
@@ -118,7 +131,7 @@ export class SettingsHelperClass {
     async syncLocalSettingsToCloud (platform: PlatformService, toast: ToastrService): Promise<void> {
         const savedConfigs = this.readConfigFile(platform)
         if (savedConfigs) {
-            await this.adapterHandler[savedConfigs.adapter].syncLocalSettingsToCloud(platform, toast).then()
+            await this.adapterHandler[savedConfigs.adapter].syncLocalSettingsToCloud(platform, toast)
         } else {
             toast.error(CloudSyncLang.trans('sync.error_invalid_setting_2'))
         }
@@ -257,6 +270,43 @@ export class SettingsHelperClass {
         }
     }
 
+    async toggleEnabledShowLoader (value: boolean, platform: PlatformService, toast: ToastrService): Promise<any> {
+        const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.storedSettingsFilename
+        if (!fs.existsSync(filePath)) {
+            toast.error(CloudSyncLang.trans('sync.need_to_save_config'))
+            return false
+        }
+        const savedConfigs = this.readConfigFile(platform)
+
+        if (savedConfigs) {
+            savedConfigs.showLoader = value
+            const fileContent = CloudSyncLang.trans('common.config_inject_header') + CryptoJS.AES.encrypt(JSON.stringify(savedConfigs), this.generatedCryptoHash).toString()
+
+            const promise = new Promise((resolve, reject) => {
+                return fs.writeFile(filePath, fileContent,
+                    (err) => {
+                        if (err) {
+                            reject(false)
+                        }
+
+                        resolve(true)
+                    })
+            })
+
+            return promise.then(status => {
+                if (status) {
+                    toast.info(value ? 'Syncing icon enabled.' : 'Syncing icon disabled.')
+                } else {
+                    toast.info(CloudSyncLang.trans('sync.error_save_setting'))
+                }
+                return status
+            })
+        } else {
+            toast.info(CloudSyncLang.trans('sync.error_save_setting'))
+            return false
+        }
+    }
+
     async removeConfirmFile (platform: PlatformService, toast: ToastrService, needConfirm = true): Promise<boolean> {
         let result = false
         try {
@@ -301,6 +351,29 @@ export class SettingsHelperClass {
 
     verifyServerConfigIsValid (configRawData: string): boolean {
         return configRawData.includes(CloudSyncLang.trans('common.verifyConfigString'))
+    }
+
+    clearLastErrorMessage (platform: PlatformService, adapter: string, params: any): void {
+        params.lastErrorMessage = ''
+        this.saveSettingsToFile(platform, adapter, params)
+    }
+
+    loadPluginSettings (platform: PlatformService): void {
+        const logger = new Logger(platform)
+        const requestUrl = CloudSyncSettingsData.external_urls.ApiUrl + '/tabby-sync/plugin-settings'
+        axios.post(requestUrl, {},{
+            timeout: 30000,
+        }).then((response) => {
+            logger.log('Response: ' + JSON.stringify(response))
+            const data = response.data
+            if (data.status === 'success') {
+                logger.log('Settings loaded successfully')
+                CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiKey = data.dropbox.apiKey
+                CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiSecret = data.dropbox.apiSecret
+            } else {
+                logger.log('Error while loading settings: ' + data.message)
+            }
+        })
     }
 }
 

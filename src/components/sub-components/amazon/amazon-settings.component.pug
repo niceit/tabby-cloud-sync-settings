@@ -11,9 +11,8 @@
     .row
         .col-md-6.col-sm-12
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-lock
+                .input-group-text
+                    i.fas.fa-fw.fa-lock
                 input.form-control(
                     type='text',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
@@ -22,9 +21,8 @@
                 )
 
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-lock
+                .input-group-text
+                    i.fas.fa-fw.fa-lock
                 input.form-control(
                     type='text',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
@@ -33,9 +31,8 @@
                 )
 
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-folder
+                .input-group-text
+                    i.fas.fa-fw.fa-folder
                 input.form-control(
                     type='text',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
@@ -45,9 +42,8 @@
 
         .col-md-6.col-sm-12
             .input-group.mb-2(*ngIf='provider === presetData.values.S3_COMPATIBLE')
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-folder-open
+                .input-group-text
+                    i.fas.fa-fw.fa-folder-open
                 input.form-control(
                     type='text',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
@@ -56,9 +52,8 @@
                 )
 
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-globe
+                .input-group-text
+                    i.fas.fa-fw.fa-globe
                 select.form-control(*ngIf='![presetData.values.BLACKBLAZE, presetData.values.S3_COMPATIBLE].includes(provider)',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
                     [(ngModel)]='form.region'
@@ -71,9 +66,8 @@
                     [(ngModel)]='form.region')
 
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-folder-open
+                .input-group-text
+                    i.fas.fa-fw.fa-folder-open
                 input.form-control(
                     type='text',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',

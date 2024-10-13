@@ -1,2 +1,7 @@
 {
+    "host": "webdav.example.com",
+    "username": "user",
+    "password": "password",
+    "location": "/",
+    "port": 443
 }

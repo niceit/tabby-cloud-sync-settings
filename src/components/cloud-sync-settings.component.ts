@@ -8,6 +8,8 @@ import SettingsHelper from '../utils/settings-helper'
 import axios from 'axios'
 import { version } from '../../package.json'
 import devConstants from '../services/dev-constants'
+import { ConnectionGroup } from '../interface'
+import Logger from "../utils/Logger";
 
 /** @hidden */
 @Component({
@@ -25,15 +27,27 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     serviceProviders = CloudSyncSettingsData.serviceProvidersList
     selectedProvider = ''
 
+    groups: ConnectionGroup[] = [
+        {
+            name: 'Exclusive Sponsor Cloud Services',
+            collapsed: true,
+            type: 'exclusive',
+        },
+        {
+            name: 'Free Cloud Services',
+            collapsed: false,
+            type: 'free',
+        },
+    ]
+
     form_messages = {
         errors: [],
         success: [],
     }
     syncEnabled = false
+    isShowSyncLoader = true
     intervalSync = CloudSyncSettingsData.defaultSyncInterval
     storedSettingsData = null
-    showBottomLoaderIcon = false
-
     form = CloudSyncSettingsData.formData
 
     @HostBinding('class.content-box') true
@@ -51,6 +65,7 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         if (this.storedSettingsData) {
             this.selectedProvider = this.storedSettingsData.adapter
             this.syncEnabled = this.storedSettingsData.enabled
+            this.isShowSyncLoader = !!this.storedSettingsData?.showLoader
             this.intervalSync = this.storedSettingsData?.interval_insync || CloudSyncSettingsData.defaultSyncInterval
         } else {
             this.selectedProvider = this.serviceProviderValues.S3
@@ -73,19 +88,16 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         this.resetFormMessages()
     }
 
-    toggleEnableSync (): void {
-        this.showBottomLoaderIcon = true
-        SettingsHelper.toggleEnabledPlugin(this.syncEnabled, this.platform, this.toast).then((result) => {
-            this.showBottomLoaderIcon = false
-            if (result) {
-                this.config.requestRestart()
-            }
-        })
+    async toggleEnableSync(): Promise<void> {
+        await SettingsHelper.toggleEnabledPlugin(this.syncEnabled, this.platform, this.toast)
+    }
+
+    async toggleEnableShowLoader(): Promise<void> {
+        await SettingsHelper.toggleEnabledShowLoader(this.isShowSyncLoader, this.platform, this.toast)
     }
 
     onIntervalSyncChanged (): void {
         SettingsHelper.saveIntervalSync(this.intervalSync, this.platform, this.toast).then((result) => {
-            this.showBottomLoaderIcon = false
             if (result) {
                 this.config.requestRestart()
             }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import axios from 'axios'
+import CloudSyncSettingsData from "../../data/setting-items";
 
 @Component({
     selector: 'cloud-sync-feedback-form',
@@ -7,8 +8,8 @@ import axios from 'axios'
     styles: [require('./feedback.component.scss')],
 })
 export class CloudSyncFeedbackComponent implements OnInit {
-    requestUrl = 'https://ws.phprockets.com/submit-feedback'
-    requestSubscribeUrl = 'https://ws.phprockets.com/subsribe-newsletter'
+    requestUrl = CloudSyncSettingsData.external_urls.ApiUrl + '/submit-feedback'
+    requestSubscribeUrl = 'https:/' + CloudSyncSettingsData.external_urls.ApiUrl + '/subscribe-newsletter'
     isFormProcessing = false
     isFormSubscribeProcessing = false
     form_messages = {

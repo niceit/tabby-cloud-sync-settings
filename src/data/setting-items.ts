@@ -12,6 +12,7 @@ const providerConstantItems = {
     WEBDAV: 'webdav',
     FTP: 'ftp',
     GIST: 'gists',
+    DROPBOX: 'dropbox',
 }
 
 const amazonS3CompatibilityInstances = [
@@ -28,6 +29,8 @@ const amazonCompatibilityEndpoints = {
 }
 
 const DevEnv = DevEnvConstants
+const API_URL = `${DevEnv.ENABLE_DEBUG ? 'http' : 'https' }://tabby-api.tranit.${DevEnv.ENABLE_DEBUG ? 'local': 'co'}`
+
 const CloudSyncSettingsData = {
     defaultSyncInterval: 20, // 20 seconds
     tabbySettingsFilename: '/config.yaml',
@@ -41,17 +44,19 @@ const CloudSyncSettingsData = {
         { name: 'Amazon S3', value: providerConstantItems.S3 },
         { name: 'Wasabi', value: providerConstantItems.WASABI },
         { name: 'DigitalOcean Space', value: providerConstantItems.DIGITAL_OCEAN },
-        { name: 'Blackblaze', value: providerConstantItems.BLACKBLAZE },
+        { name: 'Backblaze', value: providerConstantItems.BLACKBLAZE },
         { name: 'S3 Compatible (Minio, etc...)', value: providerConstantItems.S3_COMPATIBLE },
         { name: 'WebDav', value: providerConstantItems.WEBDAV },
         { name: 'Gists', value: providerConstantItems.GIST },
         { name: 'FTP / FTPS', value: providerConstantItems.FTP },
+        { name: 'Dropbox', value: providerConstantItems.DROPBOX },
     ],
     BuiltinLoginMode: {
         LOGIN: 'Login',
         RESET_PASSWORD: 'ResetPassword',
     },
     availablePluginVersions: [
+        '1.6.0',
         '1.5.2',
         '1.5.1',
         '1.5.0',
@@ -115,11 +120,11 @@ const CloudSyncSettingsData = {
             region: '',
         },
         [providerConstantItems.WEBDAV]: {
-            host: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().host : '',
-            username: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().username : '',
-            password: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().password : '',
-            location: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().location : '',
-            port: DevEnv.ENABLE_DEBUG ? DevMockData.getWebDavMockData().port : '443',
+            host: '',
+            username: '',
+            password: '',
+            location: '',
+            port: '443',
         },
         [providerConstantItems.FTP]: {
             protocol: 'ftp',
@@ -135,11 +140,15 @@ const CloudSyncSettingsData = {
             accessToken: '',
             id: '',
         },
+        [providerConstantItems.DROPBOX]: {
+            apiKey: '',
+            apiSecret: '',
+        },
     },
     external_urls: {
-        ApiUrl: `https://${DevEnv.ENABLE_DEBUG ? 'dev.' : ''}ws.phprockets.com`,
-        BlackBlazeHelp: 'https://tabby-cloud.tranit.co/how-to-get-blackblaze-regtion-code/',
-        checkForUpdateUrl: `https://${DevEnv.ENABLE_DEBUG ? 'dev.' : ''}ws.phprockets.com/tabby-sync/check-for-updates`,
+        ApiUrl: API_URL,
+        BlackBlazeHelp: API_URL + '/how-to-get-blackblaze-regtion-code/',
+        checkForUpdateUrl: API_URL + '/tabby-sync/check-for-updates'
     },
     isCloudStorageS3Compatibility (provider: string): boolean {
         return amazonS3CompatibilityInstances.includes(provider)

@@ -2,7 +2,7 @@
     .col-md-12
         h3 Check for Updates
     .col-md-12.mb-2
-        .alert.alert-info
+        .alert.alert-warning
             p.mb-0
                 i.fas.fa-info-circle.mr-2
                 span You are using version {{version}}
@@ -71,7 +71,7 @@
                 tr(*ngFor="let version of availableRollbackBuilds")
                     td {{version}}
                     td
-                        button.btn.btn-primary.btn-sm.flex-shrink-0.ml-3.mb-2(
+                        button.btn.btn-warning.btn-sm.flex-shrink-0.ml-3.mb-2(
                             (click)='confirmRollbackToVersion(version).then()',
                             [disabled]='isUpdatingPlugin',
                         )

@@ -10,9 +10,8 @@
     .row
         .col-md-6.col-sm-12
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-globe
+                .input-group-text
+                    i.fas.fa-fw.fa-globe
                 select.form-control(
                     [(ngModel)]='form.protocol',
                     [disabled]='isSettingSaved || isCheckLoginSuccess',
@@ -21,9 +20,8 @@
                     option(*ngFor='let item of protocol', [ngValue]='item.value') {{item.name}}
 
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-globe
+                .input-group-text
+                    i.fas.fa-fw.fa-globe
                 input.form-control(
                     type='text',
                     [placeholder]='translate.trans("ftp.host_placeholder")',
@@ -32,9 +30,8 @@
                 )
 
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-folder-open
+                .input-group-text
+                    i.fas.fa-fw.fa-folder-open
                 input.form-control(
                     type='text',
                     [placeholder]='translate.trans("ftp.location_placeholder")',
@@ -43,9 +40,8 @@
                 )
         .col-md-6.col-sm-12
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-plug
+                .input-group-text
+                    i.fas.fa-fw.fa-plug
                 input.form-control(
                     type='text',
                     [placeholder]='translate.trans("ftp.port_placeholder")',
@@ -54,9 +50,8 @@
                 )
 
             .input-group.mb-2
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-user
+                .input-group-text
+                    i.fas.fa-fw.fa-user
                 input.form-control(
                     type='text',
                     [placeholder]='translate.trans("ftp.username_placeholder")',
@@ -65,9 +60,8 @@
                 )
 
             .input-group.mb-2.relative
-                .input-group-prepend
-                    .input-group-text
-                        i.fas.fa-fw.fa-lock
+                .input-group-text
+                    i.fas.fa-fw.fa-lock
                 input.form-control(
                     [type]='passwordFieldType',
                     [placeholder]='translate.trans("ftp.password_placeholder")',

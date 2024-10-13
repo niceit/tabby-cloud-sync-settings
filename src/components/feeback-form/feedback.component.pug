@@ -14,9 +14,8 @@
         .form-group
             .col-md-12
                 .input-group.mb-2
-                    .input-group-prepend
-                        .input-group-text
-                            i.fas.fa-fw.fa-book
+                    .input-group-text
+                        i.fas.fa-fw.fa-book
                     input.form-control(
                         type='text',
                         [placeholder]="'Subject (*)'",
@@ -24,9 +23,8 @@
                     )
             .col-md-12
                 .input-group.mb-2
-                    .input-group-prepend
-                        .input-group-text
-                            i.fas.fa-fw.fa-user
+                    .input-group-text
+                        i.fas.fa-fw.fa-user
                     input.form-control(
                         type='text',
                         [placeholder]="'Your Name (*)'",
@@ -34,9 +32,8 @@
                     )
             .col-md-12
                 .input-group.mb-2
-                    .input-group-prepend
-                        .input-group-text
-                            i.fas.fa-fw.fa-envelope
+                    .input-group-text
+                        i.fas.fa-fw.fa-envelope
                     input.form-control(
                         type='text',
                         [placeholder]="'Your Email (*)'",
@@ -44,26 +41,24 @@
                     )
             .col-md-12
                 .input-group.mb-2
-                    .input-group-prepend
-                        .input-group-text
-                            i.fas.fa-fw.fa-message
+                    .input-group-text
+                        i.fas.fa-fw.fa-message
                     textarea.form-control.message-body(
                         [placeholder]="'Message (*)'",
                         [(ngModel)]='form.message',
                     )
             .col-md-12
                 .input-group.mb-2
-                    .input-group-prepend
-                        .input-group-text
-                            i.fas.fa-fw.fa-question-circle.mr-2
-                            span Answer the question: {{calculationGenerateObj.left}} + {{calculationGenerateObj.right}} =
+                    .input-group-text
+                        i.fas.fa-fw.fa-question-circle.mr-2
+                        span Answer the question: {{calculationGenerateObj.left}} + {{calculationGenerateObj.right}} =
                     input.form-control(
                         type='text',
                         [placeholder]="''",
                         [(ngModel)]='calculationGenerateObj.answer',
                     )
             .col-md-12.pt-3.text-right
-                button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='!isFormProcessing ? submitFeedback() : null')
+                button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='!isFormProcessing ? submitFeedback() : null')
                     i.fas.fa-fw.fa-plug.mr-2
                     span(*ngIf="isFormProcessing") Submitting...
                     span(*ngIf="!isFormProcessing") Submit
@@ -83,9 +78,8 @@
         .form-group
             .col-md-12.pt-2
                 .input-group.mb-2
-                    .input-group-prepend
-                        .input-group-text
-                            i.fas.fa-fw.fa-envelope
+                    .input-group-text
+                        i.fas.fa-fw.fa-envelope
                     input.form-control(
                         type='text',
                         [placeholder]="'Your email'",

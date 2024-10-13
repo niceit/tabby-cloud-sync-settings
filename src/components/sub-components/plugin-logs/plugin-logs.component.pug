@@ -1,0 +1,68 @@
+.row.pb-1.has-border-top.mt-3.pt-3
+    .col-md-12
+        h3 Tabby Sync Logs
+    .col-md-12.mb-2
+        .alert.alert-warning
+            p.mb-0
+                i.fas.fa-info-circle.mr-2
+                span The logs below are from the plugin itself. You can use the them to trace the plugin's activity.
+
+.row.pb-1.has-border-top.mt-2.pt-2
+    .col-md-12.mb-2
+            p.mb-0
+                i.fas.fa-info-circle.mr-2
+                span You can filter the logs by date.
+
+            p.mb-0
+                i.fas.fa-info-circle.mr-2
+                span You are viewing the logs for: {{queryDate}}.
+
+    .col-md-12.mb-2
+        .row
+            .col-md-4
+                .input-group.mb-2
+                    input.form-control(
+                        type='text',
+                        [placeholder]='"Log Date (DD-MM-YYYY)"',
+                        [(ngModel)]='queryDate',
+                    )
+
+            .col-md-4
+                .input-group.mb-2
+                    input.form-control(
+                        type='number',
+                        [placeholder]='"Limit"',
+                        [(ngModel)]='queryItemLimit',
+                    )
+
+            .col-md-4
+                button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='applyFilter()', [disabled]='isLoadingLogs')
+                    i.fas.fa-fw.fa-filter.mr-2
+                    span([textContent]='"Apply Filter"')
+
+    .col-md-12(*ngIf='isHavingError')
+        .alert.alert-warning
+            p.pb-0.mb-0 {{errorMessage}}
+
+    .col-md-12.mt-2
+        div.log-table
+            table.table.table-striped.table-bordered.table-hover.table-sm
+                thead
+                    tr
+                        th Time
+                        th Level
+                        th Message
+                tbody(*ngIf="items.length")
+                    tr(*ngFor="let item of items")
+                        td {{item.time}}
+                        td([ngClass]="'log-' + item.level") {{item.level}}
+                        td
+                            div.log-message {{item.message}}
+
+                tbody(*ngIf="isLoadingLogs")
+                    tr
+                        td(colspan='3') Loading logs...
+
+                tbody(*ngIf="!isLoadingLogs && !items.length")
+                    tr
+                        td(colspan='3') No logs found.

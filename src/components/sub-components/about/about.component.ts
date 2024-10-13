@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core'
 import { author, support_url, github_url, version, date } from '../../../../package.json'
 import { PlatformService } from 'terminus-core'
+import CloudSyncSettingsData from "../../../data/setting-items";
 
 @Component({
     selector: 'cloud-sync-about',
@@ -10,8 +11,9 @@ import { PlatformService } from 'terminus-core'
 export class CloudSyncAboutComponent implements OnInit {
     info = {
         author: 'Author: ' + author,
-        support_url: 'Plugin support URL: ' + support_url,
+        support_url: 'Plugin Page: ' + support_url,
         github_url: 'Github URL: ' + github_url,
+        buy_me_a_cafe: 'Buy Me A Coffee',
         version: 'Version: ' + version + ' - Updated date ' + date,
     }
 
@@ -29,5 +31,9 @@ export class CloudSyncAboutComponent implements OnInit {
 
     openGitHubUrl (): void {
         this.platform.openExternal(github_url)
+    }
+
+    openDonationPage (): void {
+        this.platform.openExternal(CloudSyncSettingsData.donationUrl)
     }
 }

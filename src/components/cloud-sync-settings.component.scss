@@ -8,6 +8,44 @@
 .tabby-sync-loading {
     position: fixed;
     z-index: 999;
-    right: 10px;
-    bottom: 40px;
+    right: 30px;
+    bottom: 30px;
+    display: none;
+    // fade-out animation
+    animation: fade-out 0.5s;
 }
+.tabby-sync-loading.active {
+    display: block;
+    // animate fade-in
+    animation: fade-in 0.5s;
+}
+.tabby-sync-connection-type.expanded,
+.tabby-sync-connection-type.expanded:hover {
+    background-color: #0059a559;
+}
+.mr-2 {
+    margin-right: 5px;
+}
+.mb-2 {
+    margin-bottom: 5px;
+}
+.ml-2 {
+    margin-left: 5px;
+}
+.ml-3 {
+    margin-left: 10px;
+}
+/* HTML: <div class="loader"></div> */
+.tabby-sync-loading .loader {
+    width: 30px;
+    aspect-ratio: 1;
+    --_c:no-repeat radial-gradient(farthest-side,#25b09b 92%,#0000);
+    background:
+        var(--_c) top,
+        var(--_c) left,
+        var(--_c) right,
+        var(--_c) bottom;
+    background-size: 12px 12px;
+    animation: l7 1s infinite;
+}
+@keyframes l7 {to{transform: rotate(.5turn)}}

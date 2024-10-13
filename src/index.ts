@@ -22,6 +22,9 @@ import { ChangeLogsComponent } from './components/change-logs/change-logs.compon
 import { SupportUsComponent } from './components/support-us/support-us.component'
 import CloudSyncSettingsData from './data/setting-items'
 import { CheckForUpdatesComponent } from './components/sub-components/check-for-updates/check-for-updates.component'
+import {CloudSyncDropboxSettingsComponent} from "./components/sub-components/dropbox/dropbox-settings.component";
+import Logger from "./utils/Logger";
+import {PluginLogsComponent} from "./components/sub-components/plugin-logs/plugin-logs.component";
 
 let autoSynInProgress = false
 let autoSynIntervalInstance = null
@@ -52,16 +55,19 @@ let initAutoSynIntervalFrequency = CloudSyncSettingsData.defaultSyncInterval * 1
         ChangeLogsComponent,
         SupportUsComponent,
         CheckForUpdatesComponent,
+        PluginLogsComponent,
         ToggleComponent,
+        CloudSyncDropboxSettingsComponent,
     ],
 })
-
 
 export default class CloudSyncSettingsModule {
     constructor (private app: AppService,
         private platform: PlatformService,
         private toast: ToastrService,
         private configService: ConfigService) {
+        this.injectLoaderIndicator()
+        SettingsHelper.loadPluginSettings(this.platform)
         setTimeout(async () => {
             await this.syncCloudSettings().then(() => {
                 setTimeout(() => {
@@ -74,32 +80,78 @@ export default class CloudSyncSettingsModule {
     }
 
     subscribeToAutoSyncEvent (): void {
-        // Auto Sync between local and remote every 30s
+        // Auto Sync between local and remote every interval config set
         autoSynIntervalInstance = setTimeout(() => {
             this.syncCloudSettings().then()
         }, initAutoSynIntervalFrequency)
     }
 
     subscribeToConfigChangeEvent (): void {
+        const logger = new Logger(this.platform)
         this.configService.changed$.subscribe(async () => {
-            await SettingsHelper.syncLocalSettingsToCloud(this.platform, this.toast).then(() => { /* TODO document why this arrow function is empty */ })
+            if (autoSynInProgress) {
+                logger.log('Config changed. But auto sync is in progress. Skipping...')
+                return
+            }
+
+            logger.log('Config changed. Syncing local settings to cloud...')
+            this.showLoaderIndicator()
+            await SettingsHelper.syncLocalSettingsToCloud(this.platform, this.toast).then(() => {
+                this.hideLoaderIndicator()
+            }).catch((err) => {
+                this.hideLoaderIndicator()
+                logger.log('Error while syncing local settings to cloud: ' + err.message, 'error')
+                this.toast.error(err.message)
+            })
         })
     }
 
     async syncCloudSettings (): Promise<void> {
+        const logger = new Logger(this.platform)
         if (!autoSynInProgress) {
             autoSynInProgress = true
             const savedConfigs = SettingsHelper.readConfigFile(this.platform)
             if (savedConfigs?.enabled) {
-                console.warn('Tabby Auto Sync Started ' + new Date().toLocaleString())
+                if (savedConfigs?.showLoader) {
+                    this.showLoaderIndicator()
+                }
+
+                logger.log('Tabby Auto Sync Started ' + new Date().toLocaleString())
                 initAutoSynIntervalFrequency = (savedConfigs?.interval_insync || CloudSyncSettingsData.defaultSyncInterval) * 1000
                 await SettingsHelper.syncWithCloud(this.configService, this.platform, this.toast).then(() => {
-                    autoSynInProgress = false
-                    this.subscribeToAutoSyncEvent()
+                    logger.log('Tabby Auto Sync Completed ' + new Date().toLocaleString())
+                    setTimeout(() => {
+                        autoSynInProgress = false
+                        this.subscribeToAutoSyncEvent()
+                    }, 1500)
+
+                    setTimeout(() => {
+                        this.hideLoaderIndicator()
+                    }, 3000)
                 })
+            } else {
+                logger.log('Tabby Auto Sync Disabled ' + new Date().toLocaleString())
             }
         } else {
             clearTimeout(autoSynIntervalInstance)
         }
+    }
+
+    injectLoaderIndicator (): void {
+        // Add an element to the end of body
+        const loader = document.createElement('div')
+        loader.classList.add('tabby-sync-loading')
+        loader.innerHTML = '<div class="loader"></div>'
+        document.body.appendChild(loader)
+    }
+
+    showLoaderIndicator (): void {
+        // @ts-ignore
+        document.querySelector('.tabby-sync-loading').classList.add('active')
+    }
+
+    hideLoaderIndicator (): void {
+        // @ts-ignore
+        document.querySelector('.tabby-sync-loading').classList.remove('active')
     }
 }

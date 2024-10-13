@@ -31,6 +31,8 @@ This plugin is **FREE** of use under public license MIT.
 ![](./screenshots/cloud-services/cloud-services-blackblaze.png)
 ![](./screenshots/cloud-services/cloud-services-github.png)
 ![](./screenshots/cloud-services/cloud-services-gitlab.png)
+![](./screenshots/cloud-services/cloud-services-koofr.png)
+![](./screenshots/cloud-services/cloud-services-dropbox.png)
 
 ## Checkout some screenshots
 
@@ -66,6 +68,15 @@ Hope you will like this plugin for your productivity work.
 ----
 
 Keep tracking of version release change logs
+
+## [v1.6.5] - 2014-10-14
+
+- Dropbox official supported.
+- Plugin logs supported.
+- Optimize the sync feature.
+- Fix known bugs
+- UI Adjustments according to Tabby newer version.
+
 
 ## [v1.6.0] - 2023-02-17
 
