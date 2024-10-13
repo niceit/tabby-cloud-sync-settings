@@ -69,7 +69,7 @@ Hope you will like this plugin for your productivity work.
 
 Keep tracking of version release change logs
 
-## [v1.6.5] - 2014-10-14
+## [v1.6.5] - 2024-10-14
 
 - Dropbox official supported.
 - Plugin logs supported.
