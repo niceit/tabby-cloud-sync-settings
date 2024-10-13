@@ -31,6 +31,8 @@ This plugin is **FREE** of use under public license MIT.
 ![](./screenshots/cloud-services/cloud-services-blackblaze.png)
 ![](./screenshots/cloud-services/cloud-services-github.png)
 ![](./screenshots/cloud-services/cloud-services-gitlab.png)
+![](./screenshots/cloud-services/cloud-services-koofr.png)
+![](./screenshots/cloud-services/cloud-services-dropbox.png)
 
 ## Checkout some screenshots
 

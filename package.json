@@ -1,7 +1,7 @@
 {
   "name": "terminus-cloud-settings-sync",
-  "version": "1.6.0",
-  "date": "17th Febuary 2023",
+  "version": "1.6.5",
+  "date": ".. October 2024",
   "description": "Cloud Services sync the Tabby config and connections across platform devices.",
   "keywords": [
     "terminus-plugin"
@@ -20,7 +20,7 @@
     "dist"
   ],
   "author": "TranIT - tran.tuan@tranit.co",
-  "support_url": "https://tabby-cloud.tranit.co",
+  "support_url": "https://tabby-sync.github.io/",
   "github_url": "https://www.github.com/niceit/tabby-cloud-sync-settings",
   "license": "MIT",
   "devDependencies": {
@@ -86,5 +86,5 @@
   "bugs": {
     "url": "https://github.com/niceit/tabby-cloud-sync-settings/issues"
   },
-  "homepage": "https://tabby-cloud.tranit.co"
+  "homepage": "https://tabby-sync.github.io/"
 }
