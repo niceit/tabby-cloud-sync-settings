@@ -69,6 +69,15 @@ Hope you will like this plugin for your productivity work.
 
 Keep tracking of version release change logs
 
+## [v1.6.5] - 2014-10-14
+
+- Dropbox official supported.
+- Plugin logs supported.
+- Optimize the sync feature.
+- Fix known bugs
+- UI Adjustments according to Tabby newer version.
+
+
 ## [v1.6.0] - 2023-02-17
 
 - Fix WebDav init sync issue.
