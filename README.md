@@ -57,12 +57,6 @@ Hope you will like this plugin for your productivity work.
 
 [![Donate to TranIT](https://tranit.co/donate-tranit.png)](https://donorbox.org/tabby-cloud-sync-settings-donation)
 
-## Project supported by <a href="https://jb.gg/OpenSourceSupport" target="_blank">Jetbrains</a>. Special thanks!
-
-----
-
-<a href="https://jb.gg/OpenSourceSupport" target="_blank"><img width="250" style="width: 250px;" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo."></a>
-
 # Change logs
 
 ----
