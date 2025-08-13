@@ -12,7 +12,7 @@ const AmazonData = {
         { text: 'Asia Pacific (Seoul)', value: 'ap-northeast-2' },
         { text: 'Asia Pacific (Singapore) ap-northeast-2', value: 'ap-southeast-1' },
         { text: 'Asia Pacific (Sydney) ap-southeast-2', value: 'ap-southeast-2' },
-        { text: 'Asia Pacific (Jakarta) ap-southeast-3', value: 'ap-southeast-2' },
+        { text: 'Asia Pacific (Jakarta) ap-southeast-3', value: 'ap-southeast-3' },
         { text: 'Asia Pacific (Tokyo) ap-southeast-1', value: 'ap-northeast-1' },
         { text: 'Canada (Central) ca-central-1', value: 'ca-central-1' },
         { text: 'China (Beijing) cn-north-1', value: 'cn-north-1' },
