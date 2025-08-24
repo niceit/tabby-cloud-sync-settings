@@ -2,7 +2,9 @@
 
 ----
 
-### Support for Tabby SSH https://github.com/Eugeny/tabby
+#### ❤️ If you love the project, please Sponsor it so I will have self-fund to keep it long live development. Thanks so much! ❤️
+
+### Plugin for Tabby SSH https://github.com/Eugeny/tabby
 
 <p align="center">
   <a href="https://www.npmjs.com/package/terminus-cloud-settings-sync"><img alt="npm" src="https://img.shields.io/npm/v/terminus-cloud-settings-sync?label=npmjs"></a>
