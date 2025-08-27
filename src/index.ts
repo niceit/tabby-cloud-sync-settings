@@ -94,6 +94,14 @@ export default class CloudSyncSettingsModule {
                 return
             }
 
+            const savedConfigs = SettingsHelper.readConfigFile(this.platform)
+            if (!savedConfigs?.enabled) {
+                logger.log('Config changed. But sync is disabled. Skipping...')
+                // Reset autoSynInProgress when sync is disabled to prevent stuck state
+                autoSynInProgress = false
+                return
+            }
+
             logger.log('Config changed. Syncing local settings to cloud...')
             this.showLoaderIndicator()
             await SettingsHelper.syncLocalSettingsToCloud(this.platform, this.toast).then(() => {
@@ -109,9 +117,9 @@ export default class CloudSyncSettingsModule {
     async syncCloudSettings (): Promise<void> {
         const logger = new Logger(this.platform)
         if (!autoSynInProgress) {
-            autoSynInProgress = true
             const savedConfigs = SettingsHelper.readConfigFile(this.platform)
             if (savedConfigs?.enabled) {
+                autoSynInProgress = true
                 if (savedConfigs?.showLoader) {
                     this.showLoaderIndicator()
                 }
@@ -131,6 +139,8 @@ export default class CloudSyncSettingsModule {
                 })
             } else {
                 logger.log('Tabby Auto Sync Disabled ' + new Date().toLocaleString())
+                // Reset autoSynInProgress when sync is disabled to prevent stuck state
+                autoSynInProgress = false
             }
         } else {
             clearTimeout(autoSynIntervalInstance)
