@@ -1,11 +1,12 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import CloudSyncSettingsData from '../../../data/setting-items'
 import { AuthType, createClient } from 'webdav'
 import Lang from '../../../data/lang'
 import SettingsHelper from '../../../utils/settings-helper'
 import { ConfigService, PlatformService } from 'terminus-core'
-import { ToastrService } from 'ngx-toastr'
 import CloudSyncLang from '../../../data/lang'
+import PluginToast from '../../../services/toast'
+import { SyncResult } from '../../../interface'
 import Logger from '../../../utils/Logger'
 import WebDav from '../../../utils/cloud-components/WebDav'
 
@@ -23,9 +24,6 @@ interface formData {
     styles: [require('./webdav-settings.component.scss')],
 })
 export class CloudSyncWebDavSettingsComponent implements OnInit {
-    @Output() resetFormMessages = new EventEmitter()
-    @Output() setFormMessage = new EventEmitter()
-
     translate = CloudSyncLang
     presetData = CloudSyncSettingsData
     isPreloadingSavedConfig = true
@@ -36,31 +34,25 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
 
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.WEBDAV] as formData
 
-    constructor (private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
+    constructor (private config: ConfigService, private platform: PlatformService) {
 
     }
 
     ngOnInit (): void {
         const configs = SettingsHelper.readConfigFile(this.platform)
-        if (configs) {
-            if (configs.adapter === this.presetData.values.WEBDAV) {
-                this.form = configs.configs as formData
-                this.isSettingSaved = true
-            }
+        if (configs && configs.adapter === this.presetData.values.WEBDAV) {
+            this.form = { ...configs.configs } as formData
+            this.isSettingSaved = true
         }
         this.isPreloadingSavedConfig = false
     }
 
     async testConnection (): Promise<void> {
         const logger = new Logger(this.platform)
-        this.resetFormMessages.emit()
         let isFormValidated = true
         for (const idx in this.form) {
             if (this.form[idx].trim() === '' && idx !== 'port') {
-                this.setFormMessage.emit({
-                    message: Lang.trans('form.error.required_all'),
-                    type: 'error',
-                })
+                PluginToast.error(Lang.trans('form.error.required_all'))
                 isFormValidated = false
                 break
             }
@@ -78,58 +70,41 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
                     ? this.form.location.substr(0, this.form.location.length - 1)
                     : this.form.location
             }
+            const testFile = this.form.location + '/test.txt'
 
             try {
-                await client.putFileContents(this.form.location + 'test.txt', 'Test content', { overwrite: true }).then(() => {
-                    this.isFormProcessing = false
-                    this.isCheckLoginSuccess = true
-                    this.setFormMessage.emit({
-                        message: Lang.trans('sync.setting_valid'),
-                        type: 'success',
-                    })
-                    client.deleteFile(this.form.location + 'test.txt')
-                })
+                await client.putFileContents(testFile, 'Test content', { overwrite: true })
+                this.isFormProcessing = false
+                this.isCheckLoginSuccess = true
+                PluginToast.success(Lang.trans('sync.setting_valid'))
+                await client.deleteFile(testFile)
             } catch (e) {
                 this.isFormProcessing = false
-                this.setFormMessage.emit({
-                    message: Lang.trans('sync.error_connection'),
-                    type: 'error',
-                })
+                PluginToast.error(Lang.trans('sync.error_connection'))
                 logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + e.toString(), 'error')
             }
         }
     }
 
     async saveSettings (): Promise<void> {
-        this.resetFormMessages.emit()
         this.isFormProcessing = true
         SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.WEBDAV, this.form).then(result => {
             this.isFormProcessing = false
             if (!result) {
-                this.setFormMessage.emit({
-                    message: Lang.trans('settings.amazon.save_settings_failed'),
-                    type: 'error',
-                })
+                PluginToast.error(Lang.trans('settings.amazon.save_settings_failed'))
             } else {
+                PluginToast.success(Lang.trans('settings.amazon.save_settings_success'))
                 this.isSettingSaved = true
-                this.setFormMessage.emit({
-                    message: Lang.trans('settings.amazon.save_settings_success'),
-                    type: 'success',
-                })
-                this.isSettingSaved = true
-                SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
-                    const resultCheck = typeof result === 'boolean' ? result : result['result']
-                    if (resultCheck) {
+                this.isSyncingProgress = true
+                SettingsHelper.syncWithCloud(this.config, this.platform, true).then(async (result: SyncResult) => {
+                    if (result.result) {
                         this.config.requestRestart()
                     } else {
-                        this.setFormMessage.emit({
-                            message: typeof result !== 'boolean' && result['message'] ? result['message'] : Lang.trans('sync.sync_server_failed'),
-                            type: 'error',
-                        })
+                        PluginToast.error(result.message || Lang.trans('sync.sync_server_failed'))
                         this.isSettingSaved = false
                         this.isCheckLoginSuccess = false
                         this.isPreloadingSavedConfig = false
-                        await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
+                        await SettingsHelper.removeConfirmFile(this.platform, false)
                     }
                     this.isSyncingProgress = false
                 })
@@ -138,35 +113,24 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
     }
 
     async uploadLocalSettings (): Promise<void> {
-        this.resetFormMessages.emit()
         this.isFormProcessing = true
         SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.WEBDAV, this.form).then(result => {
             this.isFormProcessing = false
             if (!result) {
-                this.setFormMessage.emit({
-                    message: Lang.trans('settings.amazon.save_settings_failed') + ' 1',
-                    type: 'error',
-                })
+                PluginToast.error(Lang.trans('settings.amazon.save_settings_failed'))
             } else {
                 this.isSettingSaved = true
-                this.setFormMessage.emit({
-                    message: Lang.trans('settings.amazon.save_settings_success'),
-                    type: 'success',
-                })
-                this.isSettingSaved = true
-                WebDav.syncLocalSettingsToCloud(this.platform, this.toast).then(async (result) => {
-                    const resultCheck = typeof result === 'boolean' ? result : result['result']
-                    if (resultCheck) {
+                PluginToast.success(Lang.trans('settings.amazon.save_settings_success'))
+                this.isSyncingProgress = true
+                WebDav.syncLocalSettingsToCloud(this.platform).then(async (result: SyncResult) => {
+                    if (result.result) {
                         this.config.requestRestart()
                     } else {
-                        this.setFormMessage.emit({
-                            message: (typeof result !== 'boolean' && result['message'] ? result['message'] : Lang.trans('sync.sync_server_failed')) + ' 2',
-                            type: 'error',
-                        })
+                        PluginToast.error(result.message || Lang.trans('sync.sync_server_failed'))
                         this.isSettingSaved = false
                         this.isCheckLoginSuccess = false
                         this.isPreloadingSavedConfig = false
-                        await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
+                        await SettingsHelper.removeConfirmFile(this.platform, false)
                     }
                     this.isSyncingProgress = false
                 })
@@ -175,13 +139,11 @@ export class CloudSyncWebDavSettingsComponent implements OnInit {
     }
 
     cancelSaveSettings (): void {
-        this.resetFormMessages.emit()
         this.isCheckLoginSuccess = false
     }
 
     async removeSavedSettings (): Promise<void> {
-        this.resetFormMessages.emit()
-        const result = await SettingsHelper.removeConfirmFile(this.platform, this.toast)
+        const result = await SettingsHelper.removeConfirmFile(this.platform)
         if (result) {
             this.isSettingSaved = false
             this.isCheckLoginSuccess = false

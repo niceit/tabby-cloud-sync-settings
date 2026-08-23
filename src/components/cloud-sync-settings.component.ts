@@ -1,7 +1,6 @@
-import { compare as semverCompare } from 'semver'
+import { compare as semverCompare, valid as semverValid } from 'semver'
 import { Component, HostBinding, OnInit } from '@angular/core'
 import { ConfigService, PlatformService, BaseComponent } from 'terminus-core'
-import { ToastrService } from 'ngx-toastr'
 import CloudSyncSettingsData from '../data/setting-items'
 import Lang from '../data/lang'
 import SettingsHelper from '../utils/settings-helper'
@@ -9,7 +8,6 @@ import axios from 'axios'
 import { version } from '../../package.json'
 import devConstants from '../services/dev-constants'
 import { ConnectionGroup } from '../interface'
-import Logger from "../utils/Logger";
 
 /** @hidden */
 @Component({
@@ -21,6 +19,7 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     lastVersion = ''
     translate = Lang
     isUpdateAvailable = false
+    updateAvailableMessage = ''
     isDebug = devConstants.ENABLE_DEBUG
 
     serviceProviderValues = CloudSyncSettingsData.values
@@ -40,10 +39,6 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         },
     ]
 
-    form_messages = {
-        errors: [],
-        success: [],
-    }
     syncEnabled = false
     isShowSyncLoader = true
     intervalSync = CloudSyncSettingsData.defaultSyncInterval
@@ -53,14 +48,13 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     @HostBinding('class.content-box') true
     constructor (
         public config: ConfigService,
-        private toast: ToastrService,
         private platform: PlatformService
     ) {
         super()
     }
 
     ngOnInit (): void {
-        this.checkForNewVersion().then()
+        this.checkForNewVersion().catch(() => { /* offline or API unreachable — ignore */ })
         this.storedSettingsData = SettingsHelper.readConfigFile(this.platform)
         if (this.storedSettingsData) {
             this.selectedProvider = this.storedSettingsData.adapter
@@ -72,55 +66,42 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         }
     }
 
+    /**
+     * Queries the npm registry for the latest published version and flags an update
+     * as available when the installed version is older (semver comparison).
+     */
     async checkForNewVersion (): Promise<void> {
-        await axios.get(CloudSyncSettingsData.external_urls.checkForUpdateUrl, {
+        const response = await axios.get(CloudSyncSettingsData.external_urls.checkForUpdateUrl, {
             timeout: 30000,
-        }).then((response) => {
-            const data = response.data
-            if (semverCompare(version, data.version) === -1) {
-                this.isUpdateAvailable = true
-                this.lastVersion = data.version
-            }
         })
+        const latestVersion = response.data?.['dist-tags']?.latest
+        if (typeof latestVersion !== 'string' || !semverValid(latestVersion)) {
+            throw new Error('npm registry returned an invalid latest version')
+        }
+
+        if (semverCompare(version, latestVersion) === -1) {
+            this.isUpdateAvailable = true
+            this.lastVersion = latestVersion
+            this.updateAvailableMessage = Lang.trans('alerts.update_available', { version: latestVersion })
+        }
     }
 
-    onSelectProviderChange (): void {
-        this.resetFormMessages()
-    }
-
+    /** Persists the enabled/disabled state of the sync plugin. */
     async toggleEnableSync(): Promise<void> {
-        await SettingsHelper.toggleEnabledPlugin(this.syncEnabled, this.platform, this.toast)
+        await SettingsHelper.toggleEnabledPlugin(this.syncEnabled, this.platform)
     }
 
+    /** Persists whether the sync loader indicator should be shown. */
     async toggleEnableShowLoader(): Promise<void> {
-        await SettingsHelper.toggleEnabledShowLoader(this.isShowSyncLoader, this.platform, this.toast)
+        await SettingsHelper.toggleEnabledShowLoader(this.isShowSyncLoader, this.platform)
     }
 
+    /** Saves the sync interval and requests an app restart when it changed successfully. */
     onIntervalSyncChanged (): void {
-        SettingsHelper.saveIntervalSync(this.intervalSync, this.platform, this.toast).then((result) => {
+        SettingsHelper.saveIntervalSync(this.intervalSync, this.platform).then((result) => {
             if (result) {
                 this.config.requestRestart()
             }
         })
-    }
-
-    resetFormMessages (): void {
-        this.form_messages.errors = []
-        this.form_messages.success = []
-    }
-
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    setFormMessage (params: any): void {
-        switch (params.type) {
-            case 'success': {
-                this.form_messages.success.push(params.message)
-                break
-            }
-
-            case 'error': {
-                this.form_messages.errors.push(params.message)
-                break
-            }
-        }
     }
 }

@@ -1,24 +1,24 @@
 .form-group(*ngIf='!connectedData.isConnected')
     .header.mb-2
-        .title(*ngIf='!isConnecting', [textContent]="'Connect to Dropbox'")
-        .title(*ngIf='isConnecting', [textContent]="'Authorizing Dropbox...'")
+        .title(*ngIf='!isConnecting', [textContent]='translate.trans("dropbox.title")')
+        .title(*ngIf='isConnecting', [textContent]='translate.trans("dropbox.title_connecting")')
 
 .row(*ngIf='!connectedData.isConnected')
     .col-md-12.mb-2(*ngIf='!isConnecting')
         button.btn.btn-primary.flex-shrink-0.ml-3.mb-2((click)='connect()')
             i.fa.fa-brands.fa-dropbox.mr-2
-            span Connect
+            span([textContent]='translate.trans("buttons.connect")')
 
 .row(*ngIf='!connectedData.isConnected && !isSaveSettingErrored')
     .col-md-12.mb-2(*ngIf='isConnecting')
         button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='cancelConnect()')
             span.spinner-border.spinner-border-sm.mr-2
-            span Cancel
+            span([textContent]='translate.trans("buttons.cancel")')
 
     .col-md-12.mb-2(*ngIf='isConnecting')
         .w-100.d-flex.flex-column
-            h3(translate) Callback URL
-            p After granted access, paste the redirected URL into the textbox below.
+            h3([textContent]='translate.trans("dropbox.callback_title")')
+            p([textContent]='translate.trans("dropbox.callback_hint")')
             textarea.form-control.h-150(
                 [(ngModel)]='callbackUrl',
             )
@@ -26,13 +26,13 @@
     .col-md-12.mb-2(*ngIf='isConnecting')
         button.btn.btn-primary.flex-shrink-0.ml-3.mb-2.mr-2((click)='!isFormProcessing ? handleAuthCallback() : null')
             i.fa.fa-brands.fa-dropbox.mr-2(*ngIf='!isFormProcessing')
-            span(*ngIf='!isFormProcessing', [textContent]='"Obtain Access Token"')
+            span(*ngIf='!isFormProcessing', [textContent]='translate.trans("dropbox.obtain_token")')
             span.spinner-border.spinner-border-sm.mr-2(*ngIf='isFormProcessing')
-            span(*ngIf='isFormProcessing', [textContent]='"Obtaining Access Token..."')
+            span(*ngIf='isFormProcessing', [textContent]='translate.trans("dropbox.obtaining_token")')
 
         button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='pasteFromClipboard()')
             i.fa.fa-paste.mr-2
-            span Paste from Clipboard
+            span([textContent]='translate.trans("dropbox.paste_from_clipboard")')
 
 
 .row(*ngIf='connectedData.isConnected && !isSaveSettingErrored')
@@ -40,24 +40,24 @@
         .alert.alert-success
             p.mb-2
                 i.fas.fa-info-circle.mr-2
-                span Connected: {{connectedData.email}}
+                span([textContent]='connectedLabel')
 
     .col-md-12.mb-2(*ngIf='connectedData.lastErrorMessage')
         .alert.alert-warning
             p.mb-2
                 i.fas.fa-info-circle.mr-2
-                span Sync Errored: {{connectedData.lastErrorMessage}}
+                span([textContent]='lastSyncErrorLabel')
 
     .col-md-12.mb-2(*ngIf='isSettingSaved')
         button.btn.btn-danger.flex-shrink-0.ml-3((click)='disconnectSettings()')
             i.fa.fa-fw.fa-sign-out-alt.mr-2
-            span Disconnect Account
+            span([textContent]='translate.trans("dropbox.disconnect_account")')
 
     .col-md-12.mb-2(*ngIf='!isSettingSaved')
         button.btn.btn-warning.flex-shrink-0.ml-3.mr-2((click)='saveSettings()')
             i.fa.fa-fw.fa-save.mr-2
-            span Save Settings
+            span([textContent]='translate.trans("buttons.save_settings")')
 
         button.btn.btn-danger.flex-shrink-0.ml-3((click)='disconnect()')
             i.fa.fa-fw.fa-sign-out-alt.mr-2
-            span Disconnect
+            span([textContent]='translate.trans("buttons.disconnect")')

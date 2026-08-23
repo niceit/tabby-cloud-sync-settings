@@ -1,6 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 import DevEnvConstants from '../services/dev-constants'
-import DevMockData from '../utils/dev-mock-data'
 
 const providerConstantItems = {
     BUILT_IN: 'builtin-tabby',
@@ -33,8 +31,16 @@ const API_URL = `${DevEnv.ENABLE_DEBUG ? 'http' : 'https' }://tabby-api.tranit.$
 
 const CloudSyncSettingsData = {
     defaultSyncInterval: 20, // 20 seconds
+    /**
+     * Tolerance applied when local and remote timestamps have to decide the sync
+     * direction (only on the very first cycle, before a content baseline
+     * exists). Absorbs client clock drift and the second-level granularity of
+     * FTP `MDTM` / WebDav `lastmod`.
+     */
+    syncSkewToleranceSeconds: 5,
     tabbySettingsFilename: '/config.yaml',
     storedSettingsFilename: '/sync-settings' + (DevEnv.ENABLE_DEBUG ? '-dev': '') + '.json',
+    syncStateFilename: '/sync-state' + (DevEnv.ENABLE_DEBUG ? '-dev': '') + '.json',
     cloudSettingsFilename: '/tabby-settings' + (DevEnv.ENABLE_DEBUG ? '-dev': '') + '.json',
     tabbyLocalEncryptedFile: '/tabby-settings-encrypted.tmp',
     values: providerConstantItems,
@@ -45,8 +51,8 @@ const CloudSyncSettingsData = {
         { name: 'Wasabi', value: providerConstantItems.WASABI },
         { name: 'DigitalOcean Space', value: providerConstantItems.DIGITAL_OCEAN },
         { name: 'Backblaze', value: providerConstantItems.BLACKBLAZE },
-        { name: 'S3 Compatible (Minio, etc...)', value: providerConstantItems.S3_COMPATIBLE },
-        { name: 'WebDav', value: providerConstantItems.WEBDAV },
+        { name: 'S3 Compatible (MinIO, etc.)', value: providerConstantItems.S3_COMPATIBLE },
+        { name: 'WebDAV', value: providerConstantItems.WEBDAV },
         { name: 'Gists', value: providerConstantItems.GIST },
         { name: 'FTP / FTPS', value: providerConstantItems.FTP },
         { name: 'Dropbox', value: providerConstantItems.DROPBOX },
@@ -148,7 +154,8 @@ const CloudSyncSettingsData = {
     external_urls: {
         ApiUrl: API_URL,
         BlackBlazeHelp: API_URL + '/how-to-get-blackblaze-regtion-code/',
-        checkForUpdateUrl: API_URL + '/tabby-sync/check-for-updates'
+        checkForUpdateUrl: 'https://registry.npmjs.org/terminus-cloud-settings-sync',
+        githubIssuesUrl: 'https://github.com/niceit/tabby-cloud-sync-settings/issues',
     },
     isCloudStorageS3Compatibility (provider: string): boolean {
         return amazonS3CompatibilityInstances.includes(provider)

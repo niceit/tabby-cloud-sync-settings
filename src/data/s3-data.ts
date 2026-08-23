@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 const AmazonData = {
     regions: [
         { text: 'US East (Ohio) us-east-2', value: 'us-east-2' },

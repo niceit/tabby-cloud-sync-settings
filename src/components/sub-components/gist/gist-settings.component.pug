@@ -87,5 +87,5 @@
 
     .row-mt-3
         .col-md-12
-            small.help-text(*ngIf="form.type === 'github'", (click)="goToHelpLink('github')") Gists are one feature of GitHub, which defines them as "a simple way to share snippets and pastes with others."
-            small.help-text(*ngIf="form.type === 'gitee'", (click)="goToHelpLink('gitee')") Collaboration platform for software development & code hosting, has over 6 million registered members and 15 million projects hosted. Providing Enterprise Services since 2016, been a leading SAAS provider in developer business.
+            small.help-text(*ngIf="form.type === 'github'", (click)="goToHelpLink('github')", [textContent]='translate.trans("gist.help_github")')
+            small.help-text(*ngIf="form.type === 'gitee'", (click)="goToHelpLink('gitee')", [textContent]='translate.trans("gist.help_gitee")')

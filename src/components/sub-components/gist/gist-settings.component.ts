@@ -1,10 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-import { Component, EventEmitter, OnInit, Output } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import CloudSyncSettingsData from '../../../data/setting-items'
 import SettingsHelper from '../../../utils/settings-helper'
 import { ConfigService, PlatformService } from 'terminus-core'
-import { ToastrService } from 'ngx-toastr'
 import CloudSyncLang from '../../../data/lang'
+import PluginToast from '../../../services/toast'
+import { SyncResult } from '../../../interface'
 import Logger from '../../../utils/Logger'
 import Github from '../../../utils/cloud-components/gists/github'
 import Gitee from '../../../utils/cloud-components/gists/gitee'
@@ -23,9 +23,6 @@ interface formData {
     styles: [require('./gist-settings.component.scss')],
 })
 export class CloudSyncGistSettingsComponent implements OnInit {
-    @Output() resetFormMessages = new EventEmitter()
-    @Output() setFormMessage = new EventEmitter()
-
     translate = CloudSyncLang
     presetData = CloudSyncSettingsData
     isPreloadingSavedConfig = true
@@ -38,24 +35,22 @@ export class CloudSyncGistSettingsComponent implements OnInit {
 
     passwordFieldType = 'password'
     gistTypeChoices = [
-        { value: 'github', name: 'Github' },
+        { value: 'github', name: 'GitHub' },
         // { value: 'gitee', name: 'Gitee' }, // TODO Tran Implement
-        { value: 'gitlab', name: 'Gitlab' },
+        { value: 'gitlab', name: 'GitLab' },
         // { value: 'bitbucket', name: 'Bitbucket' }, // TODO Tran Implement
     ]
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.GIST] as formData
 
-    constructor (private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
+    constructor (private config: ConfigService, private platform: PlatformService) {
 
     }
 
     ngOnInit (): void {
         const configs = SettingsHelper.readConfigFile(this.platform)
-        if (configs) {
-            if (configs.adapter === this.presetData.values.GIST) {
-                this.form = configs.configs as formData
-                this.isSettingSaved = true
-            }
+        if (configs && configs.adapter === this.presetData.values.GIST) {
+            this.form = { ...configs.configs } as formData
+            this.isSettingSaved = true
         }
         this.isPreloadingSavedConfig = false
     }
@@ -66,14 +61,10 @@ export class CloudSyncGistSettingsComponent implements OnInit {
 
     async testConnection (): Promise<void> {
         const logger = new Logger(this.platform)
-        this.resetFormMessages.emit()
         let isFormValidated = true
         for (const idx in this.form) {
             if (this.form[idx].trim() === '' && !['name', 'id'].includes(idx)) {
-                this.setFormMessage.emit({
-                    message: CloudSyncLang.trans('form.error.required_all'),
-                    type: 'error',
-                })
+                PluginToast.error(CloudSyncLang.trans('form.error.required_all'))
                 isFormValidated = false
                 break
             }
@@ -101,78 +92,51 @@ export class CloudSyncGistSettingsComponent implements OnInit {
                 }
 
                 if ($component) {
-                    $component.testConnection(this.platform, this.createGistIfNotExist).then(response => {
+                    $component.testConnection(this.platform).then(response => {
                         this.isFormProcessing = false
-                        console.info('Test Result', response)
                         if (response.hasOwnProperty('code') && parseInt(response.code) === 0) {
-                            this.setFormMessage.emit({
-                                message: response.message,
-                                type: 'error',
-                            })
+                            PluginToast.error(response.message)
                         } else {
-                            this.setFormMessage.emit({
-                                message: CloudSyncLang.trans('settings.amazon.connected'),
-                                type: 'success',
-                            })
+                            PluginToast.success(CloudSyncLang.trans('settings.amazon.connected'))
                             this.isCheckLoginSuccess = true
                             if (!this.form.id) {
                                 this.form.id = response.data.id
                             }
                         }
                     }).catch((err) => {
-                        console.log('error | ', err)
+                        logger.log('Gist test connection error: ' + err.toString(), 'error')
                         this.isFormProcessing = false
                     })
                 } else {
-                    this.setFormMessage.emit({
-                        message: CloudSyncLang.trans('gist.invalid_provider'),
-                        type: 'success',
-                    })
+                    PluginToast.success(CloudSyncLang.trans('gist.invalid_provider'))
                 }
             } catch (e) {
                 this.isFormProcessing = false
-                this.setFormMessage.emit({
-                    message: CloudSyncLang.trans('sync.error_connection'),
-                    type: 'error',
-                })
+                PluginToast.error(CloudSyncLang.trans('sync.error_connection'))
                 logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + e.toString(), 'error')
             }
         }
     }
 
     async saveSettings (): Promise<void> {
-        this.resetFormMessages.emit()
         this.isFormProcessing = true
         SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.GIST, this.form).then(async result => {
             this.isFormProcessing = false
             if (!result) {
-                this.setFormMessage.emit({
-                    message: CloudSyncLang.trans('settings.amazon.save_settings_failed'),
-                    type: 'error',
-                })
+                PluginToast.error(CloudSyncLang.trans('settings.amazon.save_settings_failed'))
             } else {
-                this.setFormMessage.emit({
-                    message: CloudSyncLang.trans('settings.amazon.save_settings_success'),
-                    type: 'success',
-                })
+                PluginToast.success(CloudSyncLang.trans('settings.amazon.save_settings_success'))
                 this.isSettingSaved = true
                 this.isSyncingProgress = true
-                await SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (subResult: any) => {
-                    const resultCheck = typeof subResult === 'boolean' ? subResult : subResult['result']
-                    if (resultCheck) {
+                await SettingsHelper.syncWithCloud(this.config, this.platform, true).then(async (subResult: SyncResult) => {
+                    if (subResult.result) {
                         this.config.requestRestart()
                     } else {
-                        this.resetFormMessages.emit()
-                        this.setFormMessage.emit({
-                            message: typeof subResult !== 'boolean' && subResult['message']
-                                ? subResult['message']
-                                : CloudSyncLang.trans('sync.sync_server_failed'),
-                            type: 'error',
-                        })
+                        PluginToast.error(subResult.message || CloudSyncLang.trans('sync.sync_server_failed'))
                         this.isSettingSaved = false
                         this.isCheckLoginSuccess = false
                         this.isPreloadingSavedConfig = false
-                        await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
+                        await SettingsHelper.removeConfirmFile(this.platform, false)
                     }
                     this.isSyncingProgress = false
                 })
@@ -181,13 +145,11 @@ export class CloudSyncGistSettingsComponent implements OnInit {
     }
 
     cancelSaveSettings (): void {
-        this.resetFormMessages.emit()
         this.isCheckLoginSuccess = false
     }
 
     async removeSavedSettings (): Promise<void> {
-        this.resetFormMessages.emit()
-        const result = await SettingsHelper.removeConfirmFile(this.platform, this.toast)
+        const result = await SettingsHelper.removeConfirmFile(this.platform)
         if (result) {
             this.isSettingSaved = false
             this.isCheckLoginSuccess = false
@@ -208,7 +170,7 @@ export class CloudSyncGistSettingsComponent implements OnInit {
             }
             this.platform.openExternal(platformViewUrl + this.form.id)
         } else {
-            this.toast.error(this.translate.trans('gist.enter_id'))
+            PluginToast.error(this.translate.trans('gist.enter_id'))
         }
     }
 

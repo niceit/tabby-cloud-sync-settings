@@ -62,7 +62,7 @@
 
                 input.form-control(*ngIf='[presetData.values.BLACKBLAZE, presetData.values.S3_COMPATIBLE].includes(provider)',
                     [disabled]='isSettingSaved || isServiceAccountCheckPassed',
-                    [placeholder]='provider === presetData.values.BLACKBLAZE ? translate.trans("s3.blackblaze_bucket_placeholder") : translate.trans("s3.region_placeholder")',
+                    [placeholder]='provider === presetData.values.BLACKBLAZE ? translate.trans("s3.blackblaze_region_placeholder") : translate.trans("s3.region_placeholder")',
                     [(ngModel)]='form.region')
 
             .input-group.mb-2
@@ -76,7 +76,7 @@
                 )
 
             .col-md-12
-                small.blackblaze-help(*ngIf='provider === presetData.values.BLACKBLAZE', (click)='openBlackBlazeRegionHelp()') Learn how to get BlackBlaze B2 Region code
+                small.blackblaze-help(*ngIf='provider === presetData.values.BLACKBLAZE', (click)='openBlackBlazeRegionHelp()', [textContent]='translate.trans("s3.blackblaze_region_help")')
 
     .row.mt-3(*ngIf='!isSettingSaved')
         .col-md-12.col-sm-12.pl-0(*ngIf='!isServiceAccountCheckPassed')

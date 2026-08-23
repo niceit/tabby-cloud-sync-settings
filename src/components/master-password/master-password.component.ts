@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core'
+import CloudSyncLang from '../../data/lang'
 
 @Component({
     selector: 'master-password-form',
@@ -6,6 +7,7 @@ import { Component, OnInit } from '@angular/core'
     styles: [require('./master-password.component.scss')],
 })
 export class MasterPasswordComponent implements OnInit {
+    translate = CloudSyncLang
     form = {
         password: '',
         reTypePassword: '',

@@ -1,10 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-import { Component, EventEmitter, OnInit, Output } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import CloudSyncSettingsData from '../../../data/setting-items'
 import SettingsHelper from '../../../utils/settings-helper'
 import { ConfigService, PlatformService } from 'terminus-core'
-import { ToastrService } from 'ngx-toastr'
 import CloudSyncLang from '../../../data/lang'
+import PluginToast from '../../../services/toast'
+import { SyncResult } from '../../../interface'
 import Logger from '../../../utils/Logger'
 
 interface formData {
@@ -22,9 +22,6 @@ interface formData {
     styles: [require('./ftp-settings.component.scss')],
 })
 export class CloudSyncFtpSettingsComponent implements OnInit {
-    @Output() resetFormMessages = new EventEmitter()
-    @Output() setFormMessage = new EventEmitter()
-
     translate = CloudSyncLang
     presetData = CloudSyncSettingsData
     isPreloadingSavedConfig = true
@@ -41,17 +38,15 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     ]
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.FTP] as formData
 
-    constructor (private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
+    constructor (private config: ConfigService, private platform: PlatformService) {
 
     }
 
     ngOnInit (): void {
         const configs = SettingsHelper.readConfigFile(this.platform)
-        if (configs) {
-            if (configs.adapter === this.presetData.values.FTP) {
-                this.form = configs.configs as formData
-                this.isSettingSaved = true
-            }
+        if (configs && configs.adapter === this.presetData.values.FTP) {
+            this.form = { ...configs.configs } as formData
+            this.isSettingSaved = true
         }
         this.isPreloadingSavedConfig = false
     }
@@ -62,14 +57,10 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
 
     async testConnection (): Promise<void> {
         const logger = new Logger(this.platform)
-        this.resetFormMessages.emit()
         let isFormValidated = true
         for (const idx in this.form) {
             if (this.form[idx].toString().trim() === '') {
-                this.setFormMessage.emit({
-                    message: CloudSyncLang.trans('form.error.required_all'),
-                    type: 'error',
-                })
+                PluginToast.error(CloudSyncLang.trans('form.error.required_all'))
                 isFormValidated = false
                 break
             }
@@ -100,23 +91,14 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
                         this.isFormProcessing = false
                         if (result.code === 220) {
                             this.isCheckLoginSuccess = true
-                            this.setFormMessage.emit({
-                                message: CloudSyncLang.trans('sync.setting_valid'),
-                                type: 'success',
-                            })
+                            PluginToast.success(CloudSyncLang.trans('sync.setting_valid'))
                         } else {
-                            this.setFormMessage.emit({
-                                message: CloudSyncLang.trans('sync.error_setting_save_file'),
-                                type: 'error',
-                            })
+                            PluginToast.error(CloudSyncLang.trans('sync.error_setting_save_file'))
                         }
                     })
             } catch (e) {
                 this.isFormProcessing = false
-                this.setFormMessage.emit({
-                    message: CloudSyncLang.trans('sync.error_connection'),
-                    type: 'error',
-                })
+                PluginToast.error(CloudSyncLang.trans('sync.error_connection'))
                 logger.log(CloudSyncLang.trans('log.error_test_connection') + ' | Exception: ' + e.toString(), 'error')
             }
 
@@ -127,36 +109,24 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     }
 
     async saveSettings (): Promise<void> {
-        this.resetFormMessages.emit()
         this.isFormProcessing = true
         SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.FTP, this.form).then(async result => {
             this.isFormProcessing = false
             if (!result) {
-                this.setFormMessage.emit({
-                    message: CloudSyncLang.trans('settings.amazon.save_settings_failed'),
-                    type: 'error',
-                })
+                PluginToast.error(CloudSyncLang.trans('settings.amazon.save_settings_failed'))
             } else {
-                this.setFormMessage.emit({
-                    message: CloudSyncLang.trans('settings.amazon.save_settings_success'),
-                    type: 'success',
-                })
+                PluginToast.success(CloudSyncLang.trans('settings.amazon.save_settings_success'))
                 this.isSettingSaved = true
                 this.isSyncingProgress = true
-                await SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (result) => {
-                    const resultCheck = typeof result === 'boolean' ? result : result['result']
-                    console.log('RESULT', result)
-                    if (resultCheck) {
+                await SettingsHelper.syncWithCloud(this.config, this.platform, true).then(async (result: SyncResult) => {
+                    if (result.result) {
                         this.config.requestRestart()
                     } else {
-                        this.setFormMessage.emit({
-                            message: typeof result !== 'boolean' && result['message'] ? result['message'] : CloudSyncLang.trans('sync.sync_server_failed'),
-                            type: 'error',
-                        })
+                        PluginToast.error(result.message || CloudSyncLang.trans('sync.sync_server_failed'))
                         this.isSettingSaved = false
                         this.isCheckLoginSuccess = false
                         this.isPreloadingSavedConfig = false
-                        await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
+                        await SettingsHelper.removeConfirmFile(this.platform, false)
                     }
                     this.isSyncingProgress = false
                 })
@@ -165,13 +135,11 @@ export class CloudSyncFtpSettingsComponent implements OnInit {
     }
 
     cancelSaveSettings (): void {
-        this.resetFormMessages.emit()
         this.isCheckLoginSuccess = false
     }
 
     async removeSavedSettings (): Promise<void> {
-        this.resetFormMessages.emit()
-        const result = await SettingsHelper.removeConfirmFile(this.platform, this.toast)
+        const result = await SettingsHelper.removeConfirmFile(this.platform)
         if (result) {
             this.isSettingSaved = false
             this.isCheckLoginSuccess = false

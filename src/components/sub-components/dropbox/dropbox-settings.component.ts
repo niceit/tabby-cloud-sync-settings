@@ -1,14 +1,11 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-import { Component, EventEmitter, OnInit, Output } from '@angular/core'
+import { Component, EventEmitter, OnInit } from '@angular/core'
 import CloudSyncSettingsData from '../../../data/setting-items'
 import SettingsHelper from '../../../utils/settings-helper'
 import { ConfigService, PlatformService } from 'terminus-core'
-import { ToastrService } from 'ngx-toastr'
 import CloudSyncLang from '../../../data/lang'
+import PluginToast from '../../../services/toast'
 import Logger from '../../../utils/Logger'
-import {Dropbox} from "dropbox";
-import * as url from "node:url";
-import Lang from "../../../data/lang";
+import { Dropbox } from 'dropbox'
 
 @Component({
     selector: 'dropbox-settings',
@@ -16,10 +13,6 @@ import Lang from "../../../data/lang";
     styles: [require('./dropbox-settings.component.scss')],
 })
 export class CloudSyncDropboxSettingsComponent implements OnInit {
-    @Output() resetFormMessages = new EventEmitter()
-    @Output() setFormMessage = new EventEmitter()
-
-
     private dropboxServiceEmitter = new EventEmitter()
     private dbx: Dropbox
 
@@ -41,87 +34,86 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
     isSaveSettingErrored = false
     callbackUrl = ''
 
-    constructor(private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {
+    get connectedLabel (): string {
+        return CloudSyncLang.trans('dropbox.connected', { email: this.connectedData.email })
+    }
+
+    get lastSyncErrorLabel (): string {
+        return CloudSyncLang.trans('dropbox.last_sync_error', { message: this.connectedData.lastErrorMessage })
+    }
+
+    constructor (private config: ConfigService, private platform: PlatformService) {
         const logger = new Logger(this.platform)
-        if (!CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiKey || !CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiSecret) {
-            this.toast.error('Unable to fetch Dropbox settings. Please contact support.')
-            logger.log('Unable to fetch Dropbox settings. Please contact support.')
+        const dropboxForm = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX]
+        if (!dropboxForm.apiKey || !dropboxForm.apiSecret) {
+            PluginToast.error(CloudSyncLang.trans('dropbox.missing_app_credentials'))
+            logger.log(CloudSyncLang.trans('dropbox.missing_app_credentials'))
         } else {
-            this.dbx = new Dropbox({clientId: CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiKey, clientSecret: CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiSecret})
+            this.dbx = new Dropbox({ clientId: dropboxForm.apiKey, clientSecret: dropboxForm.apiSecret })
         }
     }
 
     ngOnInit (): void {
         const configs = SettingsHelper.readConfigFile(this.platform)
-        if (configs) {
-            if (configs.adapter === this.presetData.values.DROPBOX) {
-                this.connectedData = configs.configs
-                this.isSettingSaved = true
-            }
+        if (configs && configs.adapter === this.presetData.values.DROPBOX) {
+            this.connectedData = { ...configs.configs }
+            this.isSettingSaved = true
         }
 
         this.dropboxServiceEmitter.subscribe(async (event: { action: string, result: boolean, message?: string }) => {
-            switch (event.action) {
-                case 'dropbox-sync-complete': {
-                    if (event.result) {
-                        this.isSettingSaved = true
-                        this.config.requestRestart()
-                    } else {
-                        this.resetFormMessages.emit()
-                        this.disconnect()
-                        this.setFormMessage.emit({
-                            message: event.message,
-                            type: 'error',
-                        })
+            if (event.action === 'dropbox-sync-complete') {
+                if (event.result) {
+                    this.isSettingSaved = true
+                    this.config.requestRestart()
+                } else {
+                    this.disconnect()
+                    PluginToast.error(event.message)
 
-                        this.isSettingSaved = false
-                        this.isSaveSettingErrored = true
-                        await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
-                    }
-                    break
+                    this.isSettingSaved = false
+                    this.isSaveSettingErrored = true
+                    await SettingsHelper.removeConfirmFile(this.platform, false)
                 }
             }
         })
     }
 
     async connect (): Promise<void> {
-        this.resetFormMessages.emit()
         if (!this.dbx) {
-            this.toast.error('Unable to fetch Dropbox settings. Please contact support.')
+            PluginToast.error(CloudSyncLang.trans('dropbox.missing_app_credentials'))
             return
         }
-        const dbx = this.dbx;
+        const dbx = this.dbx
+        const logger = new Logger(this.platform)
         this.isConnecting = true
         // @ts-ignore
         dbx.auth.getAuthenticationUrl('http://localhost', null, 'code', 'offline', null, 'none', false)
             .then((authUrl) => {
-                console.log(`authUrl:${authUrl}`);
+                logger.log(`authUrl:${authUrl}`)
                 this.platform.openExternal(authUrl)
-            });
+            })
     }
 
-    handleAuthCallback() {
+    handleAuthCallback (): void {
         if (!this.callbackUrl) {
-            this.toast.error('Callback URL is not set')
+            PluginToast.error(CloudSyncLang.trans('dropbox.missing_callback_url'))
+            return
         }
 
         this.isFormProcessing = true
-        const dbx = this.dbx;
+        const dbx = this.dbx
         const logger = new Logger(this.platform)
 
-        const { code } = url.parse(this.callbackUrl, true).query;
-        logger.log(`code:${code}`);
+        const code = new URL(this.callbackUrl).searchParams.get('code')
+        logger.log(`code:${code}`)
 
         // @ts-ignore
         dbx.auth.getAccessTokenFromCode('http://localhost', code)
             .then((token: any) => {
-                console.log(`Token Result:${JSON.stringify(token)}`);
                 // @ts-ignore
-                dbx.auth.setRefreshToken(token.result.refresh_token);
+                dbx.auth.setRefreshToken(token.result.refresh_token)
                 dbx.usersGetCurrentAccount()
                     .then((response) => {
-                        logger.log('response ' + response.toString());
-                        this.toast.success('Successfully connected to Dropbox!')
+                        PluginToast.success(CloudSyncLang.trans('dropbox.connect_success'))
                         this.connectedData.isConnected = true
                         this.connectedData.accessToken = token.result.access_token
                         this.connectedData.refreshToken = token.result.refresh_token
@@ -129,35 +121,27 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
                         this.isFormProcessing = false
                     })
                     .catch((error) => {
-                        logger.log(error, 'error');
-                        this.toast.error(error.message)
+                        logger.log(error, 'error')
+                        PluginToast.error(error.message)
                         this.isFormProcessing = false
-                    });
+                    })
             })
             .catch((error) => {
-                this.toast.error(error.message)
-                logger.log(error, 'error');
+                PluginToast.error(error.message)
+                logger.log(error, 'error')
                 this.isFormProcessing = false
-            });
+            })
     }
 
     async saveSettings (): Promise<void> {
-        this.resetFormMessages.emit()
         SettingsHelper.saveSettingsToFile(this.platform, CloudSyncSettingsData.values.DROPBOX, this.connectedData).then(result => {
             this.isFormProcessing = false
             if (!result) {
-                this.setFormMessage.emit({
-                    message: Lang.trans('settings.amazon.save_settings_failed'),
-                    type: 'error',
-                })
+                PluginToast.error(CloudSyncLang.trans('settings.amazon.save_settings_failed'))
             } else {
                 this.isSettingSaved = true
-                this.setFormMessage.emit({
-                    message: Lang.trans('settings.amazon.save_settings_success'),
-                    type: 'success',
-                })
-                this.isSettingSaved = true
-                SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true, this.dropboxServiceEmitter)
+                PluginToast.success(CloudSyncLang.trans('settings.amazon.save_settings_success'))
+                SettingsHelper.syncWithCloud(this.config, this.platform, true, this.dropboxServiceEmitter)
             }
         })
     }
@@ -174,30 +158,29 @@ export class CloudSyncDropboxSettingsComponent implements OnInit {
     async disconnectSettings(): Promise<void> {
         if ((await this.platform.showMessageBox({
             type: 'warning',
-            message: 'Are you sure you want to disconnect?',
-            buttons: ['Cancel', 'Disconnect'],
+            message: CloudSyncLang.trans('dropbox.confirm_disconnect'),
+            buttons: [CloudSyncLang.trans('buttons.cancel'), CloudSyncLang.trans('buttons.disconnect')],
             defaultId: 0,
         })).response === 1) {
-            await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
+            await SettingsHelper.removeConfirmFile(this.platform, false)
             this.disconnect()
             this.config.requestRestart()
         }
     }
 
     cancelConnect (): void {
-        this.resetFormMessages.emit()
         this.isConnecting = false
     }
 
-    async pasteFromClipboard () {
+    async pasteFromClipboard (): Promise<void> {
         const logger = new Logger(this.platform)
         try {
-            const text = await navigator.clipboard.readText();
-            logger.log('Clipboard text:', text);
+            const text = await navigator.clipboard.readText()
             this.callbackUrl = text
-            this.toast.success('Successfully pasted from clipboard')
+            PluginToast.success(CloudSyncLang.trans('dropbox.clipboard_success'))
         } catch (err) {
-            logger.log('Failed to read clipboard contents: ' + err.toString(), 'error');
+            PluginToast.error(CloudSyncLang.trans('dropbox.clipboard_error'))
+            logger.log('Failed to read clipboard contents: ' + err.toString(), 'error')
         }
     }
 }
