@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 import { Injectable } from '@angular/core'
 import { CloudSyncSettingsComponent } from 'components/cloud-sync-settings.component'
 import { SettingsTabProvider } from 'terminus-settings'

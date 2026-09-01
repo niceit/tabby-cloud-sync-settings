@@ -1,7 +1,7 @@
 .alert.alert-warning(*ngIf='isDebug')
     p.mb-0
         i.fas.fa-exclamation-triangle.mr-1
-        |  This is a debug build. Please use the production build for production use.
+        span([textContent]='translate.trans("alerts.debug_build")')
 
 h3([textContent]='translate.trans("settings.title")')
 .mb-3([textContent]='translate.trans("settings.sub_title")')
@@ -15,58 +15,59 @@ h3([textContent]='translate.trans("settings.title")')
 .alert.alert-warning(*ngIf='isUpdateAvailable')
     p.mb-0
         i.fas.fa-exclamation-triangle.mr-1
-        | A New version is available to update: {{lastVersion}}
+        span([textContent]='updateAvailableMessage')
 
 .row
     .col-md-12
         ul.nav-tabs(ngbNav, #nav='ngbNav')
             li(ngbNavItem)
-                a(ngbNavLink) General
+                a(ngbNavLink, [textContent]='translate.trans("tabs.general")')
                 ng-template(ngbNavContent)
                     .row.pb-1.has-border-top.mt-3
-                        .col-md-12
+                        .col-md-12.general-settings
                             .form-line
                                 .header
                                     .title
                                         i.fas.fa-fw.fa-cog.mr-2
                                         span([textContent]='translate.trans("settings.service_label")')
+                                    .description([textContent]='translate.trans("settings.service_hint")')
 
                                 select.form-control(
                                     [(ngModel)]='selectedProvider',
-                                    (ngModelChange)='onSelectProviderChange()',
-
+                                    (ngModelChange)='onProviderChanged($event)',
                                 )
                                     option(*ngFor='let item of serviceProviders', [ngValue]='item.value') {{item.name}}
 
-                            .form-line.enable-sync
+                            .form-line
                                 .header
                                     .title
                                         i.fas.fa-fw.fa-check-circle.mr-2
-                                        span Sync enabled
-                                toggle(
+                                        span([textContent]='translate.trans("settings.sync_enabled_label")')
+                                    .description([textContent]='translate.trans("settings.sync_enabled_hint")')
+                                toggle.general-settings-toggle(
                                     [(ngModel)]='syncEnabled',
                                     [disabled]='storedSettingsData === null',
                                     (ngModelChange)='toggleEnableSync()',
                                 )
 
-                            .form-line.enable-sync
+                            .form-line
                                 .header
                                     .title
-                                        i.fas.fa-fw.fa-check-circle.mr-2
-                                        span Show sync loader
-                                toggle(
+                                        i.fas.fa-fw.fa-spinner.mr-2
+                                        span([textContent]='translate.trans("settings.show_loader_label")')
+                                    .description([textContent]='translate.trans("settings.show_loader_hint")')
+                                toggle.general-settings-toggle(
                                     [(ngModel)]='isShowSyncLoader',
                                     [disabled]='storedSettingsData === null',
                                     (ngModelChange)='toggleEnableShowLoader()',
                                 )
 
-
-                            .form-line.sync-interval(style='margin-top: -25px;')
+                            .form-line
                                 .header
                                     .title
-                                        i.fas.fa-refresh.mr-2
-                                        span Interval syncing time (in seconds)
-                                    .subtitle How often should Tabby sync your settings?
+                                        i.fas.fa-fw.fa-refresh.mr-2
+                                        span([textContent]='translate.trans("settings.interval_label")')
+                                    .description([textContent]='translate.trans("settings.interval_hint")')
                                 input.form-control(
                                     type='number',
                                     [(ngModel)]='intervalSync',
@@ -75,109 +76,178 @@ h3([textContent]='translate.trans("settings.title")')
                                 )
 
                     .row
-                        .col-md-12(*ngIf='form_messages.errors.length || form_messages.success.length')
-                            .alert.alert-success(*ngIf='form_messages.success.length')
-                                p.pb-0.mb-0(*ngFor='let message of form_messages.success') {{message}}
-
-                            .alert.alert-danger(*ngIf='form_messages.errors.length')
-                                p.pb-0.mb-0(*ngFor='let message of form_messages.errors') {{message}}
-
                         .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.BUILT_IN')
-                            builtin-settings(
-                                (resetFormMessages)='resetFormMessages()',
-                                (setFormMessage)='setFormMessage($event)'
-                            )
+                            builtin-settings
 
                         .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.S3')
                             amazon-settings(
-                                (resetFormMessages)='resetFormMessages()',
-                                (setFormMessage)='setFormMessage($event)',
                                 [provider]='serviceProviderValues.S3'
                             )
 
                         .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.WASABI')
                             amazon-settings(
-                                (resetFormMessages)='resetFormMessages()',
-                                (setFormMessage)='setFormMessage($event)',
                                 [provider]='serviceProviderValues.WASABI'
                             )
 
                         .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.DIGITAL_OCEAN')
                             amazon-settings(
-                                (resetFormMessages)='resetFormMessages()',
-                                (setFormMessage)='setFormMessage($event)',
                                 [provider]='serviceProviderValues.DIGITAL_OCEAN'
                             )
 
                         .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.BLACKBLAZE')
                             amazon-settings(
-                                (resetFormMessages)='resetFormMessages()',
-                                (setFormMessage)='setFormMessage($event)',
                                 [provider]='serviceProviderValues.BLACKBLAZE'
                             )
 
                         .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.S3_COMPATIBLE')
                             amazon-settings(
-                                (resetFormMessages)='resetFormMessages()',
-                                (setFormMessage)='setFormMessage($event)',
                                 [provider]='serviceProviderValues.S3_COMPATIBLE'
                             )
 
                         .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.WEBDAV')
-                            webdav-settings(
-                                (resetFormMessages)='resetFormMessages()',
-                                (setFormMessage)='setFormMessage($event)'
-                            )
+                            webdav-settings
 
                         .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.FTP')
-                            ftp-settings(
-                                (resetFormMessages)='resetFormMessages()',
-                                (setFormMessage)='setFormMessage($event)'
-                            )
+                            ftp-settings
 
                         .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.GIST')
-                            gist-settings(
-                                (resetFormMessages)='resetFormMessages()',
-                                (setFormMessage)='setFormMessage($event)'
-                            )
+                            gist-settings
 
                         .col-md-12.has-border-top.pt-3(*ngIf='selectedProvider === serviceProviderValues.DROPBOX')
-                            dropbox-settings(
-                                (resetFormMessages)='resetFormMessages()',
-                                (setFormMessage)='setFormMessage($event)',
-                            )
+                            dropbox-settings
 
                         cloud-sync-about
 
-            // TODO TRAN | Tobe implemented encryption with vault
-            //li(ngbNavItem)
-            //    a(ngbNavLink) Security
-            //    ng-template(ngbNavContent)
-            //        master-password-form
+            li(ngbNavItem)
+                a(ngbNavLink, [textContent]='translate.trans("tabs.security")')
+                ng-template(ngbNavContent)
+                    .row.pb-1.has-border-top.mt-3
+                        .col-md-12.pt-3
+                            .alert.alert-warning.legacy-encryption-warning(
+                                *ngIf='encryptionSecretLoaded && !hasCustomEncryptionSecret',
+                                role='alert',
+                            )
+                                .legacy-encryption-warning__icon
+                                    i.fas.fa-shield-alt
+                                .legacy-encryption-warning__copy
+                                    strong([textContent]='translate.trans("settings.encryption_legacy_title")')
+                                    p.mb-0([textContent]='translate.trans("settings.encryption_legacy_warning")')
+
+                            .cloud-sync-encryption
+                                .encryption-heading
+                                    .title
+                                        i.fas.fa-fw.fa-lock.mr-2
+                                        span([textContent]='translate.trans("settings.encryption_title")')
+                                    .description(
+                                        *ngIf='encryptionSecretLoaded && !hasCustomEncryptionSecret',
+                                        [textContent]='translate.trans("settings.encryption_hint")',
+                                    )
+                                .encryption-active-panel(*ngIf='hasCustomEncryptionSecret', role='status')
+                                    .encryption-active-panel__icon
+                                        i.fas.fa-shield-alt(aria-hidden='true')
+                                    .encryption-active-panel__copy
+                                        strong([textContent]='translate.trans("settings.encryption_configured")')
+                                        p([textContent]='translate.trans("settings.encryption_configured_hint")')
+                                        .encryption-active-panel__warning
+                                            i.fas.fa-exclamation-triangle(aria-hidden='true')
+                                            span([textContent]='translate.trans("settings.encryption_recovery_warning")')
+
+                                ng-container(*ngIf='encryptionSecretLoaded && !hasCustomEncryptionSecret')
+                                    .encryption-field-row
+                                        .encryption-field-copy
+                                            label(
+                                                for='cloud-sync-encryption-secret',
+                                                [textContent]='translate.trans("settings.encryption_secret_label")',
+                                            )
+                                            .description([textContent]='translate.trans("settings.encryption_secret_hint")')
+                                        .encryption-secret-input
+                                            input.form-control(
+                                                id='cloud-sync-encryption-secret',
+                                                [type]='showEncryptionSecret ? "text" : "password"',
+                                                autocomplete='new-password',
+                                                [(ngModel)]='encryptionSecret',
+                                                [placeholder]='translate.trans("settings.encryption_secret_placeholder")',
+                                            )
+                                            button.encryption-secret-toggle(
+                                                type='button',
+                                                (click)='toggleEncryptionSecretVisibility()',
+                                                [attr.aria-label]='translate.trans(showEncryptionSecret ? "settings.encryption_hide_secret" : "settings.encryption_show_secret")',
+                                                [attr.title]='translate.trans(showEncryptionSecret ? "settings.encryption_hide_secret" : "settings.encryption_show_secret")',
+                                                aria-controls='cloud-sync-encryption-secret',
+                                                [attr.aria-pressed]='showEncryptionSecret',
+                                            )
+                                                i.fas.fa-eye(*ngIf='!showEncryptionSecret', aria-hidden='true')
+                                                i.fas.fa-eye-slash(*ngIf='showEncryptionSecret', aria-hidden='true')
+
+                                    .encryption-field-row
+                                        .encryption-field-copy
+                                            label(
+                                                for='cloud-sync-encryption-secret-confirmation',
+                                                [textContent]='translate.trans("settings.encryption_confirm_label")',
+                                            )
+                                            .description([textContent]='translate.trans("settings.encryption_confirm_hint")')
+                                        .encryption-secret-input
+                                            input.form-control(
+                                                id='cloud-sync-encryption-secret-confirmation',
+                                                [type]='showEncryptionSecretConfirmation ? "text" : "password"',
+                                                autocomplete='new-password',
+                                                [(ngModel)]='encryptionSecretConfirmation',
+                                                [placeholder]='translate.trans("settings.encryption_confirm_placeholder")',
+                                            )
+                                            button.encryption-secret-toggle(
+                                                type='button',
+                                                (click)='toggleEncryptionSecretConfirmationVisibility()',
+                                                [attr.aria-label]='translate.trans(showEncryptionSecretConfirmation ? "settings.encryption_hide_confirmation" : "settings.encryption_show_confirmation")',
+                                                [attr.title]='translate.trans(showEncryptionSecretConfirmation ? "settings.encryption_hide_confirmation" : "settings.encryption_show_confirmation")',
+                                                aria-controls='cloud-sync-encryption-secret-confirmation',
+                                                [attr.aria-pressed]='showEncryptionSecretConfirmation',
+                                            )
+                                                i.fas.fa-eye(*ngIf='!showEncryptionSecretConfirmation', aria-hidden='true')
+                                                i.fas.fa-eye-slash(*ngIf='showEncryptionSecretConfirmation', aria-hidden='true')
+
+                                    .encryption-action-row
+                                        button.btn.btn-primary(
+                                            type='button',
+                                            (click)='setCustomEncryptionSecret()',
+                                            [disabled]='!encryptionSecret || !encryptionSecretConfirmation',
+                                        )
+                                            i.fas.fa-key.mr-2
+                                            span([textContent]='translate.trans("settings.encryption_set")')
+
+                        .col-md-12.has-border-top.pt-3
+                            .form-line
+                                .header
+                                    .title
+                                        i.fas.fa-fw.fa-history.mr-2
+                                        span Configuration recovery
+                                    .description Restore a previous local configuration snapshot before a sync change is applied.
+                                .text-muted(*ngIf='!recoverySnapshots.length') No local recovery snapshots yet.
+                                .table-responsive(*ngIf='recoverySnapshots.length')
+                                    table.table.table-sm
+                                        tbody
+                                            tr(*ngFor='let snapshot of recoverySnapshots')
+                                                td {{snapshot.split('/').pop()}}
+                                                td.text-right
+                                                    button.btn.btn-secondary.btn-sm(
+                                                        type='button',
+                                                        (click)='restoreRecoverySnapshot(snapshot)',
+                                                    )
+                                                        i.fas.fa-undo.mr-1
+                                                        span Restore
 
             li(ngbNavItem)
-                a(ngbNavLink) Feedback
+                a(ngbNavLink, [textContent]='translate.trans("tabs.feedback")')
                 ng-template(ngbNavContent)
                     cloud-sync-feedback-form
 
             li(ngbNavItem)
-                a(ngbNavLink) Support Us
-                ng-template(ngbNavContent)
-                    support-us-cloud-sync
-
-            li(ngbNavItem)
-                a(ngbNavLink) Change Logs
+                a(ngbNavLink, [textContent]='translate.trans("tabs.change_logs")')
                 ng-template(ngbNavContent)
                     change-logs-cloud-sync
 
             li(ngbNavItem)
-                a(ngbNavLink) Check for update
+                a(ngbNavLink, [textContent]='translate.trans("tabs.check_for_update")')
                 ng-template(ngbNavContent)
                     check-for-updates-cloud-sync
-
-            li(ngbNavItem)
-                a(ngbNavLink) Logs
-                ng-template(ngbNavContent)
-                    plugin-logs
 
 div([ngbNavOutlet]='nav')

@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 export interface AmazonParams {
     endpointUrl: string,
     appId: string,
@@ -31,8 +30,39 @@ export interface WebDavParams {
     port: string,
 }
 
+export interface DropboxParams {
+    isConnected?: boolean,
+    accessToken: string,
+    refreshToken: string,
+    location: string,
+    email?: string,
+    lastErrorMessage?: string,
+}
+
 export interface ConnectionGroup {
     name: string,
     collapsed: boolean,
     type: string
+}
+
+/**
+ * Shape of the encrypted `sync-settings.json` file persisted next to the
+ * Tabby config. `configs` holds the provider-specific credentials/options.
+ */
+export interface StoredSettings {
+    adapter: string,
+    enabled: boolean,
+    showLoader: boolean,
+    interval_insync: number,
+    configs: any,
+}
+
+/**
+ * Normalized result returned by every cloud adapter's `sync` /
+ * `syncLocalSettingsToCloud` call so callers no longer need to guard against
+ * a bare boolean return value.
+ */
+export interface SyncResult {
+    result: boolean,
+    message: string,
 }

@@ -1,5 +1,6 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import CloudSyncSettingsData from '../../../data/setting-items'
+import CloudSyncLang from '../../../data/lang'
 
 interface formData {
     email: string,
@@ -13,10 +14,8 @@ interface formData {
     styles: [require('./builtin-settings.component.scss')],
 })
 export class CloudSyncBuiltinSettingsComponent implements OnInit {
-    @Output() resetFormMessages = new EventEmitter()
-    @Output() setFormMessage = new EventEmitter()
-
     presetData = CloudSyncSettingsData
+    translate = CloudSyncLang
     builtinLoginMode = CloudSyncSettingsData.BuiltinLoginMode.LOGIN
     isCheckLoginSuccess = false
     isFormProcessing = false
@@ -35,7 +34,6 @@ export class CloudSyncBuiltinSettingsComponent implements OnInit {
     }
 
     cancelSaveSettings (): void {
-        this.resetFormMessages.emit()
         this.isCheckLoginSuccess = false
     }
 }

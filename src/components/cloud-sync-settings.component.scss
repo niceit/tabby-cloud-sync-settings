@@ -1,23 +1,247 @@
 .has-border-top {
   border-top: 1px solid rgba(0, 0, 0, 0.2);
 }
-.enable-sync {
-  margin-top: -25px;
+
+.cloud-sync-encryption {
+    width: 100%;
+}
+
+.legacy-encryption-warning {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+}
+
+.legacy-encryption-warning__icon {
+    flex: 0 0 auto;
+    margin: 2px 12px 0 0;
+    font-size: 18px;
+}
+
+.legacy-encryption-warning__copy strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.legacy-encryption-warning__copy p {
+    max-width: 74ch;
+    line-height: 1.5;
+}
+
+.general-settings .form-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 30%);
+    column-gap: 40px;
+    align-items: center;
+}
+
+.general-settings .form-line .header {
+    min-width: 0;
+    margin-right: 0;
+}
+
+.general-settings .form-line .description {
+    max-width: 60ch;
+    line-height: 1.5;
+}
+
+.general-settings .form-line > .form-control {
+    width: 100%;
+    min-width: 0;
+}
+
+.general-settings .form-line > .general-settings-toggle {
+    justify-self: end;
+}
+
+.encryption-heading {
+    padding: 4px 0 16px;
+}
+
+.encryption-heading .title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.encryption-heading .description,
+.encryption-field-copy .description {
+    font-size: 13px;
+    opacity: 0.5;
+}
+
+.encryption-active-panel {
+    display: flex;
+    align-items: flex-start;
+    margin: 12px 0 16px;
+    padding: 16px;
+    border: 1px solid rgba(40, 167, 69, 0.45);
+    border-radius: 6px;
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.encryption-active-panel__icon {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin-right: 12px;
+    border-radius: 50%;
+    color: #28a745;
+    background: rgba(40, 167, 69, 0.18);
+}
+
+.encryption-active-panel__copy {
+    min-width: 0;
+}
+
+.encryption-active-panel__copy strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #28a745;
+    font-size: 15px;
+}
+
+.encryption-active-panel__copy p {
+    margin: 0;
+    line-height: 1.5;
+    opacity: 0.8;
+}
+
+.encryption-active-panel__warning {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.encryption-active-panel__warning i {
+    flex: 0 0 auto;
+    margin: 3px 7px 0 0;
+    color: #d99100;
+}
+
+.encryption-field-row {
+    display: flex;
+    align-items: center;
+    min-height: 88px;
+    padding: 12px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.encryption-field-copy {
+    flex: 1 1 auto;
+    margin-right: 24px;
+}
+
+.encryption-field-copy label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.encryption-secret-input {
+    position: relative;
+    flex: 0 0 42%;
+    width: 42%;
+}
+
+.encryption-secret-input .form-control {
+    width: 100%;
+    padding-right: 42px;
+}
+
+.encryption-secret-toggle {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 4px;
+    color: inherit;
+    background: transparent;
+    opacity: 0.65;
+    cursor: pointer;
+}
+
+.encryption-secret-toggle:hover,
+.encryption-secret-toggle:focus {
+    background: rgba(127, 127, 127, 0.14);
+    opacity: 1;
+}
+
+.encryption-secret-toggle:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 1px;
+}
+
+.encryption-action-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 0 16px;
+}
+
+.encryption-action-row .btn {
+    display: inline-flex;
+    align-items: center;
+}
+
+@media (max-width: 760px) {
+    .general-settings .form-line {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 12px;
+        align-items: start;
+    }
+
+    .general-settings .form-line > .general-settings-toggle {
+        justify-self: start;
+    }
+
+    .encryption-field-row {
+        display: block;
+    }
+
+    .encryption-field-copy {
+        margin: 0 0 10px;
+    }
+
+    .encryption-secret-input {
+        width: 100%;
+    }
 }
 
 .tabby-sync-loading {
     position: fixed;
     z-index: 999;
-    right: 30px;
-    bottom: 30px;
-    display: none;
-    // fade-out animation
-    animation: fade-out 0.5s;
+    right: 24px;
+    bottom: 24px;
+    width: 40px;
+    height: 40px;
+    padding: 1px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: var(--theme-bg-more-2, #27272a);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24), inset 0 1px rgba(255, 255, 255, 0.05);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px) scale(0.94);
+    transition: opacity 180ms ease-out, transform 180ms ease-out, visibility 0s linear 180ms;
+    pointer-events: none;
 }
+
 .tabby-sync-loading.active {
-    display: block;
-    // animate fade-in
-    animation: fade-in 0.5s;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    transition-delay: 0s;
 }
 .tabby-sync-connection-type.expanded,
 .tabby-sync-connection-type.expanded:hover {
@@ -35,17 +259,48 @@
 .ml-3 {
     margin-left: 10px;
 }
-/* HTML: <div class="loader"></div> */
 .tabby-sync-loading .loader {
-    width: 30px;
-    aspect-ratio: 1;
-    --_c:no-repeat radial-gradient(farthest-side,#25b09b 92%,#0000);
-    background:
-        var(--_c) top,
-        var(--_c) left,
-        var(--_c) right,
-        var(--_c) bottom;
-    background-size: 12px 12px;
-    animation: l7 1s infinite;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
 }
-@keyframes l7 {to{transform: rotate(.5turn)}}
+
+.tabby-sync-loading .loader__track,
+.tabby-sync-loading .loader__progress {
+    fill: none;
+    stroke-width: 1.6;
+}
+
+.tabby-sync-loading .loader__track {
+    stroke: currentColor;
+    opacity: 0.12;
+}
+
+.tabby-sync-loading .loader__progress {
+    stroke: var(--bs-primary, #4fadff);
+    stroke-linecap: round;
+    stroke-dasharray: 28 79;
+    transform-origin: center;
+    animation: cloud-sync-loader-spin 900ms linear infinite;
+}
+
+.tabby-sync-loading .loader__cloud {
+    fill: var(--bs-body-color, #e8eaed);
+    opacity: 0.82;
+}
+
+@keyframes cloud-sync-loader-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tabby-sync-loading,
+    .tabby-sync-loading.active {
+        transition: none;
+    }
+
+    .tabby-sync-loading .loader__progress {
+        animation: none;
+    }
+}

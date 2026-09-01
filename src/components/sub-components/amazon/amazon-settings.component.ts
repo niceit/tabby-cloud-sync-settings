@@ -1,13 +1,12 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
+import { Component, Input, OnInit } from '@angular/core'
 import cloudSyncSettingsHelper from '../../../utils/CloudSyncSettingsHelper'
 import AmazonS3 from '../../../utils/cloud-components/AmazonS3'
 import CloudSyncSettingsData from '../../../data/setting-items'
 import SettingsHelper from '../../../utils/settings-helper'
 import { ConfigService, PlatformService } from 'terminus-core'
-import { ToastrService } from 'ngx-toastr'
 import CloudSyncLang from '../../../data/lang'
-import Logger from '../../../utils/Logger'
+import PluginToast from '../../../services/toast'
+import { SyncResult } from '../../../interface'
 
 interface formData {
     endpointUrl: string,
@@ -24,8 +23,6 @@ interface formData {
     styles: [require('./amazon-settings.component.scss')],
 })
 export class CloudSyncAmazonSettingsComponent implements OnInit {
-    @Output() resetFormMessages = new EventEmitter()
-    @Output() setFormMessage = new EventEmitter()
     @Input() provider: string
 
     presetData = CloudSyncSettingsData
@@ -38,9 +35,8 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     form: formData = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.S3] as formData
     s3Regions = []
 
-    constructor (private config: ConfigService, private platform: PlatformService, private toast: ToastrService) {}
+    constructor (private config: ConfigService, private platform: PlatformService) {}
     ngOnInit (): void {
-        const logger = new Logger(this.platform)
         this.s3Regions = cloudSyncSettingsHelper.getS3regionsList(this.provider)
         if (![this.presetData.values.BLACKBLAZE, this.presetData.values.S3_COMPATIBLE].includes(this.provider)) {
             this.form.region = this.s3Regions[0].value
@@ -49,28 +45,21 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
         }
 
         const configs = SettingsHelper.readConfigFile(this.platform)
-        if (configs) {
-            if (configs.adapter === this.provider) {
-                this.form = configs.configs as formData
-                this.isSettingSaved = true
-            }
+        if (configs && configs.adapter === this.provider) {
+            this.form = { ...configs.configs } as formData
+            this.isSettingSaved = true
         }
         this.isPreloadingSavedConfig = false
         AmazonS3.setProvider(this.provider)
-        logger.log('Inside instance => ' + this.provider)
     }
 
     validateFormInput (): boolean {
-        this.resetFormMessages.emit()
         let isFormValidated = true
         for (const idx in this.form) {
-            if (this.form[idx].trim() === '') {
+            if (this.form[idx].toString().trim() === '') {
                 if (this.provider === this.presetData.values.S3_COMPATIBLE && idx === 'region') {continue}
 
-                this.setFormMessage.emit({
-                    message: CloudSyncLang.trans('form.error.required_all'),
-                    type: 'error',
-                })
+                PluginToast.error(CloudSyncLang.trans('form.error.required_all'))
                 isFormValidated = false
                 break
             }
@@ -95,69 +84,45 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
             const timeOutConnectionCheck = setTimeout(() => {
                 isTimedOut = true
                 this.isFormProcessing = false
-                this.setFormMessage.emit({
-                    message: CloudSyncLang.trans('settings.error_connection_timeout'),
-                    type: 'error',
-                })
+                PluginToast.error(CloudSyncLang.trans('settings.error_connection_timeout'))
             }, 15000)
             AmazonS3.testConnection(this.platform, this.form).then(response => {
                 if (!isTimedOut) {
                     clearTimeout(timeOutConnectionCheck)
                     this.isFormProcessing = false
-                    console.log('Response | ', response)
                     if (response.hasOwnProperty('code') && parseInt(response.code) === 0) {
-                        this.setFormMessage.emit({
-                            message: response.message,
-                            type: 'error',
-                        })
+                        PluginToast.error(response.message)
                     } else {
-                        this.setFormMessage.emit({
-                            message: CloudSyncLang.trans('settings.amazon.connected'),
-                            type: 'success',
-                        })
+                        PluginToast.success(CloudSyncLang.trans('settings.amazon.connected'))
                         this.isServiceAccountCheckPassed = true
                     }
                 }
-            }).catch((err) => {
-                console.log('error | ', err)
+            }).catch(() => {
                 this.isFormProcessing = false
             })
         }
     }
 
     async saveAmazonS3Settings (): Promise<void> {
-        this.resetFormMessages.emit()
         this.isFormProcessing = true
         SettingsHelper.saveSettingsToFile(this.platform, this.provider, this.form).then(async result => {
             this.isFormProcessing = false
             if (!result) {
-                this.setFormMessage.emit({
-                    message: CloudSyncLang.trans('settings.amazon.save_settings_failed'),
-                    type: 'error',
-                })
+                PluginToast.error(CloudSyncLang.trans('settings.amazon.save_settings_failed'))
             } else {
-                this.setFormMessage.emit({
-                    message: CloudSyncLang.trans('settings.amazon.save_settings_success'),
-                    type: 'success',
-                })
+                PluginToast.success(CloudSyncLang.trans('settings.amazon.save_settings_success'))
 
                 this.isSettingSaved = true
                 this.isSyncingProgress = true
-                await SettingsHelper.syncWithCloud(this.config, this.platform, this.toast, true).then(async (subResult: any) => {
-                    const resultCheck = typeof subResult === 'boolean' ? subResult : subResult['result']
-                    if (resultCheck) {
+                await SettingsHelper.syncWithCloud(this.config, this.platform, true).then(async (subResult: SyncResult) => {
+                    if (subResult.result) {
                         this.config.requestRestart()
                     } else {
-                        this.setFormMessage.emit({
-                            message: typeof subResult !== 'boolean' && subResult['message']
-                                ? subResult['message']
-                                : CloudSyncLang.trans('sync.sync_server_failed'),
-                            type: 'error',
-                        })
+                        PluginToast.error(subResult.message || CloudSyncLang.trans('sync.sync_server_failed'))
                         this.isSettingSaved = false
                         this.isServiceAccountCheckPassed = false
                         this.isPreloadingSavedConfig = false
-                        await SettingsHelper.removeConfirmFile(this.platform, this.toast, false)
+                        await SettingsHelper.removeConfirmFile(this.platform, false)
                     }
                     this.isSyncingProgress = false
                 })
@@ -166,7 +131,6 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     }
 
     cancelSaveSettings (): void {
-        this.resetFormMessages.emit()
         this.isServiceAccountCheckPassed = false
     }
 
@@ -175,8 +139,7 @@ export class CloudSyncAmazonSettingsComponent implements OnInit {
     }
 
     async removeSavedSettings (): Promise<void> {
-        this.resetFormMessages.emit()
-        const result = await SettingsHelper.removeConfirmFile(this.platform, this.toast)
+        const result = await SettingsHelper.removeConfirmFile(this.platform)
         if (result) {
             this.isSettingSaved = false
             this.isServiceAccountCheckPassed = false

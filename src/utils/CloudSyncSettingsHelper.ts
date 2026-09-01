@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 import AmazonData from '../data/s3-data'
 import CloudSyncSettingsData from '../data/setting-items'
 

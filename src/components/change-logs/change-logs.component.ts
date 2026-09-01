@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import CloudSyncSettingsData from '../../data/setting-items'
+import CloudSyncLang from '../../data/lang'
 import { PlatformService } from 'terminus-core'
 
 @Component({
@@ -8,6 +9,8 @@ import { PlatformService } from 'terminus-core'
     styles: [require('./change-logs.component.scss')],
 })
 export class ChangeLogsComponent implements OnInit {
+    translate = CloudSyncLang
+
     constructor (private platform: PlatformService) {
         // do nothing
     }

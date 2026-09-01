@@ -1,68 +1,90 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-import winston, {QueryOptions} from 'winston'
+import winston from 'winston'
 import { PlatformService } from 'terminus-core'
-import moment from "moment";
-import fs from "fs";
+import moment from 'moment'
+import fs from 'fs'
 
 const path = require('path')
+
+const DATE_FORMAT = 'DD-MM-YYYY'
+
+/**
+ * Thin wrapper around winston that writes a daily rotating log file next to the
+ * Tabby config. Winston loggers are cached per log file so we do not rebuild the
+ * transports (and re-open the file handle) on every `new Logger(platform)`,
+ * which previously happened dozens of times per sync cycle.
+ */
 export default class Logger {
+    private static loggerCache: Record<string, winston.Logger> = {}
     private platform: PlatformService
     private logger: winston.Logger
 
     constructor (platform: PlatformService) {
         this.platform = platform
-        const loggerFile = this.getCurrentLoggerFile()
-
-        this.logger  = winston.createLogger({
-            transports: [
-                new winston.transports.Console(),
-                new winston.transports.File({ filename: loggerFile }),
-            ],
-            format: winston.format.json(),
-        })
+        this.logger = Logger.getWinstonLogger(this.getCurrentLoggerFile())
     }
 
+    /** Absolute path of today's log file. */
     getCurrentLoggerFile (): string {
-        return path.dirname(this.platform.getConfigPath()) + '/tabby-sync/' + moment().format('DD-MM-YYYY') + '.log'
+        return this.getLoggerFileForDate(moment().format(DATE_FORMAT))
     }
 
-    getLogContents (callback: any, date: string = moment().format('DD-MM-YYYY'), limit = 1000): any {
-        const loggerFile =  path.dirname(this.platform.getConfigPath()) + '/tabby-sync/' + date + '.log'
+    /** Absolute path of the log file for the given `DD-MM-YYYY` date string. */
+    private getLoggerFileForDate (date: string): string {
+        return path.dirname(this.platform.getConfigPath()) + '/tabby-sync/' + date + '.log'
+    }
 
-        // check if the file exists
+    /** Build or reuse a cached winston logger bound to `filename`. */
+    private static getWinstonLogger (filename: string): winston.Logger {
+        if (!Logger.loggerCache[filename]) {
+            Logger.loggerCache[filename] = winston.createLogger({
+                transports: [
+                    new winston.transports.Console(),
+                    new winston.transports.File({ filename }),
+                ],
+                format: winston.format.json(),
+            })
+        }
+
+        return Logger.loggerCache[filename]
+    }
+
+    /**
+     * Query the persisted log entries for a given day.
+     *
+     * @param callback Node-style `(err, result)` callback.
+     * @param date Day to query in `DD-MM-YYYY` format (defaults to today).
+     * @param limit Maximum number of entries to return.
+     */
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    getLogContents (callback: any, date: string = moment().format(DATE_FORMAT), limit = 1000): any {
+        const loggerFile = this.getLoggerFileForDate(date)
+
         if (!fs.existsSync(loggerFile)) {
             return callback(new Error('Log file is not exist.'), [])
         }
 
-        const logger = winston.createLogger({
-            transports: [
-                new winston.transports.Console(),
-                new winston.transports.File({ filename: loggerFile }),
-            ],
-            format: winston.format.json(),
-        })
-
+        const logger = Logger.getWinstonLogger(loggerFile)
+        const day = moment(date, DATE_FORMAT)
         const options = {
-            // @ts-ignore
-            from: moment(date, 'DD-MM-YYYY').toDate(),
-            until: moment(date, 'DD-MM-YYYY').toDate(),
+            from: day.startOf('day').toDate(),
+            until: day.clone().endOf('day').toDate(),
             limit: limit,
             start: 0,
             order: 'desc',
-            fields: ['message', 'level', 'time']
-        } as any;
+            fields: ['message', 'level', 'time'],
+        } as any
 
-        return logger.query(options , (err, result) => {
+        return logger.query(options, (err, result) => {
             callback(err, result)
         })
     }
 
+    /** Append a log entry at the given level (defaults to `info`). */
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     log (content: any, level = 'info'): void {
-        const time = new Date()
         this.logger.log({
             level: level,
-            time: time.toLocaleString(),
+            time: new Date().toLocaleString(),
             message: content,
         })
     }

@@ -1,3 +1,39 @@
 .message-body {
   height: 200px !important;
 }
+
+.changelog-table-wrap {
+  overflow-x: auto;
+}
+
+.changelog-table {
+  min-width: 720px;
+}
+
+.changelog-table th,
+.changelog-table td {
+  vertical-align: top;
+}
+
+.changelog-table th:nth-child(1),
+.changelog-table td:nth-child(1) {
+  width: 100px;
+  min-width: 100px;
+  white-space: nowrap;
+}
+
+.changelog-table th:nth-child(2),
+.changelog-table td:nth-child(2) {
+  width: 130px;
+  min-width: 130px;
+  white-space: nowrap;
+}
+
+.changelog-table ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.changelog-table li + li {
+  margin-top: 0.25rem;
+}

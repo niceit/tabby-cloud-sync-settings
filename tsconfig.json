@@ -16,6 +16,11 @@
     "declaration": true,
     "declarationDir": "dist",
     "resolveJsonModule": true,
+    "types": [
+      "jest",
+      "node",
+      "webpack-env"
+    ],
     "lib": [
       "dom",
       "es2015",

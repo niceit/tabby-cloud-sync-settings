@@ -1,66 +1,47 @@
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 import { ConfigService, PlatformService } from 'terminus-core'
-import { ToastrService } from 'ngx-toastr'
-import { GistParams } from '../../../interface'
+import { GistParams, SyncResult } from '../../../interface'
 import Github from './github'
-import SettingsHelper from '../../settings-helper'
 import Gitee from './gitee'
 import Gitlab from './gitlab'
+import Gist from '../gist'
+import SettingsHelper from '../../settings-helper'
 
+type GistFactory = (id: string, accessToken: string) => Gist
+
+/**
+ * Facade that dispatches gist sync operations to the correct provider based on
+ * the stored `type` (github/gitee/gitlab).
+ */
 class Gists {
-    sync = async (config: ConfigService, platform: PlatformService, toast: ToastrService, params: GistParams, firstInit = false) => {
-        let $component = null
-        switch (params.type) {
-            case 'github': {
-                $component = new Github(params.id, params.accessToken)
-                break
-            }
-
-            case 'gitee': {
-                $component = new Gitee(params.id, params.accessToken)
-                break
-            }
-
-            case 'gitlab': {
-                $component = new Gitlab(params.id, params.accessToken)
-                break
-            }
-        }
-
-        if ($component) {
-            return $component.sync(config, platform, toast, params, firstInit)
-        }
-
-        return false
+    private factories: Record<string, GistFactory> = {
+        github: (id, token) => new Github(id, token),
+        gitee: (id, token) => new Gitee(id, token),
+        gitlab: (id, token) => new Gitlab(id, token),
     }
 
-    syncLocalSettingsToCloud = async (platform: PlatformService, toast: ToastrService) => {
-        const configs = SettingsHelper.readConfigFile(platform).configs
-        let $component = null
-        switch (configs.type) {
-            case 'github': {
-                $component = new Github(configs.id, configs.accessToken)
-                break
-            }
+    /** Instantiate the provider component for a given gist type. */
+    private createComponent (type: string, id: string, accessToken: string): Gist {
+        const factory = this.factories[type]
+        return factory ? factory(id, accessToken) : null
+    }
 
-            case 'gitee': {
-                $component = new Gitee(configs.id, configs.accessToken)
-                break
-            }
-
-            case 'gitlab': {
-                $component = new Gitlab(configs.id, configs.accessToken)
-                break
-            }
+    sync = async (config: ConfigService, platform: PlatformService, params: GistParams, firstInit = false): Promise<SyncResult> => {
+        const component = this.createComponent(params.type, params.id, params.accessToken)
+        if (!component) {
+            return { result: false, message: '' }
         }
 
-        if ($component) {
-            if (configs.type === 'gitlab') {
-                return $component.syncLocalSettingsToCloud(platform, toast)
-            } else {
-                return $component.syncLocalSettingsToCloud(platform, toast, null)
-            }
+        return component.sync(config, platform, params, firstInit)
+    }
+
+    syncLocalSettingsToCloud = async (platform: PlatformService): Promise<boolean> => {
+        const configs = SettingsHelper.readConfigFile(platform).configs as GistParams
+        const component = this.createComponent(configs.type, configs.id, configs.accessToken)
+        if (!component) {
+            return false
         }
+
+        return component.syncLocalSettingsToCloud(platform)
     }
 }
 
