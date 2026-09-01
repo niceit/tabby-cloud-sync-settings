@@ -62,6 +62,7 @@ const CloudSyncSettingsData = {
         RESET_PASSWORD: 'ResetPassword',
     },
     availablePluginVersions: [
+        '1.6.5',
         '1.6.0',
         '1.5.2',
         '1.5.1',
@@ -147,8 +148,7 @@ const CloudSyncSettingsData = {
             id: '',
         },
         [providerConstantItems.DROPBOX]: {
-            apiKey: '',
-            apiSecret: '',
+            apiKey: process.env.DROPBOX_APP_KEY || '',
         },
     },
     external_urls: {
@@ -172,6 +172,6 @@ const CloudSyncSettingsData = {
 
     },
     donationUrl: 'https://donorbox.org/tabby-cloud-sync-settings-donation',
-    pluginUrl: 'https://tabby-cloud.tranit.co',
+    pluginUrl: 'https://tabby-sync.github.io/',
 }
 export default CloudSyncSettingsData

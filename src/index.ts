@@ -22,14 +22,21 @@ import { ChangeLogsComponent } from './components/change-logs/change-logs.compon
 import CloudSyncSettingsData from './data/setting-items'
 import { CheckForUpdatesComponent } from './components/sub-components/check-for-updates/check-for-updates.component'
 import { CloudSyncDropboxSettingsComponent } from './components/sub-components/dropbox/dropbox-settings.component'
+import { DropboxEncryptionSecretModalComponent } from './components/sub-components/dropbox/dropbox-encryption-secret-modal.component'
 import Logger from './utils/Logger'
 import SyncLock from './utils/sync-lock'
 import SyncState, { resolveBaselineKey } from './utils/sync-state'
 import { getLocalConfigHash } from './utils/config-hash'
+import { ToolbarButtonProvider } from 'terminus-core'
+import { CloudSyncCommandProvider, CommandProvider } from './providers/cloud-sync-command.provider'
+import { CloudSyncToolbarProvider } from './providers/cloud-sync-toolbar.provider'
+import { CloudSyncActions } from './providers/cloud-sync-actions'
 
 let autoSynIntervalInstance = null
 let configChangeDebounceInstance = null
 let initAutoSynIntervalFrequency = CloudSyncSettingsData.defaultSyncInterval * 1000
+let consecutiveSyncFailures = 0
+let syncPausedForConflict = false
 
 /**
  * How long to wait after a config change before uploading. Tabby emits
@@ -46,9 +53,13 @@ const CONFIG_CHANGE_DEBOUNCE_MS = 1500
     ],
     providers: [
         { provide: SettingsTabProvider, useClass: SyncConfigSettingsTabProvider, multi: true },
+        CloudSyncActions,
+        { provide: CommandProvider, useClass: CloudSyncCommandProvider, multi: true },
+        { provide: ToolbarButtonProvider, useClass: CloudSyncToolbarProvider, multi: true },
     ],
     entryComponents: [
         CloudSyncSettingsComponent,
+        DropboxEncryptionSecretModalComponent,
     ],
     declarations: [
         CloudSyncAmazonSettingsComponent,
@@ -64,6 +75,7 @@ const CONFIG_CHANGE_DEBOUNCE_MS = 1500
         CheckForUpdatesComponent,
         ToggleComponent,
         CloudSyncDropboxSettingsComponent,
+        DropboxEncryptionSecretModalComponent,
     ],
 })
 
@@ -72,13 +84,12 @@ export default class CloudSyncSettingsModule {
         private platform: PlatformService,
         private configService: ConfigService) {
         this.injectLoaderIndicator()
-        SettingsHelper.loadPluginSettings(this.platform)
-        setTimeout(() => {
-            this.syncCloudSettings().then(() => {
-                setTimeout(() => {
-                    this.subscribeToConfigChangeEvent()
-                }, 2000)
-            })
+        SettingsHelper.loadEncryptionSecret().then(() => {
+            return this.syncCloudSettings()
+        }).then(() => {
+            setTimeout(() => {
+                this.subscribeToConfigChangeEvent()
+            }, 2000)
         })
     }
 
@@ -120,6 +131,9 @@ export default class CloudSyncSettingsModule {
 
     /** Upload the local config after a debounced change event, if it really changed. */
     private async pushLocalConfigChange (): Promise<void> {
+        if (this.isTabbySyncActive() || syncPausedForConflict) {
+            return
+        }
         const logger = new Logger(this.platform)
         if (SyncLock.isLocked) {
             logger.log(`Config changed. But "${SyncLock.currentOwner}" is in progress. Skipping...`)
@@ -171,6 +185,9 @@ export default class CloudSyncSettingsModule {
      * against this loop too.
      */
     async syncCloudSettings (): Promise<void> {
+        if (this.isTabbySyncActive() || syncPausedForConflict) {
+            return
+        }
         const logger = new Logger(this.platform)
         if (SyncLock.isLocked) {
             logger.log(`Skipping this auto sync cycle, "${SyncLock.currentOwner}" is still running.`)
@@ -193,11 +210,24 @@ export default class CloudSyncSettingsModule {
         initAutoSynIntervalFrequency = (savedConfigs?.interval_insync || CloudSyncSettingsData.defaultSyncInterval) * 1000
 
         try {
-            await SettingsHelper.syncWithCloud(this.configService, this.platform)
+            const result = await SettingsHelper.syncWithCloud(this.configService, this.platform)
+            const message = result?.message || ''
+            if (message.toLowerCase().includes('sync conflict')) {
+                syncPausedForConflict = true
+                PluginToast.warning('Sync paused because local and cloud settings both changed. Resolve the preserved snapshots before resuming.')
+            }
+            if (result?.result) {
+                consecutiveSyncFailures = 0
+            } else {
+                consecutiveSyncFailures++
+            }
             logger.log('Tabby Auto Sync Completed ' + new Date().toLocaleString())
         } catch (err) {
             logger.log('Tabby Auto Sync Failed: ' + err.toString(), 'error')
         } finally {
+            if (consecutiveSyncFailures >= 5) {
+                initAutoSynIntervalFrequency = Math.min(initAutoSynIntervalFrequency * 2, 15 * 60 * 1000)
+            }
             this.subscribeToAutoSyncEvent()
             setTimeout(() => {
                 this.hideLoaderIndicator()
@@ -205,11 +235,23 @@ export default class CloudSyncSettingsModule {
         }
     }
 
+    private isTabbySyncActive (): boolean {
+        const sync = this.configService?.store?.configSync
+        return !!(sync?.host && sync?.token && sync?.configID)
+    }
+
     /** Append the syncing loader element to the document body. */
     injectLoaderIndicator (): void {
         const loader = document.createElement('div')
         loader.classList.add('tabby-sync-loading')
-        loader.innerHTML = '<div class="loader"></div>'
+        loader.setAttribute('role', 'status')
+        loader.setAttribute('aria-label', 'Syncing settings')
+        loader.innerHTML = `
+            <svg class="loader" aria-hidden="true" focusable="false" viewBox="0 0 40 40">
+                <circle class="loader__track" cx="20" cy="20" r="17"></circle>
+                <circle class="loader__progress" cx="20" cy="20" r="17"></circle>
+                <path class="loader__cloud" d="M26.5 25H15a3.5 3.5 0 0 1-.45-6.97 5.75 5.75 0 0 1 11.04-1.58A4.5 4.5 0 0 1 26.5 25Zm-11.5-5a1.5 1.5 0 1 0 0 3h11.5a2.5 2.5 0 0 0 .03-5 1 1 0 0 1-1.02-.78 3.75 3.75 0 0 0-7.33 1.07 1 1 0 0 1-1.15.85A1.5 1.5 0 0 0 15 20Z"></path>
+            </svg>`
         document.body.appendChild(loader)
     }
 

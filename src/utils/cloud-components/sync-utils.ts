@@ -193,6 +193,10 @@ function toIsoOrNull (value: moment.Moment | null): string {
  * that clock skew and second-granularity remote timestamps (FTP `MDTM`, WebDav
  * `lastmod`) cannot decide the outcome on their own.
  */
+export function isTrueConflict (localHash: string, remoteHash: string, baselineHash: string): boolean {
+    return !!baselineHash && localHash !== baselineHash && remoteHash !== baselineHash
+}
+
 function decideAction (
     local: LocalSnapshot,
     remoteHash: string,
@@ -203,7 +207,7 @@ function decideAction (
         const localChanged = local.hash !== baseline.hash
         const remoteChanged = remoteHash !== baseline.hash
 
-        if (localChanged && remoteChanged) {
+        if (isTrueConflict(local.hash, remoteHash, baseline.hash)) {
             return { action: 'conflict', reason: 'both sides changed since the last sync' }
         }
         if (remoteChanged) {
@@ -281,33 +285,23 @@ async function applyPush (options: SyncDirectionOptions, localHash: string): Pro
  * Handle a genuine two-sided conflict.
  *
  * Nothing is discarded: the local file is copied to `config.yaml.backup` and
- * the cloud version is written next to it as `config.yaml.conflict-<epoch>`
- * before either side wins. The winner is then chosen by timestamp, which is
- * safe now that both copies are on disk.
- *
- * There is deliberately no modal prompt here: auto-sync runs on a background
- * timer, so interrupting the user every 20 seconds would be worse than a
- * recoverable automatic resolution plus a loud log entry.
+ * the cloud version is written next to it as `config.yaml.conflict-<epoch>`.
+ * A true conflict is reported without changing either live side; an explicit
+ * restore or future conflict-resolution flow can choose the winner safely.
  */
-async function applyConflict (options: SyncDirectionOptions, local: LocalSnapshot, remotePlain: string, remoteHash: string): Promise<SyncOutcome> {
-    const { platform, logger, remoteUpdatedAt, providerLabel } = options
+async function applyConflict (options: SyncDirectionOptions, remotePlain: string): Promise<SyncOutcome> {
+    const { platform, logger, providerLabel } = options
 
     await SettingsHelper.backupTabbyConfigFile(platform)
     const snapshotPath = await SettingsHelper.writeConflictSnapshot(platform, remotePlain)
-    logger.log(`Sync conflict on ${providerLabel}: local and cloud both changed. Cloud copy saved to ${snapshotPath || 'nowhere (write failed)'}, local copy saved to config.yaml.backup.`, 'warn')
+    const message = 'Sync conflict: both local and cloud configs changed. Resolve using the preserved snapshots.'
+    logger.log(`Sync conflict on ${providerLabel}: local copy preserved in config.yaml.backup; cloud copy saved to ${snapshotPath || 'nowhere (write failed)'}. No winner selected.`, 'warn')
 
-    const toleranceMs = CloudSyncSettingsData.syncSkewToleranceSeconds * 1000
-    const cloudWins = remoteUpdatedAt && remoteUpdatedAt.valueOf() - local.updatedAt.valueOf() > toleranceMs
-
-    if (cloudWins) {
-        logger.log('Conflict resolved in favour of the cloud copy (newer).', 'warn')
-        const outcome = await applyPull(options, remotePlain, remoteHash)
-        return { ...outcome, action: 'conflict' }
+    return {
+        action: 'conflict',
+        result: false,
+        message: message + (snapshotPath ? ' Cloud snapshot: ' + snapshotPath : ''),
     }
-
-    logger.log('Conflict resolved in favour of the local copy.', 'warn')
-    const outcome = await applyPush(options, local.hash)
-    return { ...outcome, action: 'conflict' }
 }
 
 /**
@@ -382,7 +376,7 @@ export async function resolveSyncDirection (options: SyncDirectionOptions): Prom
         }
 
         case 'conflict': {
-            return applyConflict(options, local, remotePlain, remoteHash)
+            return applyConflict(options, remotePlain)
         }
 
         default: {

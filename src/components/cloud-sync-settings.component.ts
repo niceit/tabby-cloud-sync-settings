@@ -7,7 +7,8 @@ import SettingsHelper from '../utils/settings-helper'
 import axios from 'axios'
 import { version } from '../../package.json'
 import devConstants from '../services/dev-constants'
-import { ConnectionGroup } from '../interface'
+import PluginToast from '../services/toast'
+import Logger from '../utils/Logger'
 
 /** @hidden */
 @Component({
@@ -26,24 +27,19 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
     serviceProviders = CloudSyncSettingsData.serviceProvidersList
     selectedProvider = ''
 
-    groups: ConnectionGroup[] = [
-        {
-            name: 'Exclusive Sponsor Cloud Services',
-            collapsed: true,
-            type: 'exclusive',
-        },
-        {
-            name: 'Free Cloud Services',
-            collapsed: false,
-            type: 'free',
-        },
-    ]
 
     syncEnabled = false
     isShowSyncLoader = true
     intervalSync = CloudSyncSettingsData.defaultSyncInterval
     storedSettingsData = null
     form = CloudSyncSettingsData.formData
+    hasCustomEncryptionSecret = false
+    encryptionSecretLoaded = false
+    encryptionSecret = ''
+    encryptionSecretConfirmation = ''
+    showEncryptionSecret = false
+    showEncryptionSecretConfirmation = false
+    recoverySnapshots: string[] = []
 
     @HostBinding('class.content-box') true
     constructor (
@@ -53,8 +49,12 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         super()
     }
 
-    ngOnInit (): void {
+    async ngOnInit (): Promise<void> {
         this.checkForNewVersion().catch(() => { /* offline or API unreachable — ignore */ })
+        await SettingsHelper.loadEncryptionSecret()
+        this.hasCustomEncryptionSecret = SettingsHelper.hasCustomEncryptionSecret()
+        this.encryptionSecretLoaded = true
+        this.recoverySnapshots = SettingsHelper.listSnapshots(this.platform, 'snapshot')
         this.storedSettingsData = SettingsHelper.readConfigFile(this.platform)
         if (this.storedSettingsData) {
             this.selectedProvider = this.storedSettingsData.adapter
@@ -64,6 +64,21 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
         } else {
             this.selectedProvider = this.serviceProviderValues.S3
         }
+    }
+
+    /** Logs provider selection and safe Dropbox build diagnostics without exposing credentials. */
+    onProviderChanged (provider: string): void {
+        const dropboxForm = this.form[this.serviceProviderValues.DROPBOX]
+        const appKey = typeof dropboxForm?.apiKey === 'string' ? dropboxForm.apiKey.trim() : ''
+
+        new Logger(this.platform).log({
+            event: 'cloud-sync-provider-selected',
+            provider,
+            pluginVersion: version,
+            buildId: process.env.TABBY_CLOUD_SYNC_BUILD_ID || 'unknown',
+            dropboxAppKeyPresent: appKey.length > 0,
+            dropboxAppKeyLength: appKey.length,
+        })
     }
 
     /**
@@ -83,6 +98,48 @@ export class CloudSyncSettingsComponent extends BaseComponent implements OnInit 
             this.isUpdateAvailable = true
             this.lastVersion = latestVersion
             this.updateAvailableMessage = Lang.trans('alerts.update_available', { version: latestVersion })
+        }
+    }
+
+    async restoreRecoverySnapshot (snapshotPath: string): Promise<void> {
+        const restored = await SettingsHelper.restoreSnapshot(this.platform, snapshotPath)
+        if (restored) {
+            PluginToast.success('Configuration snapshot restored. Restart Tabby to load it.')
+            this.config.requestRestart()
+        } else {
+            PluginToast.error('The configuration snapshot could not be restored.')
+        }
+    }
+
+    toggleEncryptionSecretVisibility (): void {
+        this.showEncryptionSecret = !this.showEncryptionSecret
+    }
+
+    toggleEncryptionSecretConfirmationVisibility (): void {
+        this.showEncryptionSecretConfirmation = !this.showEncryptionSecretConfirmation
+    }
+
+    async setCustomEncryptionSecret (): Promise<void> {
+        if (this.hasCustomEncryptionSecret || SettingsHelper.hasCustomEncryptionSecret()) {
+            PluginToast.error(this.translate.trans('settings.encryption_already_configured'))
+            return
+        }
+
+        if (this.encryptionSecret !== this.encryptionSecretConfirmation) {
+            PluginToast.error(this.translate.trans('settings.encryption_mismatch'))
+            return
+        }
+
+        try {
+            await SettingsHelper.setCustomEncryptionSecret(this.platform, this.encryptionSecret)
+            this.hasCustomEncryptionSecret = true
+            this.encryptionSecret = ''
+            this.encryptionSecretConfirmation = ''
+            this.showEncryptionSecret = false
+            this.showEncryptionSecretConfirmation = false
+            PluginToast.success(this.translate.trans('settings.encryption_saved'))
+        } catch (error) {
+            PluginToast.error(error.message || this.translate.trans('settings.encryption_failed'))
         }
     }
 

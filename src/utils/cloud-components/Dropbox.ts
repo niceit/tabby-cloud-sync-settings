@@ -9,13 +9,14 @@ import Logger from '../../utils/Logger'
 import moment from 'moment'
 import { Dropbox } from 'dropbox'
 import { EventEmitter } from '@angular/core'
-import { applyRemoteConfigOnFirstInit, recordLocalBaselineOnFirstInit, resolveSyncDirection } from './sync-utils'
+import { applyRemoteConfigOnFirstInit, isRemoteMissingError, recordLocalBaselineOnFirstInit, resolveSyncDirection } from './sync-utils'
 
 class DropboxSync {
     private _isFirstInit = false
     private _emitter: EventEmitter<any>
     private emitterActions = {
         syncComplete: 'dropbox-sync-complete',
+        secretRequired: 'dropbox-encryption-secret-required',
         _syncFileToCloud: 'dropbox-sync-file-to-cloud',
     }
 
@@ -39,6 +40,16 @@ class DropboxSync {
             action: this.emitterActions.syncComplete,
             result,
             message,
+        })
+    }
+
+    /** Ask the provider UI to unlock an existing remote V2 config. */
+    private emitEncryptionSecretRequired (remoteContent: string): void {
+        this._emitter?.emit({
+            action: this.emitterActions.secretRequired,
+            result: false,
+            message: CloudSyncLang.trans('dropbox.encryption_secret_required'),
+            remoteContent,
         })
     }
 
@@ -80,7 +91,14 @@ class DropboxSync {
             const remoteSyncConfigUpdatedAt = response.result.server_modified
                 ? moment(response.result.server_modified)
                 : null
-            yaml.load(content)
+            if (firstInit && SettingsHelper.isV2EncryptedConfig(content) && !SettingsHelper.canDecryptConfig(content)) {
+                logger.log('Dropbox remote config uses V2 encryption and requires the custom secret.')
+                result.message = CloudSyncLang.trans('dropbox.encryption_secret_required')
+                this.emitEncryptionSecretRequired(content)
+                return result
+            }
+
+            yaml.load(SettingsHelper.doDescryption(content))
 
             if (firstInit) {
                 if ((await platform.showMessageBox({
@@ -123,7 +141,7 @@ class DropboxSync {
             logger.log('File download failed: ' + error.toString())
             await this.tryRefreshToken(platform, params, dbx, logger)
 
-            if (this._isFirstInit) {
+            if (this._isFirstInit && isRemoteMissingError(error)) {
                 if ((await platform.showMessageBox({
                     type: 'warning',
                     message: CloudSyncLang.trans('sync.confirm_push_local'),
@@ -137,6 +155,9 @@ class DropboxSync {
                     result.result = pushed.result
                     result.message = pushed.message
                 }
+            } else {
+                result.message = error.message || error.toString()
+                this.emitSyncComplete(false, result.message)
             }
         }
 
@@ -150,8 +171,8 @@ class DropboxSync {
      */
     private async tryRefreshToken (platform: PlatformService, params: DropboxParams, dbx: Dropbox, logger: Logger): Promise<void> {
         const dropboxForm = CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX]
-        if (!dropboxForm.apiKey || !dropboxForm.apiSecret) {
-            logger.log('Dropbox API Key and Secret is not set. Skipping refresh token.')
+        if (!dropboxForm.apiKey) {
+            logger.log('Dropbox app key is not set. Skipping refresh token.')
             return
         }
 
@@ -159,8 +180,6 @@ class DropboxSync {
         try {
             // @ts-ignore
             dbx.auth.setClientId(dropboxForm.apiKey)
-            // @ts-ignore
-            dbx.auth.setClientSecret(dropboxForm.apiSecret)
             // @ts-ignore
             dbx.auth.setRefreshToken(params.refreshToken)
             // @ts-ignore

@@ -2,6 +2,12 @@
 const path = require('path')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
+const webpack = require('webpack')
+
+const dropboxAppKey = (process.env.DROPBOX_APP_KEY || '').trim()
+const buildId = new Date().toISOString()
+
+console.log(`[terminus-cloud-settings-sync] Build ${buildId}: DROPBOX_APP_KEY present=${dropboxAppKey.length > 0}, length=${dropboxAppKey.length}`)
 
 module.exports = {
     target: 'node',
@@ -53,6 +59,10 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(['dist'], {
             verbose: false,
+        }),
+        new webpack.DefinePlugin({
+            'process.env.DROPBOX_APP_KEY': JSON.stringify(dropboxAppKey),
+            'process.env.TABBY_CLOUD_SYNC_BUILD_ID': JSON.stringify(buildId),
         }),
     ],
 }

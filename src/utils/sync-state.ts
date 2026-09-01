@@ -1,6 +1,7 @@
 import { PlatformService } from 'terminus-core'
 import CloudSyncSettingsData from '../data/setting-items'
 import { StoredSettings } from '../interface'
+const CryptoJS = require('crypto-js')
 
 const fs = require('fs')
 const path = require('path')
@@ -29,16 +30,41 @@ export interface SyncBaseline {
  * `gists` adapter, so the gist type is appended to stop a GitHub baseline from
  * being applied to a GitLab snippet after the user switches provider.
  */
+const SECRET_CONFIG_KEYS = /(?:secret|password|token|credential|private.?key|access.?key|client.?secret|api.?key)/i
+
+function canonicaliseTarget (value: any): any {
+    if (Array.isArray(value)) {
+        return value.map(canonicaliseTarget)
+    }
+    if (value && typeof value === 'object') {
+        const result = {}
+        for (const key of Object.keys(value).sort()) {
+            if (!SECRET_CONFIG_KEYS.test(key)) {
+                result[key] = canonicaliseTarget(value[key])
+            }
+        }
+        return result
+    }
+    return value
+}
+
+/** Return a stable, non-secret fingerprint for the configured sync target. */
+export function resolveTargetFingerprint (savedConfigs: StoredSettings): string {
+    if (!savedConfigs?.adapter) {
+        return ''
+    }
+
+    const target = canonicaliseTarget(savedConfigs.configs || {})
+    return CryptoJS.SHA256(JSON.stringify({ adapter: savedConfigs.adapter, target })).toString(CryptoJS.enc.Hex)
+}
+
 export function resolveBaselineKey (savedConfigs: StoredSettings): string {
     if (!savedConfigs?.adapter) {
         return ''
     }
 
-    if (savedConfigs.adapter === CloudSyncSettingsData.values.GIST) {
-        return savedConfigs.adapter + ':' + (savedConfigs.configs?.type || 'gist')
-    }
-
-    return savedConfigs.adapter
+    const targetFingerprint = resolveTargetFingerprint(savedConfigs)
+    return savedConfigs.adapter + ':' + targetFingerprint
 }
 
 /**
@@ -92,6 +118,17 @@ class SyncStateStore {
     read (platform: PlatformService, adapterId: string): SyncBaseline {
         const state = this.load(platform)
         return state[adapterId] || null
+    }
+
+    /** Clear state entries belonging to an adapter, including legacy keys. */
+    clearAdapter (platform: PlatformService, adapterId: string): void {
+        const state = this.load(platform)
+        for (const key of Object.keys(state)) {
+            if (key === adapterId || key.indexOf(adapterId + ':') === 0) {
+                delete state[key]
+            }
+        }
+        this.persist(platform)
     }
 
     /**

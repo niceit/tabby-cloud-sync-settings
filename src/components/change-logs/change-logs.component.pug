@@ -5,8 +5,8 @@
         p.mb-0([textContent]='translate.trans("changelogs.description")')
     .col-md-12
         .row
-            .col-md-12
-                table.table.table-striped.table-bordered.table-hover.table-sm
+            .col-md-12.changelog-table-wrap
+                table.table.table-striped.table-bordered.table-hover.table-sm.changelog-table
                     thead
                         tr
                             th([textContent]='translate.trans("changelogs.column_version")')
@@ -14,98 +14,125 @@
                             th([textContent]='translate.trans("changelogs.column_description")')
                     tbody
                         tr
+                            td 1.8.0
+                            td 2026-09-02
+                            td
+                                ul.mb-0.pl-3
+                                    li Added secure Dropbox PKCE authentication with automatic callback handling and a manual fallback.
+                                    li Added custom AES-256-GCM encryption with operating-system keychain storage and legacy-data compatibility.
+                                    li Added a secure unlock flow for encrypted Dropbox data to prevent accidental cloud overwrites.
+                                    li Improved conflict detection, safe conflict backups, synchronization pausing, and local snapshot recovery.
+                                    li Added toolbar and command-palette actions for syncing and opening Cloud Sync settings.
+                                    li Prevented conflicts with Tabby's built-in configuration sync and improved retry behavior after repeated failures.
+                                    li Expanded provider disconnect cleanup while keeping cloud files untouched.
+                                    li Improved the settings interface, accessibility, synchronization status, publishing workflow, and automated test coverage.
+                        tr
                             td 1.6.5
                             td 2024-10-14
                             td
-                                p.mb-0.pb-0 Official Dropbox support.
-                                p.mb-0.pb-0 Plugin log viewer.
-                                p.mb-0.pb-0 Faster, more reliable syncing.
-                                p.mb-0.pb-0 Bug fixes.
-                                p.mb-0.pb-0 UI updates to match newer Tabby releases.
+                                ul.mb-0.pl-3
+                                    li Official Dropbox support.
+                                    li Plugin log viewer.
+                                    li Faster, more reliable syncing.
+                                    li Bug fixes.
+                                    li UI updates to match newer Tabby releases.
                         tr
                             td 1.6.0
                             td 2023-02-17
                             td
-                                p.mb-0.pb-0 Configurable sync interval.
-                                p.mb-0.pb-0 Fixed the WebDAV first-time sync issue.
-                                p.mb-0.pb-0 Improved update checks.
-                                p.mb-0.pb-0 Added the ability to roll back to an earlier version.
-                                p.mb-0.pb-0 Added the sponsor list.
-                                p.mb-0.pb-0 Minor bug fixes.
+                                ul.mb-0.pl-3
+                                    li Configurable sync interval.
+                                    li Fixed the WebDAV first-time sync issue.
+                                    li Improved update checks.
+                                    li Added the ability to roll back to an earlier version.
+                                    li Added the sponsor list.
+                                    li Minor bug fixes.
                         tr
                             td 1.5.2
                             td 2022-11-19
                             td
-                                p.mb-0.pb-0 Configurable sync interval.
-                                p.mb-0.pb-0 Added the Updates tab.
-                                p.mb-0.pb-0 Added in-app update checks and installation.
-                                p.mb-0.pb-0 Minor bug fixes.
+                                ul.mb-0.pl-3
+                                    li Configurable sync interval.
+                                    li Added the Updates tab.
+                                    li Added in-app update checks and installation.
+                                    li Minor bug fixes.
                         tr
                             td 1.5.1
                             td 2022-08-16
                             td
-                                p.mb-0.pb-0 Added in-app feedback, changelog, and donation links.
-                                p.mb-0.pb-0 Improved the user interface.
-                                p.mb-0.pb-0 Minor bug fixes.
+                                ul.mb-0.pl-3
+                                    li Added in-app feedback, changelog, and donation links.
+                                    li Improved the user interface.
+                                    li Minor bug fixes.
                         tr
                             td 1.5.0
                             td 2022-07-17
                             td
-                                p.mb-0.pb-0 Official support for S3-compatible storage such as MinIO.
-                                p.mb-0.pb-0 Minor bug fixes.
+                                ul.mb-0.pl-3
+                                    li Official support for S3-compatible storage such as MinIO.
+                                    li Minor bug fixes.
                         tr
                             td 1.4.3
                             td ...
                             td
-                                p.mb-0.pb-0 Minor bug fixes.
+                                ul.mb-0.pl-3
+                                    li Minor bug fixes.
                         tr
                             td 1.4.0
                             td 2022-05-22
                             td
-                                p.mb-0.pb-0 Automatic sync, including changes made on other machines.
-                                p.mb-0.pb-0 Fixed critical bugs.
-                                p.mb-0.pb-0 Minor bug fixes.
+                                ul.mb-0.pl-3
+                                    li Automatic sync, including changes made on other machines.
+                                    li Fixed critical bugs.
+                                    li Minor bug fixes.
                         tr
                             td 1.3.0
                             td 2021-12-21
                             td
-                                p.mb-0.pb-0 Added FTP / FTPS port settings.
-                                p.mb-0.pb-0 Added Gist support (GitHub, GitLab).
-                                p.mb-0.pb-0 Tabby settings are backed up before the first sync.
-                                p.mb-0.pb-0 Minor bug fixes.
+                                ul.mb-0.pl-3
+                                    li Added FTP / FTPS port settings.
+                                    li Added Gist support (GitHub, GitLab).
+                                    li Tabby settings are backed up before the first sync.
+                                    li Minor bug fixes.
                         tr
                             td 1.2.2
                             td 2021-08-24
                             td
-                                p.mb-0.pb-0 Added support for Backblaze B2 storage.
+                                ul.mb-0.pl-3
+                                    li Added support for Backblaze B2 storage.
                         tr
                             td 1.2.1
                             td 2021-08-21
                             td
-                                p.mb-0.pb-0 Added support for DigitalOcean Spaces.
+                                ul.mb-0.pl-3
+                                    li Added support for DigitalOcean Spaces.
                         tr
                             td 1.2.0
                             td 2021-08-19
                             td
-                                p.mb-0.pb-0 Added support for Wasabi cloud storage.
+                                ul.mb-0.pl-3
+                                    li Added support for Wasabi cloud storage.
                         tr
                             td 1.1.3
                             td 2021-08-14
                             td
-                                p.mb-0.pb-0 Added logging.
-                                p.mb-0.pb-0 Minor bug fixes.
+                                ul.mb-0.pl-3
+                                    li Added logging.
+                                    li Minor bug fixes.
                         tr
                             td 1.0.2
                             td 2021-08-07
                             td
-                                p.mb-0.pb-0 Improved encryption of the settings file.
-                                p.mb-0.pb-0 Bug fixes.
+                                ul.mb-0.pl-3
+                                    li Improved encryption of the settings file.
+                                    li Bug fixes.
                         tr
                             td 1.0.0
                             td 2021-08-01
                             td
-                                p.mb-0.pb-0 First release of the plugin.
-                                p.mb-0.pb-0 Added support for Amazon S3, FTP, and WebDAV.
+                                ul.mb-0.pl-3
+                                    li First release of the plugin.
+                                    li Added support for Amazon S3, FTP, and WebDAV.
     .col-md-12.pt-3.text-right
         button.btn.btn-warning.flex-shrink-0.ml-3.mb-2((click)='openPluginPage()')
             i.fas.fa-fw.fa-link.mr-2

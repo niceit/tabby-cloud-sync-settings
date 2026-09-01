@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/terminus-cloud-settings-sync"><img alt="npm" src="https://img.shields.io/npm/v/terminus-cloud-settings-sync?label=npmjs"></a>
-  <a href="https://tabby-cloud.tranit.co/"><img src="https://img.shields.io/static/v1?label=Support URL&message=Visit TranIt.co&color=#333"/></a> &nbsp;
+  <a href="https://tabby-sync.github.io/"><img src="https://img.shields.io/static/v1?label=Support URL&message=Visit tabby-sync.github.io&color=#333"/></a> &nbsp;
   <img alt="GitHub" src="https://img.shields.io/github/license/niceit/tabby-cloud-sync-settings">
   <img alt="Scrutinizer code quality (GitHub/Bitbucket)" src="https://img.shields.io/scrutinizer/quality/g/niceit/tabby-cloud-sync-settings">
   <a href="https://www.codefactor.io/repository/github/niceit/tabby-cloud-sync-settings"><img src="https://www.codefactor.io/repository/github/niceit/tabby-cloud-sync-settings/badge" alt="CodeFactor" /></a>
@@ -20,6 +20,40 @@ With this plugin you could sync your settings (Including saved SSH Sessions) aut
 Current platforms supported: **MacOS** **Windows** **Linux**
 
 This plugin is **FREE** of use under public license MIT.
+
+## Publishing
+
+Dropbox OAuth uses PKCE, so published builds only need the Dropbox app key; do not embed the Dropbox app secret in the plugin.
+
+Register this exact redirect URI in the Dropbox App Console under **OAuth 2 → Redirect URIs**:
+
+```text
+http://localhost:53682/dropbox/callback
+```
+
+During connection, the plugin temporarily listens on that loopback address, validates the OAuth `state`, completes the token exchange automatically, and then closes the listener. Manual callback paste remains available as a fallback if the local port cannot be opened.
+
+Set `DROPBOX_APP_KEY` in the environment before building, watching, or publishing:
+
+```sh
+DROPBOX_APP_KEY=your_dropbox_app_key npm run build
+DROPBOX_APP_KEY=your_dropbox_app_key npm run watch
+DROPBOX_APP_KEY=your_dropbox_app_key npm publish
+```
+
+The environment variable belongs to the build/watch process, not the Tabby process. If a webpack watcher was started without `DROPBOX_APP_KEY`, stop it and restart it with the variable; otherwise each rebuild overwrites `dist/index.js` with an empty app key.
+
+For GitHub Actions, store the value as a repository secret named `DROPBOX_APP_KEY` and expose it only to the publish step:
+
+```yaml
+- name: Publish package
+  run: npm publish
+  env:
+    NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
+```
+
+`prepublishOnly` fails when `DROPBOX_APP_KEY` is missing, preventing a release with Dropbox authentication disabled. The app key is compiled into `dist/index.js` and must be treated as public client metadata, not as a secret.
 
 ## Current supported Cloud Services
 

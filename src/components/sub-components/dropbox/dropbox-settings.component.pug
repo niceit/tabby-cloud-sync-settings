@@ -15,7 +15,20 @@
             span.spinner-border.spinner-border-sm.mr-2
             span([textContent]='translate.trans("buttons.cancel")')
 
-    .col-md-12.mb-2(*ngIf='isConnecting')
+    .col-md-12.mb-2(*ngIf='isConnecting && isAutomaticCallbackAvailable && !showManualCallbackFallback')
+        .alert.alert-info.ml-3
+            i.fas.fa-external-link-alt.mr-2
+            span([textContent]='translate.trans("dropbox.callback_waiting")')
+        button.btn.btn-secondary.flex-shrink-0.ml-3.mb-2((click)='enableManualCallback()')
+            i.fa.fa-keyboard.mr-2
+            span([textContent]='translate.trans("dropbox.use_manual_callback")')
+
+    .col-md-12.mb-2(*ngIf='isConnecting && !isAutomaticCallbackAvailable && showManualCallbackFallback')
+        .alert.alert-warning.ml-3
+            i.fas.fa-exclamation-triangle.mr-2
+            span([textContent]='translate.trans("dropbox.callback_listener_unavailable")')
+
+    .col-md-12.mb-2(*ngIf='isConnecting && showManualCallbackFallback')
         .w-100.d-flex.flex-column
             h3([textContent]='translate.trans("dropbox.callback_title")')
             p([textContent]='translate.trans("dropbox.callback_hint")')
@@ -23,7 +36,7 @@
                 [(ngModel)]='callbackUrl',
             )
 
-    .col-md-12.mb-2(*ngIf='isConnecting')
+    .col-md-12.mb-2(*ngIf='isConnecting && showManualCallbackFallback')
         button.btn.btn-primary.flex-shrink-0.ml-3.mb-2.mr-2((click)='!isFormProcessing ? handleAuthCallback() : null')
             i.fa.fa-brands.fa-dropbox.mr-2(*ngIf='!isFormProcessing')
             span(*ngIf='!isFormProcessing', [textContent]='translate.trans("dropbox.obtain_token")')
@@ -47,6 +60,7 @@
             p.mb-2
                 i.fas.fa-info-circle.mr-2
                 span([textContent]='lastSyncErrorLabel')
+
 
     .col-md-12.mb-2(*ngIf='isSettingSaved')
         button.btn.btn-danger.flex-shrink-0.ml-3((click)='disconnectSettings()')

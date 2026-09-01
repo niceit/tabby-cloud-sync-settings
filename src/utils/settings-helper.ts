@@ -13,7 +13,8 @@ import Logger from './Logger'
 import SyncLock from './sync-lock'
 import SyncState, { resolveBaselineKey } from './sync-state'
 import { getLocalConfigHash } from './config-hash'
-import axios from 'axios'
+import SettingsSecret from './settings-secret'
+import { decryptPayload, encryptV1, encryptV2, isV2Payload } from './settings-crypto'
 
 const fs = require('fs')
 const path = require('path')
@@ -36,7 +37,7 @@ export class SettingsHelperClass {
         [CloudSyncSettingsData.values.DROPBOX]: DropboxSync,
     }
 
-    private generatedCryptoHash = 'tp!&nc3^to8y7^3#4%2%&szufx!'
+
 
     /**
      * Absolute path of the encrypted plugin settings file (stored next to the
@@ -52,7 +53,9 @@ export class SettingsHelperClass {
      */
     private encryptPayload (payload: any): string {
         const raw = typeof payload === 'string' ? payload : JSON.stringify(payload)
-        return CloudSyncLang.trans('common.config_inject_header') + CryptoJS.AES.encrypt(raw, this.generatedCryptoHash).toString()
+        const secret = SettingsSecret.get()
+        const encrypted = secret ? encryptV2(raw, secret) : encryptV1(raw)
+        return CloudSyncLang.trans('common.config_inject_header') + encrypted
     }
 
     /**
@@ -107,7 +110,7 @@ export class SettingsHelperClass {
                 // gist flavour on the same one) invalidates the recorded
                 // baseline, so force the next cycle to re-establish it.
                 if (resolveBaselineKey(savedConfigs) !== resolveBaselineKey(settingsArr)) {
-                    SyncState.clear(platform)
+                    SyncState.clearAdapter(platform, savedConfigs.adapter)
                 }
             }
         }
@@ -214,8 +217,7 @@ export class SettingsHelperClass {
         if (fs.existsSync(filePath)) {
             try {
                 const encrypted = fs.readFileSync(filePath, 'utf8').replace(CloudSyncLang.trans('common.config_inject_header'), '')
-                const bytes = CryptoJS.AES.decrypt(encrypted, this.generatedCryptoHash)
-                const content = bytes.toString(CryptoJS.enc.Utf8)
+                const content = decryptPayload(encrypted, SettingsSecret.get() || '')
                 data = isRaw ? content : JSON.parse(content)
             } catch (e) {
                 // Corrupted or unreadable settings file - treat as no config.
@@ -290,10 +292,68 @@ export class SettingsHelperClass {
      * @returns The path written, or `null` when the write failed.
      */
     async writeConflictSnapshot (platform: PlatformService, content: string): Promise<string> {
+        return this.writeSnapshot(platform, content, 'conflict')
+    }
+
+    /**
+     * Write a timestamped recovery snapshot and retain only the newest entries.
+     * The existing `config.yaml.backup` file is intentionally left untouched.
+     */
+    async writeSnapshot (platform: PlatformService, content: string, kind = 'snapshot', retention = 10): Promise<string> {
         const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename
-        const snapshotPath = filePath + '.conflict-' + Date.now()
+        const timestamp = Date.now()
+        let snapshotPath = filePath + '.' + kind + '-' + timestamp
+        let suffix = 1
+        while (fs.existsSync(snapshotPath)) {
+            snapshotPath = filePath + '.' + kind + '-' + timestamp + '-' + suffix
+            suffix++
+        }
         const written = await this.writeFileAsync(snapshotPath, content)
-        return written ? snapshotPath : null
+        if (!written) {
+            return null
+        }
+        this.pruneSnapshots(platform, kind, retention)
+        return snapshotPath
+    }
+
+    /** List newest-to-oldest timestamped snapshots for the local config. */
+    listSnapshots (platform: PlatformService, kind = 'snapshot'): string[] {
+        const directory = path.dirname(platform.getConfigPath())
+        const baseName = path.basename(CloudSyncSettingsData.tabbySettingsFilename)
+        try {
+            return fs.readdirSync(directory)
+                .filter((name) => name.indexOf(baseName + '.' + kind + '-') === 0)
+                .map((name) => path.join(directory, name))
+                .sort((left, right) => right.localeCompare(left))
+        } catch (e) {
+            return []
+        }
+    }
+
+    /** Restore a selected snapshot into `config.yaml`, preserving `.backup`. */
+    async restoreSnapshot (platform: PlatformService, snapshotPath: string): Promise<boolean> {
+        const filePath = path.dirname(platform.getConfigPath()) + CloudSyncSettingsData.tabbySettingsFilename
+        const resolved = path.resolve(snapshotPath)
+        if (path.dirname(resolved) !== path.dirname(path.resolve(filePath)) || !fs.existsSync(resolved)) {
+            return false
+        }
+        try {
+            await this.backupTabbyConfigFile(platform)
+            return await this.writeTabbyConfigFile(platform, fs.readFileSync(resolved, 'utf8'))
+        } catch (e) {
+            return false
+        }
+    }
+
+    private pruneSnapshots (platform: PlatformService, kind: string, retention: number): void {
+        const snapshots = this.listSnapshots(platform, kind)
+        for (const oldSnapshot of snapshots.slice(Math.max(0, retention))) {
+            try {
+                fs.unlinkSync(oldSnapshot)
+            } catch (e) {
+                // Best-effort cleanup; a retained snapshot is safer than a failed sync.
+            }
+        }
     }
 
     /**
@@ -343,7 +403,7 @@ export class SettingsHelperClass {
      * Remove the saved plugin settings file, optionally prompting the user for
      * confirmation first.
      */
-    async removeConfirmFile (platform: PlatformService, needConfirm = true): Promise<boolean> {
+    async removeConfirmFile (platform: PlatformService, needConfirm = true, showSuccess = true): Promise<boolean> {
         let result = false
         try {
             if (needConfirm) {
@@ -357,6 +417,16 @@ export class SettingsHelperClass {
                 }
             } else {
                 result = this._removeSavedConfig(platform)
+            }
+
+            if (result) {
+                const secretCleared = await this.clearCustomEncryptionSecret()
+                this.removeDisconnectedProviderArtifacts(platform)
+                if (secretCleared && showSuccess) {
+                    PluginToast.success(CloudSyncLang.trans('sync.remove_setting_success'))
+                } else if (!secretCleared) {
+                    PluginToast.error(CloudSyncLang.trans('sync.remove_secret_error'))
+                }
             }
         } catch (error) {
             PluginToast.error(CloudSyncLang.trans('sync.remove_setting_error'))
@@ -375,7 +445,6 @@ export class SettingsHelperClass {
                 // so drop it too; otherwise a re-configured provider would
                 // inherit a stale "last synced" hash.
                 SyncState.clear(platform)
-                PluginToast.success(CloudSyncLang.trans('sync.remove_setting_success'))
                 return true
             } catch (e) {
                 PluginToast.error(CloudSyncLang.trans('sync.remove_setting_error'))
@@ -385,14 +454,71 @@ export class SettingsHelperClass {
         return false
     }
 
+    /** Remove local encrypted artifacts that belong to the disconnected provider. */
+    private removeDisconnectedProviderArtifacts (platform: PlatformService): void {
+        const configDirectory = path.dirname(platform.getConfigPath())
+        const artifactPaths = [
+            this.getStoredSettingsPath(platform) + '.v1-backup',
+            configDirectory + CloudSyncSettingsData.tabbyLocalEncryptedFile,
+        ]
+
+        for (const artifactPath of artifactPaths) {
+            try {
+                if (fs.existsSync(artifactPath)) {
+                    fs.unlinkSync(artifactPath)
+                }
+            } catch (_) { }
+        }
+    }
+
+    /** Return the encrypted payload after removing the plugin file header. */
+    private getEncryptedPayload (content: string): string {
+        return content.replace(CloudSyncLang.trans('common.config_inject_header'), '')
+    }
+
     /** Decrypt a header-prefixed cloud config string back to plain text. */
     doDescryption (content: string): string {
         if (!content) {
             return ''
         }
 
-        const bytes = CryptoJS.AES.decrypt(content.replace(CloudSyncLang.trans('common.config_inject_header'), ''), this.generatedCryptoHash)
-        return bytes.toString(CryptoJS.enc.Utf8)
+        return decryptPayload(this.getEncryptedPayload(content), SettingsSecret.get() || '')
+    }
+
+    /** Detect whether a downloaded plugin config uses the authenticated V2 envelope. */
+    isV2EncryptedConfig (content: string): boolean {
+        return !!content && this.verifyServerConfigIsValid(content) && isV2Payload(this.getEncryptedPayload(content))
+    }
+
+    /** Return whether the current keychain secret can decrypt this config. */
+    canDecryptConfig (content: string): boolean {
+        try {
+            return this.doDescryption(content).length > 0
+        } catch (_) {
+            return false
+        }
+    }
+
+    /** Verify a candidate secret without storing it or modifying local configuration. */
+    verifyCustomEncryptionSecret (content: string, secret: string): boolean {
+        if (!secret || !this.isV2EncryptedConfig(content)) {
+            return false
+        }
+
+        try {
+            return decryptPayload(this.getEncryptedPayload(content), secret).length > 0
+        } catch (_) {
+            return false
+        }
+    }
+
+    /** Verify and persist the secret needed to unlock an existing remote V2 config. */
+    async unlockCustomEncryptionSecret (platform: PlatformService, content: string, secret: string): Promise<boolean> {
+        if (!this.verifyCustomEncryptionSecret(content, secret)) {
+            throw new Error(CloudSyncLang.trans('dropbox.encryption_secret_invalid'))
+        }
+
+        return this.setCustomEncryptionSecret(platform, secret)
     }
 
     /** Check whether a downloaded config was produced by this plugin. */
@@ -411,24 +537,52 @@ export class SettingsHelperClass {
      * Fetch remote plugin settings (currently the Dropbox API credentials) on
      * startup and merge them into the in-memory form data.
      */
-    loadPluginSettings (platform: PlatformService): void {
-        const logger = new Logger(platform)
-        const requestUrl = CloudSyncSettingsData.external_urls.ApiUrl + '/tabby-sync/plugin-settings'
-        axios.post(requestUrl, {}, {
-            timeout: 30000,
-        }).then((response) => {
-            const data = response.data
-            if (data.status === 'success') {
-                logger.log('Settings loaded successfully')
-                CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiKey = data.dropbox.apiKey
-                CloudSyncSettingsData.formData[CloudSyncSettingsData.values.DROPBOX].apiSecret = data.dropbox.apiSecret
-            } else {
-                logger.log('Error while loading settings: ' + data.message)
-            }
-        }).catch((err) => {
-            logger.log('Error while loading plugin settings: ' + err.toString(), 'error')
-        })
+    async loadEncryptionSecret (): Promise<void> {
+        await SettingsSecret.load()
     }
+
+    hasCustomEncryptionSecret (): boolean {
+        return SettingsSecret.hasSecret()
+    }
+
+    async setCustomEncryptionSecret (platform: PlatformService, secret: string): Promise<boolean> {
+        if (SettingsSecret.hasSecret()) {
+            throw new Error('A custom encryption secret is already active and cannot be replaced.')
+        }
+
+        const filePath = this.getStoredSettingsPath(platform)
+        const legacyContent = fs.existsSync(filePath) ? this.readConfigFile(platform, true) : null
+        await SettingsSecret.set(secret)
+
+        if (legacyContent) {
+            const backupPath = filePath + '.v1-backup'
+            try {
+                if (!fs.existsSync(backupPath)) {
+                    fs.copyFileSync(filePath, backupPath)
+                }
+                const settings = JSON.parse(legacyContent)
+                if (!await this.writeEncryptedConfig(filePath, settings)) {
+                    throw new Error('The existing settings could not be migrated.')
+                }
+                if (!this.readConfigFile(platform)) {
+                    throw new Error('The migrated settings could not be read back.')
+                }
+            } catch (error) {
+                try {
+                    fs.copyFileSync(backupPath, filePath)
+                } catch (_) { }
+                await SettingsSecret.clear()
+                throw error
+            }
+        }
+
+        return true
+    }
+
+    async clearCustomEncryptionSecret (): Promise<boolean> {
+        return SettingsSecret.clear()
+    }
+
 }
 
 export default new SettingsHelperClass()

@@ -2,6 +2,13 @@ import { Component, OnInit } from '@angular/core'
 import { PlatformService } from 'terminus-core'
 import axios from 'axios'
 import CloudSyncSettingsData from '../../../data/setting-items'
+import {
+    author as packageAuthor,
+    date as packageReleaseDate,
+    github_url as packageGitHubUrl,
+    support_url as packageSupportUrl,
+    version as packageVersion,
+} from '../../../../package.json'
 
 @Component({
     selector: 'cloud-sync-about',
@@ -9,16 +16,16 @@ import CloudSyncSettingsData from '../../../data/setting-items'
     styles: [require('./cloud-sync-about.component.scss')],
 })
 export class CloudSyncAboutComponent implements OnInit {
-    info = {
-        author: '',
-        support_url: '',
-        github_url: '',
-        buy_me_a_cafe: 'Buy me a coffee',
-        version: '',
-    }
+    supportUrl = packageSupportUrl || CloudSyncSettingsData.pluginUrl
+    githubUrl = packageGitHubUrl.replace(/^git\+/, '').replace(/\.git$/, '')
 
-    supportUrl = CloudSyncSettingsData.pluginUrl
-    githubUrl = ''
+    info = {
+        author: 'Author: ' + packageAuthor,
+        support_url: 'Plugin page: ' + this.supportUrl,
+        github_url: 'GitHub: ' + this.githubUrl,
+        buy_me_a_cafe: 'Buy me a coffee',
+        version: 'Version ' + packageVersion + ' — released ' + packageReleaseDate,
+    }
 
     constructor (private platform: PlatformService) {
         // do nothing
@@ -32,29 +39,26 @@ export class CloudSyncAboutComponent implements OnInit {
         const response = await axios.get(CloudSyncSettingsData.external_urls.checkForUpdateUrl, {
             timeout: 30000,
         })
-        const packageMetadata = response.data
-        const latestVersion = packageMetadata?.['dist-tags']?.latest
-        const latestMetadata = packageMetadata?.versions?.[latestVersion]
-
-        if (!latestMetadata || typeof latestVersion !== 'string') {
-            throw new Error('npm registry returned invalid package metadata')
+        const installedMetadata = response.data?.versions?.[packageVersion]
+        if (!installedMetadata) {
+            return
         }
 
-        const author = typeof latestMetadata.author === 'string'
-            ? latestMetadata.author
-            : latestMetadata.author?.name || ''
-        const repositoryUrl = typeof latestMetadata.repository === 'string'
-            ? latestMetadata.repository
-            : latestMetadata.repository?.url || ''
+        const author = typeof installedMetadata.author === 'string'
+            ? installedMetadata.author
+            : installedMetadata.author?.name || packageAuthor
+        const repositoryUrl = typeof installedMetadata.repository === 'string'
+            ? installedMetadata.repository
+            : installedMetadata.repository?.url || this.githubUrl
 
-        this.supportUrl = latestMetadata.support_url || latestMetadata.homepage || this.supportUrl
+        this.supportUrl = installedMetadata.support_url || installedMetadata.homepage || this.supportUrl
         this.githubUrl = repositoryUrl.replace(/^git\+/, '').replace(/\.git$/, '')
         this.info = {
             author: 'Author: ' + author,
             support_url: 'Plugin page: ' + this.supportUrl,
             github_url: 'GitHub: ' + this.githubUrl,
             buy_me_a_cafe: 'Buy me a coffee',
-            version: 'Version ' + latestVersion + ' — released ' + (latestMetadata.date || ''),
+            version: 'Version ' + packageVersion + ' — released ' + packageReleaseDate,
         }
     }
 

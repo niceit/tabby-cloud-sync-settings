@@ -72,7 +72,7 @@ const STYLES = `
 }
 
 /*
- * The sync spinner (\`.tabby-sync-loading\`, 30px, pinned 30px from the same
+ * The sync indicator (\`.tabby-sync-loading\`, 40px, pinned 24px from the same
  * corner) is on screen at exactly the moment sync toasts are raised, so the
  * stack is lifted clear of it — but only while it is actually visible, so
  * toasts otherwise sit flush against the bottom edge. Both elements are direct
