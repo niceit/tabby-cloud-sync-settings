@@ -27,7 +27,7 @@ function canonicalise (value: any): any {
 
     if (value && typeof value === 'object') {
         const sorted = {}
-        for (const key of Object.keys(value).sort()) {
+        for (const key of Object.keys(value).sort((left, right) => left.localeCompare(right))) {
             sorted[key] = canonicalise(value[key])
         }
         return sorted

@@ -38,7 +38,7 @@ function canonicaliseTarget (value: any): any {
     }
     if (value && typeof value === 'object') {
         const result = {}
-        for (const key of Object.keys(value).sort()) {
+        for (const key of Object.keys(value).sort((left, right) => left.localeCompare(right))) {
             if (!SECRET_CONFIG_KEYS.test(key)) {
                 result[key] = canonicaliseTarget(value[key])
             }

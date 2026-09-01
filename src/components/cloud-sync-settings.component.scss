@@ -51,7 +51,7 @@
     min-width: 0;
 }
 
-.general-settings .form-line > toggle {
+.general-settings .form-line > .general-settings-toggle {
     justify-self: end;
 }
 
@@ -201,7 +201,7 @@
         align-items: start;
     }
 
-    .general-settings .form-line > toggle {
+    .general-settings .form-line > .general-settings-toggle {
         justify-self: start;
     }
 

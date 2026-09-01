@@ -44,7 +44,7 @@ h3([textContent]='translate.trans("settings.title")')
                                         i.fas.fa-fw.fa-check-circle.mr-2
                                         span([textContent]='translate.trans("settings.sync_enabled_label")')
                                     .description([textContent]='translate.trans("settings.sync_enabled_hint")')
-                                toggle(
+                                toggle.general-settings-toggle(
                                     [(ngModel)]='syncEnabled',
                                     [disabled]='storedSettingsData === null',
                                     (ngModelChange)='toggleEnableSync()',
@@ -56,7 +56,7 @@ h3([textContent]='translate.trans("settings.title")')
                                         i.fas.fa-fw.fa-spinner.mr-2
                                         span([textContent]='translate.trans("settings.show_loader_label")')
                                     .description([textContent]='translate.trans("settings.show_loader_hint")')
-                                toggle(
+                                toggle.general-settings-toggle(
                                     [(ngModel)]='isShowSyncLoader',
                                     [disabled]='storedSettingsData === null',
                                     (ngModelChange)='toggleEnableShowLoader()',
