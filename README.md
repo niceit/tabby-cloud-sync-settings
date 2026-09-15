@@ -99,6 +99,17 @@ Hope you will like this plugin for your productivity work.
 
 Keep tracking of version release change logs
 
+## [v1.8.0] - 2026-09-02
+
+- Added secure Dropbox PKCE authentication with automatic callback handling and a manual fallback.
+- Added custom AES-256-GCM encryption with operating-system keychain storage and legacy-data compatibility.
+- Added a secure unlock flow for encrypted Dropbox data to prevent accidental cloud overwrites.
+- Improved conflict detection, safe conflict backups, synchronization pausing, and local snapshot recovery.
+- Added toolbar and command-palette actions for syncing and opening Cloud Sync settings.
+- Prevented conflicts with Tabby's built-in configuration sync and improved retry behavior after repeated failures.
+- Expanded provider disconnect cleanup while keeping cloud files untouched.
+- Improved the settings interface, accessibility, synchronization status, publishing workflow, and automated test coverage.
+
 ## [v1.6.5] - 2024-10-14
 
 - Dropbox official supported.
