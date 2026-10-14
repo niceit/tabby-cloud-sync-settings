@@ -40,7 +40,7 @@ class FTP {
     async sync (config: ConfigService, platform: PlatformService, params: FtpParams, firstInit = false): Promise<SyncResult> {
         const logger = new Logger(platform)
         const result: SyncResult = { result: false, message: '' }
-        if (!this.ftpClient) {
+        if (!this.ftpClient || this.ftpClient.closed) {
             this.ftpClient = await FTP.createClient(params)
         }
 
@@ -221,7 +221,7 @@ class FTP {
         const savedConfigs = SettingsHelper.readConfigFile(platform)
         const params = savedConfigs.configs as FtpParams
 
-        if (!this.ftpClient) {
+        if (!this.ftpClient || this.ftpClient.closed) {
             this.ftpClient = await FTP.createClient(params)
         }
 
